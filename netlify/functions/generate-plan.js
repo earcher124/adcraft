@@ -1,8 +1,9 @@
 const AT_BASE = "appCtUgAKIoaa6ECh";
-const AT_PLANS_TBL = "tblhHjx0eALtFAut2";
+const AT_PLANS_TBL = "tblOAtGXbtWewEAm0";
 const AT_PROFILES_TBL = "tblvXoTaqOdiZ4Kzc";
 const AT_USERS_TBL = "tbl7fisATFgQXPOhP";
 const AT_INTAKE_TBL = "tbllflTVOe6gnNP2K";
+const AT_NEW_PLAN_REQUESTS_TBL = "tblhHjx0eALtFAut2";
 
 exports.handler = async function (event) {
   console.log("generate-plan invoked", event.httpMethod);
@@ -63,7 +64,23 @@ exports.handler = async function (event) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to create plan record" }) };
   }
 
-  // 2. Create Intake Responses record linked to the Plan
+  // 2. Write to New Plan Requests table (fire-and-forget)
+  {
+    const budgetNum = parseFloat(String(body.budget || "0").replace(/[^0-9.]/g, "")) || 0;
+    fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_NEW_PLAN_REQUESTS_TBL}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${process.env.AIRTABLE_TOKEN}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fields: {
+          "Email": email || "",
+          "Primary Goal": body.goal || "",
+          "Monthly Ad Budget": budgetNum,
+        },
+      }),
+    }).catch(err => console.error("New Plan Request record error:", err.message));
+  }
+
+  // 3. Create Intake Responses record linked to the Plan
   try {
     const intakeFields = {
       "Email": email || "",
