@@ -105,6 +105,17 @@
     }
     .plan-card.visible { display: block; }
 
+    /* Checklist */
+    .checklist { list-style: none; padding: 0; margin: 0 0 24px; }
+    .checklist li { padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .checklist li:last-child { border-bottom: none; }
+    .checklist label { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; font-size: 14px; line-height: 1.6; }
+    .checklist input[type="checkbox"] {
+      flex-shrink: 0; margin-top: 3px; width: 17px; height: 17px;
+      accent-color: var(--purple); cursor: pointer;
+    }
+    .checklist input[type="checkbox"]:checked + span { text-decoration: line-through; color: var(--muted); }
+
     /* Markdown styles */
     .plan-body h1, .plan-body h2, .plan-body h3 {
       font-family: 'Playfair Display', Georgia, serif;
@@ -392,12 +403,29 @@
         html += '<h2>Smart Next Moves</h2><ul>' + p.smart_next_moves.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('') + '</ul>';
       }
 
-      // Launch plan
+      // Launch plan — rendered as a checklist
       if (p.launch_plan) {
         html += '<h2>Launch Plan</h2>';
-        if (p.launch_plan.days_1_30) html += '<h3>Days 1–30</h3><p>' + esc(p.launch_plan.days_1_30) + '</p>';
-        if (p.launch_plan.days_31_60) html += '<h3>Days 31–60</h3><p>' + esc(p.launch_plan.days_31_60) + '</p>';
-        if (p.launch_plan.days_61_90) html += '<h3>Days 61–90</h3><p>' + esc(p.launch_plan.days_61_90) + '</p>';
+        var launchPhases = [
+          { label: 'Days 1–30', key: 'days_1_30' },
+          { label: 'Days 31–60', key: 'days_31_60' },
+          { label: 'Days 61–90', key: 'days_61_90' }
+        ];
+        launchPhases.forEach(function(phase) {
+          var text = p.launch_plan[phase.key];
+          if (!text) return;
+          html += '<h3>' + phase.label + '</h3>';
+          // Split paragraph into individual tasks on period+space or newline
+          var tasks = text.split(/(?<=\.)\s+(?=[A-Z])|[\n\r]+/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 3; });
+          if (tasks.length > 1) {
+            html += '<ul class="checklist">' + tasks.map(function(t){
+              return '<li><label><input type="checkbox"> <span>' + esc(t) + '</span></label></li>';
+            }).join('') + '</ul>';
+          } else {
+            // Fallback if splitting didn't produce multiple items
+            html += '<ul class="checklist"><li><label><input type="checkbox"> <span>' + esc(text) + '</span></label></li></ul>';
+          }
+        });
       }
 
       // Assumptions
