@@ -451,9 +451,15 @@
       return lines.join('\n');
     }
 
+    // Hide content until auth confirmed
+    document.getElementById('progress-wrap').style.visibility = 'hidden';
+    document.getElementById('form-card').style.visibility = 'hidden';
+
     window.__clerkLoaded.then(async function(clerk) {
       if (!clerk.user) { window.location.href = "/login.html"; return; }
       renderNav("New Plan");
+      document.getElementById('progress-wrap').style.visibility = 'visible';
+      document.getElementById('form-card').style.visibility = 'visible';
     });
   </script>
 </body>
