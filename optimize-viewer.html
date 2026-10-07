@@ -429,14 +429,22 @@
         if (data && data.status === "Complete" && data.plan) {
           clearInterval(pollInterval);
           try {
-            plan = JSON.parse(data.plan);
-            renderPlan(plan.plan_name || data.bizName || "Optimized Plan");
+            var planRaw = data.plan;
+            plan = (typeof planRaw === "string") ? JSON.parse(planRaw) : planRaw;
+            try {
+              renderPlan(plan.plan_name || data.bizName || "Optimized Plan");
+            } catch (renderErr) {
+              console.error("renderPlan failed:", renderErr);
+              showError("There was a problem displaying the optimized plan. Please try again or contact support.");
+            }
           } catch (e) {
+            console.error("JSON parse failed:", e, data.plan);
             showError("The optimization returned an unexpected format. Please try again.");
           }
         } else if (data && data.status === "Error") {
           clearInterval(pollInterval);
-          showError(data.plan || "Optimization failed. Please try again.");
+          var errMsg = (typeof data.plan === "string") ? data.plan : "Optimization failed. Please try again.";
+          showError(errMsg);
         }
       } catch (e) {
         // keep polling
@@ -469,14 +477,12 @@
     // ── Render ────────────────────────────────────────────────
     function renderPlan(planName) {
       document.getElementById("generating").style.display = "none";
-      document.getElementById("hero-title").innerHTML = esc(planName).replace(" — Optimized", " <em>— Optimized</em>");
+      document.getElementById("hero-title").innerHTML = esc(planName).replace(" — Optimized", " <em>— Optimized</em>").replace(" — Optimized", " <em>— Optimized</em>");
 
-      renderSnapshot();
-      renderFound();
-      renderBudget();
-      renderChannelActions();
-      renderPlanTabs();
-      renderWatchList();
+      var fns = [renderSnapshot, renderFound, renderBudget, renderChannelActions, renderPlanTabs, renderWatchList];
+      fns.forEach(function(fn) {
+        try { fn(); } catch(e) { console.error(fn.name + " failed:", e); }
+      });
 
       // Show all sections
       document.querySelectorAll(".section").forEach(function(s) { s.classList.add("visible"); });
