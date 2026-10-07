@@ -35,10 +35,7 @@ exports.handler = async function (event) {
     console.log("Claude response length:", planText.length);
 
     // Strip markdown code fences if Claude wrapped the JSON
-    planText = planText.trim();
-    if (planText.startsWith(‘```’)) {
-      planText = planText.replace(/^```(?:json)?\s*/i, ‘’).replace(/\s*```$/, ‘’).trim();
-    }
+    planText = planText.trim().replace(/^\x60\x60\x60(?:json)?\s*/i, ‘’).replace(/\s*\x60\x60\x60\s*$/i, ‘’).trim();
 
     // Sanitize smart quotes and special chars that break JSON.parse in browsers
     planText = planText
