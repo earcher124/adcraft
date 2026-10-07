@@ -314,17 +314,22 @@
       var body = document.getElementById('plan-body');
       if (plan) {
         currentPlan = plan;
-        body.innerHTML = renderPlanJSON(plan);
-        restoreCheckboxes();
-        // Save checkbox state whenever one changes
-        body.addEventListener('change', function(e) {
-          if (e.target.type === 'checkbox') saveCheckboxes();
-        });
+        try {
+          body.innerHTML = renderPlanJSON(plan);
+          restoreCheckboxes();
+          body.addEventListener('change', function(e) {
+            if (e.target.type === 'checkbox') saveCheckboxes();
+          });
+        } catch(renderErr) {
+          console.error('renderPlanJSON failed:', renderErr.message);
+          body.innerHTML = '<pre style="white-space:pre-wrap;font-size:13px;line-height:1.6;">' + esc(planText) + '</pre>';
+        }
       } else {
         // JSON parse failed — show raw text in a readable way
         console.warn('JSON parse failed, rendering as text');
         body.innerHTML = '<pre style="white-space:pre-wrap;font-size:13px;line-height:1.6;">' + esc(planText) + '</pre>';
       }
+      document.getElementById('generating').style.display = 'none';
       document.getElementById('plan-card').classList.add('visible');
     }
 
@@ -492,6 +497,7 @@
         var res = await fetch('/.netlify/functions/poll-plan?id=' + encodeURIComponent(recordId));
         var data = await res.json();
 
+        console.log('[AdCraft] poll status:', data.status, '| has plan:', !!data.plan);
         if (data.status === 'Complete' && data.plan) {
           clearInterval(pollInterval);
           currentIntake = data.intake || null;
