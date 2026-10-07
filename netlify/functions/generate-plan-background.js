@@ -85,6 +85,10 @@ exports.handler = async function (event) {
     console.log("Plan saved successfully");
   } catch (err) {
     console.error("Airtable update error:", err.message);
+    // Try to mark error so poller doesn't wait 8 minutes
+    try {
+      await updateRecord(token, recordId, { "Status": "Error", "Plan Output": "Failed to save plan: " + err.message });
+    } catch (_) {}
     return { statusCode: 500, body: "Failed to save plan" };
   }
 
