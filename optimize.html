@@ -397,8 +397,8 @@
         throw new Error(errData.error || "Upload failed");
       }
 
-      // Step 3: redirect to plan viewer — it will poll until ready
-      window.location.href = "/plan-viewer.html?id=" + encodeURIComponent(newRecordId);
+      // Step 3: redirect to optimize viewer — it will poll until ready
+      window.location.href = "/optimize-viewer.html?id=" + encodeURIComponent(newRecordId);
 
     } catch (err) {
       document.getElementById("submitting-overlay").classList.remove("visible");

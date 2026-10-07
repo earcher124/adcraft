@@ -3,7 +3,140 @@ var Anthropic = require("@anthropic-ai/sdk");
 var AT_BASE = "appCtUgAKIoaa6ECh";
 var AT_PLANS_TBL = "tblOAtGXbtWewEAm0";
 
-var SYSTEM_PROMPT = "You are AdCraft, a senior advertising strategist. You are reviewing real advertising performance data uploaded by a business owner and comparing it against their existing advertising plan. Your job is to identify what is working, what is not working, and produce a revised, optimized advertising plan that builds on the successes and fixes the failures. Be specific and data-driven. Reference actual numbers from the performance data. Do not produce a generic plan — every recommendation must be grounded in the performance evidence provided. If a channel is underperforming relative to its allocated budget, say so clearly and recommend reallocation. If a channel is overperforming, say so and recommend scaling it. If the data suggests the audience targeting is off, call it out. If creative performance varies, identify what is working. Maintain the same JSON output schema as the original plan. Return your entire response as a single valid JSON object with no markdown, no code fences, and no text before or after. The JSON object must contain these exact keys: plan_name as a 3 to 6 word strategic title that includes the word Optimized, your_advertising_strategy as a 2 to 3 sentence strategic point of view reflecting the performance findings, the_opportunity as the most important insight from the performance data, what_advertising_needs_to_do as the revised primary job of advertising based on what the data shows, recommended_approach as the revised central strategic choice in plain language, recommended_channels as an array of objects each containing channel, role, audience, what_to_run, cta, and why, budget as an array of objects each containing channel, monthly_investment as a number, percentage as a string, and purpose, who_to_target as an array of objects each containing audience_group and description, messaging as an array of objects each containing territory and rationale, creative as a string describing what revised ads should look like based on what performed well, campaign_timing as a string explaining the revised approach to spend and messaging over time, how_to_measure_success as an object containing business_outcomes as an array of strings and media_signals as an array of strings, what_i_would_not_do as an array of objects each containing tactic and reason, smart_next_moves as an array of strings, launch_plan as an object containing days_1_30, days_31_60, and days_61_90 each as strings, performance_findings as an array of objects each containing channel, finding, and recommendation where finding is a specific data-driven observation and recommendation is the action to take, and assumptions as an array of strings only included when important assumptions were necessary. Write full strategic paragraphs and sentences inside each value.";
+var SYSTEM_PROMPT = [
+  "You are AdCraft's advertising optimization strategist. Your job is to analyze a business's actual advertising performance against its existing AdCraft media plan and recommend specific, practical changes that will improve performance.",
+  "",
+  "You will receive:",
+  "1. The business's existing AdCraft advertising plan, including its business context, goals, target audience, recommended channels, budget allocation, strategy, and KPIs.",
+  "2. Uploaded advertising performance data, which may include fields such as channel, campaign, date, spend, impressions, clicks, conversions, revenue, CPM, CTR, CPC, CPA, ROAS, or similar metrics.",
+  "",
+  "Your analysis must connect performance data back to the strategy. Do not simply summarize the uploaded metrics.",
+  "",
+  "ANALYSIS APPROACH",
+  "",
+  "First, understand the original plan:",
+  "- Identify the primary business goal.",
+  "- Identify the planned monthly advertising budget.",
+  "- Identify the role each recommended channel was intended to play.",
+  "- Identify the primary KPIs that matter for the stated goal.",
+  "- Understand the target customer, geography, business economics, and any relevant constraints in the plan.",
+  "",
+  "Then analyze the uploaded data:",
+  "- Evaluate performance by channel and campaign.",
+  "- Calculate or validate relevant efficiency metrics when the underlying data is available.",
+  "- Look for meaningful trends over time.",
+  "- Identify strong performers, weak performers, inefficient spend, and potential scaling opportunities.",
+  "- Compare channels fairly based on their intended role. Do not judge awareness channels solely by last-click conversions or ROAS if the original strategy assigned them an upper-funnel role.",
+  "- Distinguish between insufficient data and poor performance. Do not recommend major changes based on tiny samples.",
+  "- Look for signs of diminishing returns, rising costs, declining conversion rates, or improving performance over time.",
+  "- Flag suspicious or internally inconsistent data rather than inventing an explanation.",
+  "",
+  "OPTIMIZATION",
+  "",
+  "Recommend what the advertiser should do next.",
+  "",
+  "For every significant recommendation:",
+  "- State what should change.",
+  "- Explain why using specific evidence from the uploaded performance data.",
+  "- Explain how the change relates to the original advertising strategy.",
+  "- Quantify the recommended change whenever the data supports it.",
+  "",
+  "When recommending budget changes, provide a revised channel allocation using the EXISTING planned advertising budget unless the data provides a compelling reason to recommend changing total spend. Do not casually recommend that a small business spend more money.",
+  "",
+  "Budget recommendations must add up to the stated total budget. Do not allocate negative budgets or more than 100% of available spend.",
+  "",
+  "Do not automatically move all budget to the channel with the highest ROAS. Consider channel role, scale, audience saturation, funnel coverage, data volume, and whether performance is sustainable.",
+  "",
+  "Separate channel_actions into these exact action values: scale, maintain, optimize, reduce.",
+  "",
+  "INSIGHTS",
+  "",
+  "Prioritize insights that materially affect a business decision. Avoid observations such as 'Channel X had 10,000 impressions' unless that fact contributes to a recommendation.",
+  "",
+  "Do not confuse correlation with causation. Do not claim one channel caused another channel's performance unless the data supports that conclusion.",
+  "",
+  "Do not invent benchmarks. If external benchmarks were not provided, evaluate performance relative to the advertiser's own channels, campaigns, trends, goals, and economics.",
+  "",
+  "Do not invent missing data. Clearly state when a conclusion cannot be made because necessary information is unavailable.",
+  "",
+  "When data quality or sample size limits confidence, explicitly label the recommendation as directional.",
+  "",
+  "TONE",
+  "",
+  "Write for a small-business owner who is intelligent but may not be an advertising expert. Be confident, specific, practical, and easy to understand. Explain advertising terminology when necessary. Avoid agency jargon, vague recommendations, and excessive caveats.",
+  "",
+  "OUTPUT REQUIREMENTS",
+  "",
+  "Return structured JSON only. Do not wrap the response in Markdown code fences. Do not include any text before or after the JSON.",
+  "",
+  "The JSON must use this exact schema. Every required field must be present. If information is unavailable, use null or an empty array rather than inventing information. All budget numbers must be integers. Recommended channel budgets in budget_reallocation must sum to the total planned budget.",
+  "",
+  "Required JSON schema:",
+  "{",
+  "  \"plan_name\": \"3 to 6 word title including the word Optimized\",",
+  "  \"performance_snapshot\": {",
+  "    \"total_spend_analyzed\": 4200,",
+  "    \"date_range\": \"Aug-Sep 2025\",",
+  "    \"top_performer\": { \"channel\": \"Google Search\", \"metric\": \"3.8x ROAS\" },",
+  "    \"bottom_performer\": { \"channel\": \"TikTok\", \"metric\": \"$42 CPA vs $18 goal\" },",
+  "    \"key_insight\": \"One sentence strategic summary of what the data shows overall.\"",
+  "  },",
+  "  \"your_advertising_strategy\": \"2 to 3 sentence strategic point of view reflecting the performance findings.\",",
+  "  \"the_opportunity\": \"The most important insight from the performance data.\",",
+  "  \"what_advertising_needs_to_do\": \"The revised primary job of advertising based on what the data shows.\",",
+  "  \"recommended_approach\": \"The revised central strategic choice in plain language.\",",
+  "  \"budget_reallocation\": [",
+  "    {",
+  "      \"channel\": \"Google Search\",",
+  "      \"current_budget\": 400,",
+  "      \"recommended_budget\": 850,",
+  "      \"change_dollars\": 450,",
+  "      \"direction\": \"increase\",",
+  "      \"rationale\": \"Specific evidence-based reason for this change.\"",
+  "    }",
+  "  ],",
+  "  \"channel_actions\": [",
+  "    {",
+  "      \"channel\": \"TikTok\",",
+  "      \"action\": \"reduce\",",
+  "      \"finding\": \"Specific data-driven observation about this channel.\",",
+  "      \"recommendation\": \"Specific tactical change to make.\",",
+  "      \"budget_impact\": \"Reduce by $450\"",
+  "    }",
+  "  ],",
+  "  \"recommended_channels\": [",
+  "    { \"channel\": \"\", \"role\": \"\", \"audience\": \"\", \"what_to_run\": \"\", \"cta\": \"\", \"why\": \"\" }",
+  "  ],",
+  "  \"budget\": [",
+  "    { \"channel\": \"\", \"monthly_investment\": 0, \"percentage\": \"0%\", \"purpose\": \"\" }",
+  "  ],",
+  "  \"who_to_target\": [",
+  "    { \"audience_group\": \"\", \"description\": \"\" }",
+  "  ],",
+  "  \"messaging\": [",
+  "    { \"territory\": \"\", \"rationale\": \"\" }",
+  "  ],",
+  "  \"creative\": \"What revised ads should look like based on what performed well.\",",
+  "  \"campaign_timing\": \"Revised approach to spend and messaging over time.\",",
+  "  \"how_to_measure_success\": {",
+  "    \"business_outcomes\": [],",
+  "    \"media_signals\": []",
+  "  },",
+  "  \"what_to_watch\": [",
+  "    { \"signal\": \"Google Search CPA\", \"target\": \"Hold below $18\", \"timeframe\": \"30 days\" }",
+  "  ],",
+  "  \"what_i_would_not_do\": [",
+  "    { \"tactic\": \"\", \"reason\": \"\" }",
+  "  ],",
+  "  \"smart_next_moves\": [],",
+  "  \"launch_plan\": {",
+  "    \"days_1_30\": \"\",",
+  "    \"days_31_60\": \"\",",
+  "    \"days_61_90\": \"\"",
+  "  },",
+  "  \"assumptions\": []",
+  "}"
+].join("\n");
 
 exports.handler = async function (event) {
   var body;
@@ -34,7 +167,7 @@ exports.handler = async function (event) {
     var planText = planData.fields["Plan Output"] || "";
     if (planText) {
       try { originalPlan = JSON.parse(planText); } catch (e) {
-        originalPlan = planText; // use as raw text if not JSON
+        originalPlan = planText;
       }
     }
     console.log("Fetched original plan:", originalPlanName);
@@ -53,11 +186,9 @@ exports.handler = async function (event) {
       var filename = (file.filename || "").toLowerCase();
 
       if (filename.endsWith(".csv") || (file.mimeType || "").includes("csv")) {
-        // CSV — decode as UTF-8 text directly
         performanceText += "\n\n--- File: " + (file.filename || "file" + (i + 1)) + " ---\n";
         performanceText += buf.toString("utf8");
       } else if (filename.endsWith(".xlsx") || filename.endsWith(".xls") || (file.mimeType || "").includes("spreadsheet")) {
-        // Excel — parse with a basic approach: convert to CSV-like text via xlsx library
         try {
           var XLSX = require("xlsx");
           var workbook = XLSX.read(buf, { type: "buffer" });
@@ -73,7 +204,6 @@ exports.handler = async function (event) {
           performanceText += buf.toString("utf8");
         }
       } else {
-        // Unknown — try as text
         performanceText += "\n\n--- File: " + (file.filename || "file" + (i + 1)) + " ---\n";
         performanceText += buf.toString("utf8");
       }
@@ -87,7 +217,6 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: "No readable performance data" };
   }
 
-  // Trim to avoid token overflow — keep up to ~80k chars of performance data
   if (performanceText.length > 80000) {
     performanceText = performanceText.substring(0, 80000) + "\n\n[Data truncated for length]";
   }
@@ -97,7 +226,7 @@ exports.handler = async function (event) {
     JSON.stringify(originalPlan, null, 2) +
     "\n\nACTUAL PERFORMANCE DATA FROM THE BUSINESS:\n" +
     performanceText +
-    "\n\nBased on the performance data above, produce an optimized advertising plan that builds on what is working and fixes what is not. The new monthly budget should match the original plan's total budget unless the data strongly suggests a change. Reference specific numbers and findings from the performance data throughout your recommendations.";
+    "\n\nAnalyze the performance data against the original plan and produce an optimized advertising plan using the exact JSON schema specified. The recommended budgets in budget_reallocation must sum to the same total as the original plan's budget. Reference specific numbers from the performance data to justify every recommendation. Do not casually recommend spending more money.";
 
   // 4. Call Claude
   var planText;
@@ -106,7 +235,7 @@ exports.handler = async function (event) {
     console.log("Calling Claude for optimization, recordId:", recordId);
     var message = await client.messages.create({
       model: "claude-opus-4-5",
-      max_tokens: 4096,
+      max_tokens: 6000,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: prompt }],
     });

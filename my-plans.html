@@ -284,7 +284,7 @@
           '</div>' +
           '<div class="plan-card-footer">' +
             '<span class="plan-budget">' + escHtml(plan.budget || '') + '</span>' +
-            '<a class="btn-view" href="/plan-viewer.html?id=' + plan.id + '">View Plan →</a>' +
+            '<a class="btn-view" href="' + planViewerUrl(plan) + '">View Plan →</a>' +
           '</div>';
 
         // Click card body = toggle selection; View Plan button = navigate
@@ -375,6 +375,13 @@
       } catch(e) {
         alert("Delete failed. Please try again.");
       }
+    }
+
+    function planViewerUrl(plan) {
+      var name = plan.planName || "";
+      var isOptimized = name.indexOf("Optimized") !== -1 || name.indexOf("— Optimized") !== -1;
+      var base = isOptimized ? "/optimize-viewer.html" : "/plan-viewer.html";
+      return base + "?id=" + encodeURIComponent(plan.id);
     }
 
     function escHtml(str) {

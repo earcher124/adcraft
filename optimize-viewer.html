@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdCraft — Optimized Plan</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    :root {
+      --bg: #FAF6ED;
+      --fg: #1a1a1a;
+      --muted: #6b6270;
+      --border: #e8ddd0;
+      --purple: #4A1040;
+      --coral: #E8603C;
+      --card: #ffffff;
+      --green: #1e6b3a;
+      --green-bg: #edf7f1;
+      --red: #8b1a1a;
+      --red-bg: #fdf0f0;
+      --amber: #7a4a00;
+      --amber-bg: #fdf6e8;
+      --blue: #1a3a6b;
+      --blue-bg: #edf2fd;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]):not([data-theme="dark"]) {
+        --bg: #FAF6ED; --fg: #1a1a1a; --muted: #6b6270;
+        --border: #e8ddd0; --card: #ffffff; color-scheme: light;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #1a1518; --fg: #f0ebe6; --muted: #9a8fa0;
+      --border: #3a2f38; --card: #231d22; color-scheme: dark;
+      --green-bg: #102018; --red-bg: #201010;
+      --amber-bg: #1e1608; --blue-bg: #101828;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); font-family: 'Inter', system-ui, sans-serif; color: var(--fg); }
+
+    /* Hero */
+    .hero { padding: 48px 48px 36px; }
+    .hero-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: flex-end; gap: 24px; }
+    .hero-left { flex: 1; }
+    .hero-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: var(--coral); margin-bottom: 10px; }
+    .hero-title { font-family: 'Playfair Display', Georgia, serif; font-size: 42px; font-weight: 800; color: var(--fg); margin: 0; letter-spacing: -0.03em; line-height: 1; }
+    .hero-title em { font-style: italic; font-weight: 400; color: var(--purple); }
+    .hero-right { flex: 0 0 auto; padding-bottom: 6px; }
+    .hero-line { max-width: 900px; margin: 24px auto 0; height: 2px; background: linear-gradient(to right, var(--coral), var(--purple), transparent); }
+
+    .btn {
+      display: inline-block; font-size: 13px; font-weight: 600;
+      padding: 9px 18px; border-radius: 8px; text-decoration: none;
+      cursor: pointer; border: none; font-family: 'Inter', system-ui, sans-serif;
+      transition: background 0.2s;
+    }
+    .btn-outline { background: transparent; color: var(--purple); border: 1px solid var(--purple); }
+    .btn-outline:hover { background: var(--purple); color: #FAF6ED; }
+
+    /* Content */
+    .content { max-width: 900px; margin: 0 auto; padding: 40px 48px 100px; display: flex; flex-direction: column; gap: 48px; }
+
+    /* Generating state */
+    .generating {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 80px 40px; text-align: center;
+    }
+    .spinner {
+      width: 56px; height: 56px; border: 3px solid var(--border);
+      border-top-color: var(--purple); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 28px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .generating h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 26px; color: var(--fg); margin: 0 0 10px; }
+    .generating p { font-size: 14px; color: var(--muted); margin: 0 0 32px; }
+    .progress-track { width: 100%; max-width: 360px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 28px; overflow: hidden; }
+    .progress-bar { height: 100%; background: linear-gradient(to right, var(--coral), var(--purple)); border-radius: 2px; transition: width 1s ease; width: 0%; }
+    .gen-steps { list-style: none; padding: 0; margin: 0 auto; max-width: 320px; text-align: left; }
+    .gen-steps li { font-size: 13px; color: var(--muted); padding: 7px 0; display: flex; align-items: center; gap: 12px; transition: color 0.3s; }
+    .gen-steps li .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); flex-shrink: 0; transition: background 0.3s; }
+    .gen-steps li.active { color: var(--fg); }
+    .gen-steps li.active .dot { background: var(--coral); }
+    .gen-steps li.done .dot { background: var(--purple); }
+
+    /* Error */
+    .error-state { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 60px 40px; text-align: center; display: none; }
+    .error-state.visible { display: block; }
+    .error-state p { color: var(--muted); font-size: 15px; margin: 0 0 20px; }
+
+    /* Section wrapper */
+    .section { display: none; }
+    .section.visible { display: block; }
+
+    /* Section header */
+    .section-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--purple); margin-bottom: 8px; }
+    .section-title { font-family: 'Playfair Display', Georgia, serif; font-size: 26px; font-weight: 700; color: var(--fg); margin: 0 0 24px; }
+
+    /* ─── 1. Performance Snapshot ─────────────────── */
+    .snapshot-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .snapshot-tile {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px 20px;
+    }
+    .snapshot-tile-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 6px; }
+    .snapshot-tile-value { font-size: 22px; font-weight: 700; color: var(--fg); line-height: 1.2; margin-bottom: 4px; }
+    .snapshot-tile-sub { font-size: 12px; color: var(--muted); }
+    .snapshot-insight {
+      background: var(--card); border: 1px solid var(--border);
+      border-left: 3px solid var(--coral);
+      border-radius: 0 12px 12px 0; padding: 16px 20px;
+      font-size: 15px; line-height: 1.6; color: var(--fg);
+    }
+
+    /* ─── 2. What AdCraft Found ───────────────────── */
+    .strategy-block {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 32px 36px;
+    }
+    .strategy-text { font-size: 17px; line-height: 1.75; color: var(--fg); margin: 0 0 20px; }
+    .strategy-text:last-child { margin-bottom: 0; }
+    .opportunity-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--coral); margin-bottom: 8px; }
+    .opportunity-text { font-size: 15px; line-height: 1.65; color: var(--fg); }
+
+    /* ─── 3. Budget Reallocation ──────────────────── */
+    .realloc-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+    .realloc-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .realloc-table th {
+      background: var(--purple); color: #FAF6ED;
+      padding: 11px 16px; text-align: left; font-weight: 600;
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em;
+      white-space: nowrap;
+    }
+    .realloc-table td { padding: 13px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .realloc-table tr:last-child td { border-bottom: none; }
+    .realloc-table tr:nth-child(even) td { background: rgba(0,0,0,0.015); }
+    .realloc-channel { font-weight: 600; color: var(--fg); }
+    .realloc-rationale { font-size: 13px; color: var(--muted); max-width: 280px; }
+    .delta { display: inline-flex; align-items: center; gap: 5px; font-weight: 700; font-size: 14px; }
+    .delta-up { color: var(--green); }
+    .delta-down { color: var(--red); }
+    .delta-flat { color: var(--muted); }
+    .realloc-total {
+      display: flex; justify-content: flex-end; gap: 32px;
+      padding: 14px 16px;
+      background: var(--bg); border-top: 2px solid var(--border);
+      font-size: 13px; font-weight: 600; color: var(--fg);
+      border-radius: 0 0 12px 12px;
+    }
+
+    /* ─── 4. Channel Actions ──────────────────────── */
+    .action-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+    .action-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 20px 22px;
+    }
+    .action-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; margin-bottom: 10px;
+    }
+    .badge-scale { background: var(--green-bg); color: var(--green); }
+    .badge-maintain { background: var(--blue-bg); color: var(--blue); }
+    .badge-optimize { background: var(--amber-bg); color: var(--amber); }
+    .badge-reduce { background: var(--red-bg); color: var(--red); }
+    .action-channel { font-size: 16px; font-weight: 700; color: var(--fg); margin-bottom: 8px; }
+    .action-finding { font-size: 13px; color: var(--muted); line-height: 1.55; margin-bottom: 10px; }
+    .action-rec { font-size: 13px; line-height: 1.55; color: var(--fg); }
+    .action-budget-impact { margin-top: 10px; font-size: 12px; font-weight: 600; color: var(--muted); border-top: 1px solid var(--border); padding-top: 10px; }
+
+    /* ─── 5. Optimized Plan ───────────────────────── */
+    .plan-body-wrap {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+    }
+    .plan-tabs { display: flex; border-bottom: 1px solid var(--border); overflow-x: auto; }
+    .plan-tab {
+      padding: 13px 20px; font-size: 13px; font-weight: 600;
+      color: var(--muted); border: none; background: none;
+      cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent;
+      font-family: 'Inter', system-ui, sans-serif; transition: color 0.2s;
+    }
+    .plan-tab:hover { color: var(--fg); }
+    .plan-tab.active { color: var(--purple); border-bottom-color: var(--purple); }
+    .plan-tab-content { padding: 32px 36px; display: none; }
+    .plan-tab-content.active { display: block; }
+
+    .plan-section-title { font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 700; color: var(--fg); margin: 0 0 16px; }
+    .plan-prose { font-size: 15px; line-height: 1.75; color: var(--fg); margin: 0 0 20px; }
+
+    .channel-cards { display: flex; flex-direction: column; gap: 14px; }
+    .channel-card {
+      border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+    }
+    .channel-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; background: var(--bg); border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .channel-card-name { font-size: 15px; font-weight: 700; color: var(--fg); }
+    .channel-card-role { font-size: 12px; color: var(--muted); font-weight: 400; }
+    .channel-card-chevron { font-size: 12px; color: var(--muted); transition: transform 0.2s; }
+    .channel-card-header.open .channel-card-chevron { transform: rotate(180deg); }
+    .channel-card-body { padding: 16px 18px; display: none; }
+    .channel-card-body.open { display: block; }
+    .channel-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    .channel-pill {
+      font-size: 12px; padding: 3px 10px; border-radius: 20px;
+      background: var(--bg); border: 1px solid var(--border); color: var(--muted);
+    }
+    .channel-field-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 4px; margin-top: 14px; }
+    .channel-field-value { font-size: 14px; line-height: 1.6; color: var(--fg); }
+
+    .budget-rows { display: flex; flex-direction: column; gap: 8px; }
+    .budget-row {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 16px;
+    }
+    .budget-row-channel { flex: 1; font-size: 14px; font-weight: 600; color: var(--fg); }
+    .budget-row-bar-wrap { flex: 2; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .budget-row-bar { height: 100%; background: var(--purple); border-radius: 3px; }
+    .budget-row-amount { font-size: 14px; font-weight: 700; color: var(--fg); text-align: right; min-width: 70px; }
+    .budget-row-pct { font-size: 12px; color: var(--muted); min-width: 36px; text-align: right; }
+
+    .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .tag { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 5px 13px; font-size: 13px; color: var(--fg); }
+
+    .launch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .launch-card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+    .launch-period { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--purple); margin-bottom: 8px; }
+    .launch-text { font-size: 14px; line-height: 1.65; color: var(--fg); }
+
+    /* ─── 6. What to Watch ────────────────────────── */
+    .watch-list { display: flex; flex-direction: column; gap: 10px; }
+    .watch-item {
+      display: flex; align-items: flex-start; gap: 14px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px 18px;
+    }
+    .watch-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--purple); color: #FAF6ED;
+      font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .watch-signal { font-size: 14px; font-weight: 600; color: var(--fg); margin-bottom: 3px; }
+    .watch-meta { font-size: 12px; color: var(--muted); }
+
+    /* ─── Sticky nav ──────────────────────────────── */
+    .jump-nav {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+      padding: 0 48px;
+      display: none;
+    }
+    .jump-nav.visible { display: block; }
+    .jump-nav-inner { max-width: 900px; margin: 0 auto; display: flex; gap: 0; overflow-x: auto; }
+    .jump-link {
+      padding: 13px 18px; font-size: 12px; font-weight: 600;
+      color: var(--muted); text-decoration: none; white-space: nowrap;
+      border-bottom: 2px solid transparent; transition: color 0.2s;
+    }
+    .jump-link:hover, .jump-link.active { color: var(--purple); border-bottom-color: var(--purple); }
+
+    @media (max-width: 640px) {
+      .hero { padding: 32px 20px 24px; }
+      .hero-inner { flex-direction: column; gap: 12px; }
+      .content { padding: 28px 20px 80px; }
+      .hero-title { font-size: 30px; }
+      .plan-tab-content { padding: 20px; }
+      .strategy-block { padding: 22px 20px; }
+      .jump-nav { padding: 0 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-mount"></div>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <p class="hero-eyebrow">Optimized Plan</p>
+        <h1 class="hero-title" id="hero-title">Your <em>Optimized</em> Plan</h1>
+      </div>
+      <div class="hero-right">
+        <a class="btn btn-outline" id="btn-back" href="/my-plans.html">← My Plans</a>
+      </div>
+    </div>
+    <div class="hero-line"></div>
+  </div>
+
+  <!-- Sticky section nav (appears after load) -->
+  <nav class="jump-nav" id="jump-nav">
+    <div class="jump-nav-inner">
+      <a class="jump-link" href="#sec-snapshot">Snapshot</a>
+      <a class="jump-link" href="#sec-found">What We Found</a>
+      <a class="jump-link" href="#sec-budget">Budget Changes</a>
+      <a class="jump-link" href="#sec-channels">Channel Actions</a>
+      <a class="jump-link" href="#sec-plan">Optimized Plan</a>
+      <a class="jump-link" href="#sec-watch">What to Watch</a>
+    </div>
+  </nav>
+
+  <div class="content" id="main-content">
+
+    <!-- Generating -->
+    <div class="generating" id="generating">
+      <div class="spinner"></div>
+      <h2>Analyzing your performance data&hellip;</h2>
+      <p>Claude is reviewing your results against the original plan. This takes a minute.</p>
+      <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
+      <ul class="gen-steps" id="gen-steps">
+        <li><span class="dot"></span>Reading original plan</li>
+        <li><span class="dot"></span>Analyzing performance data</li>
+        <li><span class="dot"></span>Identifying what's working</li>
+        <li><span class="dot"></span>Calculating budget reallocation</li>
+        <li><span class="dot"></span>Building optimized plan</li>
+      </ul>
+    </div>
+
+    <!-- Error -->
+    <div class="error-state" id="error-state">
+      <p id="error-msg">Something went wrong loading this plan.</p>
+      <a class="btn btn-outline" href="/my-plans.html">← My Plans</a>
+    </div>
+
+    <!-- ─── 1. Performance Snapshot ─── -->
+    <section class="section" id="sec-snapshot">
+      <p class="section-eyebrow">01 — Performance Snapshot</p>
+      <h2 class="section-title">What the data showed</h2>
+      <div class="snapshot-tiles" id="snapshot-tiles"></div>
+      <div class="snapshot-insight" id="snapshot-insight"></div>
+    </section>
+
+    <!-- ─── 2. What AdCraft Found ─── -->
+    <section class="section" id="sec-found">
+      <p class="section-eyebrow">02 — What AdCraft Found</p>
+      <h2 class="section-title">The strategic read</h2>
+      <div class="strategy-block">
+        <p class="strategy-text" id="strategy-text"></p>
+        <div class="opportunity-label">The key opportunity</div>
+        <p class="opportunity-text" id="opportunity-text"></p>
+      </div>
+    </section>
+
+    <!-- ─── 3. Budget Reallocation ─── -->
+    <section class="section" id="sec-budget">
+      <p class="section-eyebrow">03 — Budget Reallocation</p>
+      <h2 class="section-title">Where the money should move</h2>
+      <div class="realloc-table-wrap">
+        <table class="realloc-table">
+          <thead>
+            <tr>
+              <th>Channel</th>
+              <th>Current</th>
+              <th>Recommended</th>
+              <th>Change</th>
+              <th>Rationale</th>
+            </tr>
+          </thead>
+          <tbody id="realloc-tbody"></tbody>
+        </table>
+        <div class="realloc-total" id="realloc-total"></div>
+      </div>
+    </section>
+
+    <!-- ─── 4. Channel Actions ─── -->
+    <section class="section" id="sec-channels">
+      <p class="section-eyebrow">04 — Channel Actions</p>
+      <h2 class="section-title">What to do on each channel</h2>
+      <div class="action-groups" id="action-groups"></div>
+    </section>
+
+    <!-- ─── 5. Optimized Plan ─── -->
+    <section class="section" id="sec-plan">
+      <p class="section-eyebrow">05 — Optimized Plan</p>
+      <h2 class="section-title">The full revised strategy</h2>
+      <div class="plan-body-wrap">
+        <div class="plan-tabs" id="plan-tabs"></div>
+        <div id="plan-tab-contents"></div>
+      </div>
+    </section>
+
+    <!-- ─── 6. What to Watch ─── -->
+    <section class="section" id="sec-watch">
+      <p class="section-eyebrow">06 — What to Watch Next</p>
+      <h2 class="section-title">Your 30-day checklist</h2>
+      <div class="watch-list" id="watch-list"></div>
+    </section>
+
+  </div>
+
+  <script src="_shared.js"></script>
+  <script>
+    var recordId = null;
+    var plan = null;
+    var pollInterval = null;
+    var pollCount = 0;
+
+    var params = new URLSearchParams(window.location.search);
+    recordId = params.get("id");
+
+    if (!recordId) {
+      showError("No plan ID found. Please return to My Plans.");
+    } else {
+      startPolling();
+    }
+
+    // ── Polling ──────────────────────────────────────────────
+    function startPolling() {
+      animateProgress();
+      pollInterval = setInterval(poll, 4000);
+      poll();
+    }
+
+    async function poll() {
+      pollCount++;
+      if (pollCount > 120) {
+        clearInterval(pollInterval);
+        showError("This optimization is taking longer than expected. Please check My Plans in a few minutes.");
+        return;
+      }
+      try {
+        var r = await fetch("/.netlify/functions/poll-plan?id=" + encodeURIComponent(recordId));
+        var data = await r.json();
+        if (data && data.status === "Complete" && data.plan) {
+          clearInterval(pollInterval);
+          try {
+            plan = JSON.parse(data.plan);
+            renderPlan(plan.plan_name || data.bizName || "Optimized Plan");
+          } catch (e) {
+            showError("The optimization returned an unexpected format. Please try again.");
+          }
+        } else if (data && data.status === "Error") {
+          clearInterval(pollInterval);
+          showError(data.plan || "Optimization failed. Please try again.");
+        }
+      } catch (e) {
+        // keep polling
+      }
+    }
+
+    // ── Progress animation ───────────────────────────────────
+    function animateProgress() {
+      var bar = document.getElementById("progress-bar");
+      var steps = document.querySelectorAll("#gen-steps li");
+      var stepIdx = 0;
+      var pct = 0;
+      var stepTargets = [15, 35, 55, 75, 90];
+
+      function tick() {
+        if (pct < 90) {
+          pct = Math.min(pct + (Math.random() * 3 + 0.5), 90);
+          bar.style.width = pct + "%";
+        }
+        var activeStep = Math.floor(pct / 20);
+        steps.forEach(function(s, i) {
+          s.classList.remove("active", "done");
+          if (i < activeStep) s.classList.add("done");
+          else if (i === activeStep) s.classList.add("active");
+        });
+      }
+      setInterval(tick, 800);
+    }
+
+    // ── Render ────────────────────────────────────────────────
+    function renderPlan(planName) {
+      document.getElementById("generating").style.display = "none";
+      document.getElementById("hero-title").innerHTML = esc(planName).replace(" — Optimized", " <em>— Optimized</em>");
+
+      renderSnapshot();
+      renderFound();
+      renderBudget();
+      renderChannelActions();
+      renderPlanTabs();
+      renderWatchList();
+
+      // Show all sections
+      document.querySelectorAll(".section").forEach(function(s) { s.classList.add("visible"); });
+      document.getElementById("jump-nav").classList.add("visible");
+
+      // Scroll spy for jump nav
+      initScrollSpy();
+    }
+
+    function fmtMoney(n) {
+      if (n == null) return "-";
+      return "$" + Number(n).toLocaleString();
+    }
+
+    function esc(s) {
+      if (!s) return "";
+      return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    // ── 1. Snapshot ───────────────────────────────────────────
+    function renderSnapshot() {
+      var snap = plan.performance_snapshot || {};
+      var tiles = document.getElementById("snapshot-tiles");
+      var items = [];
+
+      if (snap.total_spend_analyzed != null) {
+        items.push({ label: "Spend Analyzed", value: fmtMoney(snap.total_spend_analyzed), sub: snap.date_range || "" });
+      }
+      if (snap.top_performer && snap.top_performer.channel) {
+        items.push({ label: "Top Performer", value: esc(snap.top_performer.channel), sub: esc(snap.top_performer.metric || "") });
+      }
+      if (snap.bottom_performer && snap.bottom_performer.channel) {
+        items.push({ label: "Needs Attention", value: esc(snap.bottom_performer.channel), sub: esc(snap.bottom_performer.metric || "") });
+      }
+
+      items.forEach(function(item) {
+        var div = document.createElement("div");
+        div.className = "snapshot-tile";
+        div.innerHTML = '<div class="snapshot-tile-label">' + item.label + '</div>' +
+          '<div class="snapshot-tile-value">' + item.value + '</div>' +
+          '<div class="snapshot-tile-sub">' + item.sub + '</div>';
+        tiles.appendChild(div);
+      });
+
+      if (snap.key_insight) {
+        document.getElementById("snapshot-insight").textContent = snap.key_insight;
+      }
+    }
+
+    // ── 2. Found ──────────────────────────────────────────────
+    function renderFound() {
+      var strat = plan.your_advertising_strategy || plan.the_opportunity || "";
+      var opp = plan.the_opportunity || "";
+      document.getElementById("strategy-text").textContent = strat;
+      document.getElementById("opportunity-text").textContent = opp !== strat ? opp : (plan.what_advertising_needs_to_do || "");
+    }
+
+    // ── 3. Budget Reallocation ────────────────────────────────
+    function renderBudget() {
+      var rows = plan.budget_reallocation || [];
+      var tbody = document.getElementById("realloc-tbody");
+      var totalCurrent = 0, totalRec = 0;
+
+      rows.forEach(function(row) {
+        var cur = row.current_budget || 0;
+        var rec = row.recommended_budget || 0;
+        var change = rec - cur;
+        totalCurrent += cur;
+        totalRec += rec;
+
+        var dir = change > 0 ? "delta-up" : change < 0 ? "delta-down" : "delta-flat";
+        var arrow = change > 0 ? "&#x2191;" : change < 0 ? "&#x2193;" : "&rarr;";
+        var sign = change > 0 ? "+" : "";
+
+        var tr = document.createElement("tr");
+        tr.innerHTML =
+          '<td><span class="realloc-channel">' + esc(row.channel) + '</span></td>' +
+          '<td>' + fmtMoney(cur) + '</td>' +
+          '<td><strong>' + fmtMoney(rec) + '</strong></td>' +
+          '<td><span class="delta ' + dir + '">' + arrow + ' ' + sign + fmtMoney(Math.abs(change)) + '</span></td>' +
+          '<td><span class="realloc-rationale">' + esc(row.rationale || "") + '</span></td>';
+        tbody.appendChild(tr);
+      });
+
+      var totalEl = document.getElementById("realloc-total");
+      totalEl.innerHTML =
+        '<span>Previous total: <strong>' + fmtMoney(totalCurrent) + '</strong></span>' +
+        '<span>New total: <strong>' + fmtMoney(totalRec) + '</strong></span>';
+    }
+
+    // ── 4. Channel Actions ────────────────────────────────────
+    function renderChannelActions() {
+      var actions = plan.channel_actions || [];
+      var container = document.getElementById("action-groups");
+
+      var badgeMap = {
+        scale: "badge-scale",
+        maintain: "badge-maintain",
+        optimize: "badge-optimize",
+        reduce: "badge-reduce"
+      };
+      var labelMap = { scale: "Scale", maintain: "Maintain", optimize: "Optimize", reduce: "Reduce" };
+      var iconMap = { scale: "&#x2191;", maintain: "&#x2192;", optimize: "&#x25C6;", reduce: "&#x2193;" };
+
+      // Sort: scale first, then maintain, optimize, reduce
+      var order = ["scale", "maintain", "optimize", "reduce"];
+      actions.sort(function(a, b) {
+        return order.indexOf(a.action) - order.indexOf(b.action);
+      });
+
+      actions.forEach(function(item) {
+        var badge = badgeMap[item.action] || "badge-maintain";
+        var label = labelMap[item.action] || item.action;
+        var icon = iconMap[item.action] || "";
+        var card = document.createElement("div");
+        card.className = "action-card";
+        card.innerHTML =
+          '<span class="action-badge ' + badge + '">' + icon + ' ' + label + '</span>' +
+          '<div class="action-channel">' + esc(item.channel) + '</div>' +
+          '<div class="action-finding">' + esc(item.finding || "") + '</div>' +
+          '<div class="action-rec"><strong>Do this:</strong> ' + esc(item.recommendation || "") + '</div>' +
+          (item.budget_impact ? '<div class="action-budget-impact">' + esc(item.budget_impact) + '</div>' : '');
+        container.appendChild(card);
+      });
+    }
+
+    // ── 5. Plan Tabs ──────────────────────────────────────────
+    function renderPlanTabs() {
+      var tabs = [
+        { id: "tab-strategy", label: "Strategy", render: renderTabStrategy },
+        { id: "tab-channels", label: "Channels", render: renderTabChannels },
+        { id: "tab-budget", label: "Budget", render: renderTabBudget },
+        { id: "tab-audience", label: "Audience", render: renderTabAudience },
+        { id: "tab-messaging", label: "Messaging", render: renderTabMessaging },
+        { id: "tab-launch", label: "Launch Plan", render: renderTabLaunch },
+      ];
+
+      var tabsEl = document.getElementById("plan-tabs");
+      var contentsEl = document.getElementById("plan-tab-contents");
+
+      tabs.forEach(function(tab, i) {
+        var btn = document.createElement("button");
+        btn.className = "plan-tab" + (i === 0 ? " active" : "");
+        btn.textContent = tab.label;
+        btn.onclick = function() {
+          document.querySelectorAll(".plan-tab").forEach(function(t) { t.classList.remove("active"); });
+          document.querySelectorAll(".plan-tab-content").forEach(function(c) { c.classList.remove("active"); });
+          btn.classList.add("active");
+          document.getElementById(tab.id).classList.add("active");
+        };
+        tabsEl.appendChild(btn);
+
+        var pane = document.createElement("div");
+        pane.className = "plan-tab-content" + (i === 0 ? " active" : "");
+        pane.id = tab.id;
+        tab.render(pane);
+        contentsEl.appendChild(pane);
+      });
+    }
+
+    function renderTabStrategy(pane) {
+      var html = "";
+      if (plan.recommended_approach) {
+        html += '<h3 class="plan-section-title">Recommended Approach</h3><p class="plan-prose">' + esc(plan.recommended_approach) + '</p>';
+      }
+      if (plan.what_advertising_needs_to_do) {
+        html += '<h3 class="plan-section-title">What Advertising Needs to Do</h3><p class="plan-prose">' + esc(plan.what_advertising_needs_to_do) + '</p>';
+      }
+      if (plan.creative) {
+        html += '<h3 class="plan-section-title">Creative Direction</h3><p class="plan-prose">' + esc(plan.creative) + '</p>';
+      }
+      if (plan.campaign_timing) {
+        html += '<h3 class="plan-section-title">Campaign Timing</h3><p class="plan-prose">' + esc(plan.campaign_timing) + '</p>';
+      }
+      pane.innerHTML = html || '<p class="plan-prose">No strategy content available.</p>';
+    }
+
+    function renderTabChannels(pane) {
+      var channels = plan.recommended_channels || [];
+      if (!channels.length) { pane.innerHTML = '<p class="plan-prose">No channel data.</p>'; return; }
+      var html = '<div class="channel-cards">';
+      channels.forEach(function(ch, i) {
+        html += '<div class="channel-card">' +
+          '<div class="channel-card-header" onclick="toggleChannel(this)">' +
+            '<div><div class="channel-card-name">' + esc(ch.channel) + '</div>' +
+            '<div class="channel-card-role">' + esc(ch.role || "") + '</div></div>' +
+            '<span class="channel-card-chevron">&#x25BE;</span>' +
+          '</div>' +
+          '<div class="channel-card-body">' +
+            (ch.audience ? '<div class="channel-field-label">Audience</div><div class="channel-field-value">' + esc(ch.audience) + '</div>' : '') +
+            (ch.what_to_run ? '<div class="channel-field-label">What to Run</div><div class="channel-field-value">' + esc(ch.what_to_run) + '</div>' : '') +
+            (ch.cta ? '<div class="channel-field-label">Call to Action</div><div class="channel-field-value">' + esc(ch.cta) + '</div>' : '') +
+            (ch.why ? '<div class="channel-field-label">Why This Works</div><div class="channel-field-value">' + esc(ch.why) + '</div>' : '') +
+          '</div></div>';
+      });
+      html += '</div>';
+      pane.innerHTML = html;
+      // Open first channel
+      var first = pane.querySelector(".channel-card-header");
+      if (first) toggleChannel(first);
+    }
+
+    function toggleChannel(header) {
+      header.classList.toggle("open");
+      var body = header.nextElementSibling;
+      if (body) body.classList.toggle("open");
+    }
+
+    function renderTabBudget(pane) {
+      var items = plan.budget || [];
+      if (!items.length) { pane.innerHTML = '<p class="plan-prose">No budget data.</p>'; return; }
+      var maxAmt = Math.max.apply(null, items.map(function(b) { return b.monthly_investment || 0; }));
+      var html = '<div class="budget-rows">';
+      items.forEach(function(b) {
+        var pct = maxAmt > 0 ? ((b.monthly_investment || 0) / maxAmt * 100) : 0;
+        html += '<div class="budget-row">' +
+          '<div class="budget-row-channel">' + esc(b.channel) + '</div>' +
+          '<div class="budget-row-bar-wrap"><div class="budget-row-bar" style="width:' + pct + '%"></div></div>' +
+          '<div class="budget-row-amount">' + fmtMoney(b.monthly_investment) + '</div>' +
+          '<div class="budget-row-pct">' + esc(b.percentage || "") + '</div>' +
+        '</div>';
+      });
+      html += '</div>';
+      pane.innerHTML = html;
+    }
+
+    function renderTabAudience(pane) {
+      var targets = plan.who_to_target || [];
+      var html = "";
+      targets.forEach(function(t) {
+        html += '<h3 class="plan-section-title">' + esc(t.audience_group || "") + '</h3>' +
+          '<p class="plan-prose">' + esc(t.description || "") + '</p>';
+      });
+      pane.innerHTML = html || '<p class="plan-prose">No audience data.</p>';
+    }
+
+    function renderTabMessaging(pane) {
+      var msgs = plan.messaging || [];
+      var html = "";
+      msgs.forEach(function(m) {
+        html += '<h3 class="plan-section-title">' + esc(m.territory || "") + '</h3>' +
+          '<p class="plan-prose">' + esc(m.rationale || "") + '</p>';
+      });
+      pane.innerHTML = html || '<p class="plan-prose">No messaging data.</p>';
+    }
+
+    function renderTabLaunch(pane) {
+      var lp = plan.launch_plan || {};
+      var phases = [
+        { label: "Days 1–30", text: lp.days_1_30 },
+        { label: "Days 31–60", text: lp.days_31_60 },
+        { label: "Days 61–90", text: lp.days_61_90 },
+      ].filter(function(p) { return p.text; });
+
+      if (!phases.length) { pane.innerHTML = '<p class="plan-prose">No launch plan available.</p>'; return; }
+
+      var html = '<div class="launch-grid">';
+      phases.forEach(function(p) {
+        html += '<div class="launch-card"><div class="launch-period">' + esc(p.label) + '</div>' +
+          '<div class="launch-text">' + esc(p.text) + '</div></div>';
+      });
+      html += '</div>';
+
+      if (plan.smart_next_moves && plan.smart_next_moves.length) {
+        html += '<h3 class="plan-section-title" style="margin-top:28px;">Smart Next Moves</h3><div class="tag-list">';
+        plan.smart_next_moves.forEach(function(m) {
+          html += '<span class="tag">' + esc(m) + '</span>';
+        });
+        html += '</div>';
+      }
+      pane.innerHTML = html;
+    }
+
+    // ── 6. Watch List ─────────────────────────────────────────
+    function renderWatchList() {
+      var items = plan.what_to_watch || [];
+      var container = document.getElementById("watch-list");
+      if (!items.length) {
+        container.innerHTML = '<p style="color:var(--muted);font-size:14px;">No monitoring signals specified.</p>';
+        return;
+      }
+      items.forEach(function(item, i) {
+        var div = document.createElement("div");
+        div.className = "watch-item";
+        div.innerHTML =
+          '<div class="watch-num">' + (i + 1) + '</div>' +
+          '<div>' +
+            '<div class="watch-signal">' + esc(item.signal || "") + '</div>' +
+            '<div class="watch-meta">' +
+              (item.target ? esc(item.target) : "") +
+              (item.target && item.timeframe ? " &nbsp;&middot;&nbsp; " : "") +
+              (item.timeframe ? esc(item.timeframe) : "") +
+            '</div>' +
+          '</div>';
+        container.appendChild(div);
+      });
+    }
+
+    // ── Scroll spy ────────────────────────────────────────────
+    function initScrollSpy() {
+      var secs = ["sec-snapshot","sec-found","sec-budget","sec-channels","sec-plan","sec-watch"];
+      var links = document.querySelectorAll(".jump-link");
+      window.addEventListener("scroll", function() {
+        var scrollY = window.scrollY + 80;
+        var current = secs[0];
+        secs.forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el && el.offsetTop <= scrollY) current = id;
+        });
+        links.forEach(function(link) {
+          link.classList.toggle("active", link.getAttribute("href") === "#" + current);
+        });
+      }, { passive: true });
+    }
+
+    // ── Error ──────────────────────────────────────────────────
+    function showError(msg) {
+      document.getElementById("generating").style.display = "none";
+      var err = document.getElementById("error-state");
+      err.classList.add("visible");
+      if (msg) document.getElementById("error-msg").textContent = msg;
+    }
+
+    // ── Nav ────────────────────────────────────────────────────
+    if (typeof window.__clerkLoaded !== "undefined") {
+      window.__clerkLoaded.then(function(clerk) {
+        if (clerk && clerk.user) renderNav("Optimized Plan");
+      });
+    }
+  </script>
+</body>
+</html>
