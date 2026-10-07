@@ -263,8 +263,10 @@
     fetch("/.netlify/functions/poll-plan?id=" + encodeURIComponent(planId))
       .then(function(r) { return r.json(); })
       .then(function(d) {
-        if (d && d.planName) {
-          planName = d.planName;
+        // poll-plan returns bizName, not planName
+        var name = (d && (d.planName || d.bizName)) || "";
+        if (name) {
+          planName = name;
           document.getElementById("plan-name").textContent = planName;
         } else {
           document.getElementById("plan-name").textContent = "Your Advertising Plan";
