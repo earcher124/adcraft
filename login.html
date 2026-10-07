@@ -53,7 +53,8 @@
       }
       clerk.mountSignIn(document.getElementById("clerk-mount"), {
         fallbackRedirectUrl: "/dashboard.html",
-        signUpUrl: "/login.html"
+        signUpUrl: "/login.html",
+        routing: "hash"
       });
     });
   </script>
