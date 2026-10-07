@@ -363,9 +363,8 @@
     if (selectedFiles.length === 0 || !planId) return;
     hideError();
 
-    // Get email from localStorage (set on login)
-    var email = "";
-    try { email = localStorage.getItem("adcraft_email") || ""; } catch(e) {}
+    // Get email from intake (already fetched from the original plan record)
+    var email = (intake && intake["Email"]) || "";
 
     // Show overlay
     document.getElementById("submitting-overlay").classList.add("visible");
