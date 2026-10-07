@@ -86,9 +86,14 @@ function renderNav(activePage) {
 // Load Clerk and expose a promise that resolves when ready
 window.__clerkLoaded = new Promise(function(resolve) {
   var script = document.createElement("script");
-  script.src = "https://cdnjs.cloudflare.com/ajax/libs/clerk-js/5.74.1-snapshot.v20250718114402/clerk.min.js";
+  script.async = true;
+  script.crossOrigin = "anonymous";
+  script.src = "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js";
   script.onload = async function() {
-    var clerk = new window.Clerk(CLERK_KEY);
+    // clerk-js attaches itself as window.Clerk when loaded via script tag
+    var Clerk = window.Clerk;
+    if (typeof Clerk !== "function" && Clerk && Clerk.default) Clerk = Clerk.default;
+    var clerk = new Clerk(CLERK_KEY);
     await clerk.load();
     window.Clerk = clerk;
     resolve(clerk);
