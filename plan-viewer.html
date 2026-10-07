@@ -17,9 +17,9 @@
       --card: #ffffff;
     }
     @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --bg: #1a1518; --fg: #f0ebe6; --muted: #9a8fa0;
-        --border: #3a2f38; --card: #231d22; color-scheme: dark;
+      :root:not([data-theme="light"]):not([data-theme="dark"]) {
+        --bg: #FAF6ED; --fg: #1a1a1a; --muted: #6b6270;
+        --border: #e8ddd0; --card: #ffffff; color-scheme: light;
       }
     }
     :root[data-theme="dark"] {
@@ -187,7 +187,7 @@
     <div class="generating" id="generating">
       <div class="spinner"></div>
       <h2>Building your plan…</h2>
-      <p>This usually takes 30–90 seconds. You can stay on this page or come back later.</p>
+      <p>This takes a few minutes. You can stay on this page or come back later.</p>
       <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
       <ul class="gen-steps">
         <li id="gs1" class="active"><span class="dot"></span>Analyzing your business</li>
