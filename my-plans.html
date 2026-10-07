@@ -164,13 +164,14 @@
             : plan.status === "Generating" ? "Generating…"
             : plan.status === "Error" ? "Error" : plan.status || "";
 
+          var showBiz = plan.bizName && plan.bizName !== plan.planName;
           card.innerHTML =
             '<div class="plan-card-top">' +
               '<div class="plan-name">' + (plan.planName || 'Untitled Plan') + '</div>' +
               (statusLabel ? '<span class="plan-tag ' + statusClass + '">' + statusLabel + '</span>' : '') +
             '</div>' +
             '<div class="plan-meta">' +
-              (plan.bizName ? '<strong>' + plan.bizName + '</strong><br>' : '') +
+              (showBiz ? plan.bizName + (date ? ' · ' : '') : '') +
               (date || '') +
             '</div>' +
             '<div class="plan-card-footer">' +
