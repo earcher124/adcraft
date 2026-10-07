@@ -45,7 +45,6 @@ exports.handler = async function (event) {
             "Geography": body.geo || "",
             "Monthly Ad Budget": parseFloat(String(body.budget || "0").replace(/[^0-9.]/g, "")) || 0,
             "Status": "Generating",
-            "Intake Responses": JSON.stringify(body.formData || {}),
           },
         }),
       }
