@@ -743,72 +743,110 @@ function slideRoadmap(pptx, plan) {
   if (!phases.length) return;
 
   var cx = T.margin.x, cw = T.W - T.margin.x * 2;
-  var colGap = 0.25;
-  var phaseW = (cw - colGap * (phases.length - 1)) / phases.length;
-  var availH = T.margin.footerY - 0.1 - y;
-  var headerH = 0.65, contentH = availH - headerH - 0.1;
 
-  phases.forEach(function(phase, i) {
-    var px = cx + i * (phaseW + colGap);
-
-    // Phase header card — accent fill
-    H.addAccentCard(slide, px, y, phaseW, headerH);
-
-    // Number
-    slide.addText(phase.num, {
-      x: px + T.card.pad, y: y + T.card.pad,
-      w: 0.4, h: headerH - T.card.pad * 2,
-      fontSize: 22, color: T.color.accentLight,
-      fontFace: T.font.heading, bold: false,
-      valign: "middle",
-    });
-
-    // Phase name
-    slide.addText(phase.label.toUpperCase(), {
-      x: px + T.card.pad + 0.42, y: y + T.card.pad,
-      w: phaseW - T.card.pad * 2 - 0.44, h: 0.26,
-      fontSize: 11, color: T.color.white,
-      fontFace: T.font.body, bold: true,
-      valign: "bottom",
-    });
-
-    // Days label
-    slide.addText(phase.days, {
-      x: px + T.card.pad + 0.42, y: y + T.card.pad + 0.28,
-      w: phaseW - T.card.pad * 2 - 0.44, h: 0.22,
-      fontSize: T.size.small, color: T.color.accentLight,
-      fontFace: T.font.body,
-    });
-
-    // Content card
-    H.addCard(slide, px, y + headerH + 0.08, phaseW, contentH);
-    slide.addText(H.trunc(phase.text, 320), {
-      x: px + T.card.pad, y: y + headerH + 0.08 + T.card.pad,
-      w: phaseW - T.card.pad * 2, h: contentH - T.card.pad * 2,
-      fontSize: T.size.body, color: T.color.fg,
-      fontFace: T.font.body, wrap: true,
+  // Collect all items as a flat checklist, grouped by phase
+  // Each phase gets a label row + one checklist item row per sentence/bullet
+  var allRows = [];
+  phases.forEach(function(phase) {
+    allRows.push({ type: "phase", label: phase.label, days: phase.days });
+    // Split text into individual action items (by period, semicolon, or newline)
+    var items = phase.text
+      .split(/(?<=[.;])\s+|\n+/)
+      .map(function(s) { return s.trim().replace(/[.;]+$/, ""); })
+      .filter(function(s) { return s.length > 4; });
+    if (!items.length) items = [phase.text.trim()];
+    items.forEach(function(item) {
+      allRows.push({ type: "item", text: item });
     });
   });
 
-  // Smart next moves — below phases if room
-  if (plan.smart_next_moves && plan.smart_next_moves.length) {
-    var ny = y + availH + 0.06;
-    if (ny < T.H - 0.35) {
-      var moves = plan.smart_next_moves.slice(0, 3);
-      slide.addText("NEXT MOVES  ", {
-        x: cx, y: ny, w: 1.4, h: 0.22,
-        fontSize: T.size.sectionLabel, color: T.color.muted,
-        fontFace: T.font.body, charSpacing: 1.5,
-      });
-      moves.forEach(function(m, mi) {
-        slide.addText("→ " + H.trunc(m, 60), {
-          x: cx + 1.5 + mi * 3.6, y: ny, w: 3.5, h: 0.22,
-          fontSize: T.size.small, color: T.color.muted,
-          fontFace: T.font.body,
-        });
-      });
-    }
+  // Add smart next moves as their own section
+  var moves = (plan.smart_next_moves || []).slice(0, 5);
+  if (moves.length) {
+    allRows.push({ type: "phase", label: "Quick Wins", days: "Start Now" });
+    moves.forEach(function(m) {
+      allRows.push({ type: "item", text: m });
+    });
   }
+
+  var phaseRowH = 0.30;
+  var itemRowH  = 0.36;
+  var rowGap    = 0.06;
+  var availH    = T.margin.footerY - 0.1 - y;
+
+  // Calculate total height to see if we need to compress
+  var totalH = allRows.reduce(function(sum, r) {
+    return sum + (r.type === "phase" ? phaseRowH : itemRowH) + rowGap;
+  }, 0);
+  if (totalH > availH) {
+    // Compress item height proportionally
+    var phaseRows  = allRows.filter(function(r) { return r.type === "phase"; }).length;
+    var itemRows   = allRows.filter(function(r) { return r.type === "item"; }).length;
+    var fixedH     = phaseRows * (phaseRowH + rowGap);
+    itemRowH       = Math.max((availH - fixedH) / itemRows - rowGap, 0.24);
+  }
+
+  var checkboxW = 0.22, checkboxH = 0.18;
+  var textIndent = checkboxW + 0.14;
+  var labelW = 2.0;
+
+  var ry = y;
+  allRows.forEach(function(row) {
+    if (row.type === "phase") {
+      // Phase header: accent pill label + days tag
+      slide.addShape("rect", {
+        x: cx, y: ry, w: labelW, h: phaseRowH,
+        fill: { color: T.color.accent },
+        line: { color: T.color.accent },
+        rectRadius: 0.04,
+      });
+      slide.addText(row.label.toUpperCase(), {
+        x: cx + T.card.pad, y: ry,
+        w: labelW - T.card.pad * 2 - 0.8, h: phaseRowH,
+        fontSize: 9, color: T.color.white,
+        fontFace: T.font.body, bold: true,
+        valign: "middle",
+      });
+      slide.addText(row.days, {
+        x: cx + labelW - 0.78, y: ry,
+        w: 0.72, h: phaseRowH,
+        fontSize: T.size.small, color: T.color.accentLight,
+        fontFace: T.font.body, valign: "middle", align: "right",
+      });
+      ry += phaseRowH + rowGap;
+    } else {
+      // Checklist item row
+      var itemY = ry + (itemRowH - checkboxH) / 2;
+
+      // Checkbox outline
+      slide.addShape("rect", {
+        x: cx + 0.08, y: itemY,
+        w: checkboxH, h: checkboxH,
+        fill: { color: T.color.bgWhite },
+        line: { color: T.color.border, pt: 1 },
+        rectRadius: 0.03,
+      });
+
+      // Item text
+      slide.addText(H.trunc(row.text, 180), {
+        x: cx + 0.08 + textIndent, y: ry,
+        w: cw - textIndent - 0.1, h: itemRowH,
+        fontSize: T.size.body, color: T.color.fg,
+        fontFace: T.font.body, wrap: true, valign: "middle",
+      });
+
+      // Light row separator
+      if (ry + itemRowH + rowGap < T.margin.footerY - 0.15) {
+        slide.addShape("line", {
+          x: cx + 0.08, y: ry + itemRowH + rowGap * 0.5,
+          w: cw - 0.1, h: 0,
+          line: { color: T.color.borderLight, pt: 0.4 },
+        });
+      }
+
+      ry += itemRowH + rowGap;
+    }
+  });
 }
 
 // ── 11. OPTIMIZATION ──────────────────────────────────────────────────────────
