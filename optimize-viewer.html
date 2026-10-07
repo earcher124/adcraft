@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AdCraft — Optimized Plan</title>
+  <title>AdCraft - Optimized Plan</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap">
   <style>
     :root {
@@ -46,6 +46,10 @@
     .hero-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: var(--coral); margin-bottom: 10px; }
     .hero-title { font-family: 'Playfair Display', Georgia, serif; font-size: 42px; font-weight: 800; color: var(--fg); margin: 0; letter-spacing: -0.03em; line-height: 1; }
     .hero-title em { font-style: italic; font-weight: 400; color: var(--purple); }
+    .hero-meta { font-size: 13px; color: var(--muted); margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px 16px; }
+    .hero-meta-item { display: flex; align-items: center; gap: 5px; }
+    .hero-meta-label { font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+    .hero-meta-value { color: var(--fg); }
     .hero-right { flex: 0 0 auto; padding-bottom: 6px; }
     .hero-line { max-width: 900px; margin: 24px auto 0; height: 2px; background: linear-gradient(to right, var(--coral), var(--purple), transparent); }
 
@@ -284,6 +288,7 @@
       <div class="hero-left">
         <p class="hero-eyebrow">Optimized Plan</p>
         <h1 class="hero-title" id="hero-title">Your <em>Optimized</em> Plan</h1>
+        <p class="hero-meta" id="hero-meta" hidden></p>
       </div>
       <div class="hero-right">
         <a class="btn btn-outline" id="btn-back" href="/my-plans.html">← My Plans</a>
@@ -329,7 +334,7 @@
 
     <!-- ─── 1. Performance Snapshot ─── -->
     <section class="section" id="sec-snapshot">
-      <p class="section-eyebrow">01 — Performance Snapshot</p>
+      <p class="section-eyebrow">01 - Performance Snapshot</p>
       <h2 class="section-title">What the data showed</h2>
       <div class="snapshot-tiles" id="snapshot-tiles"></div>
       <div class="snapshot-insight" id="snapshot-insight"></div>
@@ -337,7 +342,7 @@
 
     <!-- ─── 2. What AdCraft Found ─── -->
     <section class="section" id="sec-found">
-      <p class="section-eyebrow">02 — What AdCraft Found</p>
+      <p class="section-eyebrow">02 - What AdCraft Found</p>
       <h2 class="section-title">The strategic read</h2>
       <div class="strategy-block">
         <p class="strategy-text" id="strategy-text"></p>
@@ -348,7 +353,7 @@
 
     <!-- ─── 3. Budget Reallocation ─── -->
     <section class="section" id="sec-budget">
-      <p class="section-eyebrow">03 — Budget Reallocation</p>
+      <p class="section-eyebrow">03 - Budget Reallocation</p>
       <h2 class="section-title">Where the money should move</h2>
       <div class="realloc-table-wrap">
         <table class="realloc-table">
@@ -369,14 +374,14 @@
 
     <!-- ─── 4. Channel Actions ─── -->
     <section class="section" id="sec-channels">
-      <p class="section-eyebrow">04 — Channel Actions</p>
+      <p class="section-eyebrow">04 - Channel Actions</p>
       <h2 class="section-title">What to do on each channel</h2>
       <div class="action-groups" id="action-groups"></div>
     </section>
 
     <!-- ─── 5. Optimized Plan ─── -->
     <section class="section" id="sec-plan">
-      <p class="section-eyebrow">05 — Optimized Plan</p>
+      <p class="section-eyebrow">05 - Optimized Plan</p>
       <h2 class="section-title">The full revised strategy</h2>
       <div class="plan-body-wrap">
         <div class="plan-tabs" id="plan-tabs"></div>
@@ -386,7 +391,7 @@
 
     <!-- ─── 6. What to Watch ─── -->
     <section class="section" id="sec-watch">
-      <p class="section-eyebrow">06 — What to Watch Next</p>
+      <p class="section-eyebrow">06 - What to Watch Next</p>
       <h2 class="section-title">Your 30-day checklist</h2>
       <div class="watch-list" id="watch-list"></div>
     </section>
@@ -397,6 +402,7 @@
   <script>
     var recordId = null;
     var plan = null;
+    var intake = null;
     var pollInterval = null;
     var pollCount = 0;
 
@@ -431,6 +437,7 @@
           try {
             var planRaw = data.plan;
             plan = (typeof planRaw === "string") ? JSON.parse(planRaw) : planRaw;
+            intake = data.intake || null;
             try {
               renderPlan(plan.plan_name || data.bizName || "Optimized Plan");
             } catch (renderErr) {
@@ -477,7 +484,24 @@
     // ── Render ────────────────────────────────────────────────
     function renderPlan(planName) {
       document.getElementById("generating").style.display = "none";
-      document.getElementById("hero-title").innerHTML = esc(planName).replace(" — Optimized", " <em>— Optimized</em>").replace(" — Optimized", " <em>— Optimized</em>");
+      document.getElementById("hero-title").innerHTML = esc(planName).replace(" - Optimized", " <em>- Optimized</em>").replace(" - Optimized", " <em>- Optimized</em>");
+
+      // Populate hero meta strip from intake
+      var metaEl = document.getElementById("hero-meta");
+      if (intake) {
+        var parts = [];
+        if (intake["Business Name"]) parts.push({ label: "Business", value: intake["Business Name"] });
+        if (intake["Primary Goal"]) parts.push({ label: "Goal", value: intake["Primary Goal"] });
+        if (intake["Monthly Ad Budget"]) parts.push({ label: "Budget", value: "$" + Number(String(intake["Monthly Ad Budget"]).replace(/[^0-9.]/g, "")).toLocaleString() + "/mo" });
+        if (intake["Geography"]) parts.push({ label: "Geography", value: intake["Geography"] });
+        if (intake["Email"]) parts.push({ label: "Email", value: intake["Email"] });
+        if (parts.length) {
+          metaEl.innerHTML = parts.map(function(p) {
+            return '<span class="hero-meta-item"><span class="hero-meta-label">' + esc(p.label) + '</span><span class="hero-meta-value">' + esc(p.value) + '</span></span>';
+          }).join("");
+          metaEl.hidden = false;
+        }
+      }
 
       var fns = [renderSnapshot, renderFound, renderBudget, renderChannelActions, renderPlanTabs, renderWatchList];
       fns.forEach(function(fn) {
@@ -732,9 +756,9 @@
     function renderTabLaunch(pane) {
       var lp = plan.launch_plan || {};
       var phases = [
-        { label: "Days 1–30", text: lp.days_1_30 },
-        { label: "Days 31–60", text: lp.days_31_60 },
-        { label: "Days 61–90", text: lp.days_61_90 },
+        { label: "Days 1-30", text: lp.days_1_30 },
+        { label: "Days 31-60", text: lp.days_31_60 },
+        { label: "Days 61-90", text: lp.days_61_90 },
       ].filter(function(p) { return p.text; });
 
       if (!phases.length) { pane.innerHTML = '<p class="plan-prose">No launch plan available.</p>'; return; }
