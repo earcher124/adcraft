@@ -257,7 +257,7 @@
           document.getElementById('product-type').value = p.productType || '';
           document.getElementById('target-customer').value = p.targetCustomer || '';
           document.getElementById('geo').value = p.geo || '';
-          document.getElementById('monthly-revenue').value = p.monthlyRevenue || '';
+          document.getElementById('monthly-revenue').value = (p.monthlyRevenue != null && p.monthlyRevenue !== '') ? p.monthlyRevenue : '';
           document.getElementById('current-advertising').value = p.currentAdvertising || '';
         }
       } catch(e) {

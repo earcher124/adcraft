@@ -21,7 +21,12 @@ exports.handler = async function (event) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: "Missing email" }) };
   }
 
-  const revenueRaw = profile.monthlyRevenue ? String(profile.monthlyRevenue).replace(/[^0-9.]/g, "") : "";
+  // Use != null (not !) so that 0 is treated as a valid value
+  const revenueRaw = profile.monthlyRevenue != null && profile.monthlyRevenue !== ""
+    ? String(profile.monthlyRevenue).replace(/[^0-9.]/g, "")
+    : "";
+  const revenueVal = revenueRaw !== "" ? parseFloat(revenueRaw) : null;
+
   const fields = {
     "Email": email,
     "Business Name": profile.bizName || "",
@@ -29,10 +34,14 @@ exports.handler = async function (event) {
     "Product": profile.productType || "",
     "Target Customer": profile.targetCustomer || "",
     "Geography": profile.geo || "",
-    "Monthly Revenue": revenueRaw ? parseFloat(revenueRaw) : null,
     "Current Advertising": profile.currentAdvertising || "",
   };
-  // Remove null fields to avoid type errors on empty optional fields
+  // Only include Monthly Revenue when a value was actually provided (including 0)
+  if (revenueVal !== null && !isNaN(revenueVal)) {
+    fields["Monthly Revenue"] = revenueVal;
+  }
+  // Remove empty string fields to avoid type errors on empty optional fields
+  // Note: keep 0 and other falsy-but-valid values — only strip null/""
   Object.keys(fields).forEach(k => { if (fields[k] === null || fields[k] === "") delete fields[k]; });
   fields["Email"] = email; // always keep email
 
