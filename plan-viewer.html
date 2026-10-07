@@ -229,6 +229,7 @@
     var pollInterval = null;
     var pollCount = 0;
     var currentPlan = null;
+    var currentIntake = null;
     var stepIndex = 0;
     var stepTimers = [];
 
@@ -490,6 +491,7 @@
 
         if (data.status === 'Complete' && data.plan) {
           clearInterval(pollInterval);
+          currentIntake = data.intake || null;
           showPlan(data.plan, data.bizName);
         } else if (data.status === 'Error') {
           clearInterval(pollInterval);
@@ -510,7 +512,7 @@
       fetch('/.netlify/functions/generate-xlsx', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(currentPlan)
+        body: JSON.stringify(Object.assign({}, currentPlan, currentIntake || {}))
       })
         .then(function(res) {
           if (!res.ok) throw new Error('Failed');

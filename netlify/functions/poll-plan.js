@@ -31,11 +31,19 @@ exports.handler = async function (event) {
     const status = rawStatus === "Ready" ? "Complete" : rawStatus;
     const plan = data.fields?.["Plan Output"] || null;
     const bizName = data.fields?.["Business Name"] || "";
+    const intake = {
+      "Business Name": data.fields?.["Business Name"] || "",
+      "Primary Goal": data.fields?.["Primary Goal"] || "",
+      "Geography": data.fields?.["Geography"] || "",
+      "Monthly Ad Budget": data.fields?.["Monthly Ad Budget"] || "",
+      "Budget Tier": data.fields?.["Budget Tier"] || "",
+      "Email": data.fields?.["Email"] || "",
+    };
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ status, plan, bizName }),
+      body: JSON.stringify({ status, plan, bizName, intake }),
     };
   } catch (err) {
     console.error("Poll error:", err);
