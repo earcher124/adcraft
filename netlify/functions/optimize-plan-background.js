@@ -291,12 +291,20 @@ exports.handler = async function (event) {
       console.log("Optimization returned valid JSON");
     } catch (e) {
       console.warn("Optimization did not return valid JSON:", e.message);
-      console.warn("First 300 chars:", JSON.stringify(planText.slice(0, 300)));
-      // Find the position of the error and log context around it
+      // Log char codes around position 2 to find invisible characters
+      var codes = [];
+      for (var ci = 0; ci < Math.min(20, planText.length); ci++) {
+        codes.push(planText.charCodeAt(ci));
+      }
+      console.warn("First 20 char codes:", codes.join(","));
       var match = e.message.match(/position (\d+)/);
       if (match) {
         var pos = parseInt(match[1]);
-        console.warn("Chars around position " + pos + ":", JSON.stringify(planText.slice(Math.max(0, pos - 30), pos + 30)));
+        var around = [];
+        for (var ci2 = Math.max(0, pos - 5); ci2 < Math.min(planText.length, pos + 10); ci2++) {
+          around.push(planText.charCodeAt(ci2));
+        }
+        console.warn("Char codes around position " + pos + ":", around.join(","));
       }
     }
   } catch (err) {
