@@ -42,3 +42,87 @@ exports.handler = async function (event) {
             "Email": email || "",
             "Business Name": body.bizName || "",
             "Primary Goal": body.goal || "",
+            "Geography": body.geo || "",
+            "Monthly Ad Budget": parseFloat(String(body.budget || "0").replace(/[^0-9.]/g, "")) || 0,
+            "Status": "Generating",
+          },
+        }),
+      }
+    );
+
+    const atData = await atRes.json();
+    if (!atRes.ok) {
+      console.error("Airtable create error:", JSON.stringify(atData));
+      return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to create plan record", detail: atData }) };
+    }
+    recordId = atData.id;
+  } catch (err) {
+    console.error("Airtable error:", err);
+    return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to create plan record" }) };
+  }
+
+  // 2. Fire background function (non-blocking)
+  try {
+    const siteUrl = process.env.URL || process.env.DEPLOY_URL || "https://adcrafthq.com";
+    const bgUrl = `${siteUrl}/.netlify/functions/generate-plan-background`;
+    console.log("Triggering background function:", bgUrl);
+    fetch(bgUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ recordId, prompt, email, bizName, formData: body.formData }),
+    }).then(r => console.log("Background trigger response:", r.status))
+      .catch(err => console.error("Background trigger error:", err.message));
+  } catch (err) {
+    console.error("Background trigger error:", err);
+  }
+
+  // 3. Upsert business profile (fire-and-forget)
+  if (email) {
+    upsertProfile(email, bizName, body.formData).catch(err =>
+      console.error("Profile upsert error:", err)
+    );
+  }
+
+  // 4. Return the record ID immediately — frontend polls for completion
+  return {
+    statusCode: 200,
+    headers,
+    body: JSON.stringify({ recordId, status: "generating" }),
+  };
+};
+
+async function upsertProfile(email, bizName, formData = {}) {
+  const token = process.env.AIRTABLE_TOKEN;
+
+  const searchUrl = `https://api.airtable.com/v0/${AT_BASE}/${AT_PROFILES_TBL}?filterByFormula=${encodeURIComponent(`{Email}="${email}"`)}`;
+  const searchRes = await fetch(searchUrl, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const searchData = await searchRes.json();
+
+  const fields = {
+    "Email": email,
+    "Business Name": bizName || formData.bizName || "",
+    "Business Type": formData.bizType || "",
+    "Product": formData.productType || "",
+    "Target Customer": formData.targetCustomer || "",
+    "Geography": formData.geo || "",
+    "Monthly Revenue": formData.monthlyRevenue || "",
+    "Current Advertising": formData.currentAdvertising || "",
+  };
+
+  if (searchData.records && searchData.records.length > 0) {
+    const rid = searchData.records[0].id;
+    await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_PROFILES_TBL}/${rid}`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ fields }),
+    });
+  } else {
+    await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_PROFILES_TBL}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ fields }),
+    });
+  }
+}
