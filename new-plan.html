@@ -519,7 +519,11 @@
           })
         });
 
-        if (!res.ok) throw new Error('Generation failed');
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          console.error('generate-plan error response:', JSON.stringify(errBody));
+          throw new Error('Generation failed');
+        }
         var data = await res.json();
 
         if (data.recordId) {
