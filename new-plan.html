@@ -532,12 +532,6 @@
         var data = await res.json();
 
         if (data.recordId) {
-          // Store prompt in sessionStorage so plan-viewer can fire the background call
-          try {
-            console.log('[AdCraft] storing prompt, length:', prompt ? prompt.length : 0, 'recordId:', data.recordId);
-            sessionStorage.setItem('adcraft_pending_' + data.recordId, prompt);
-            console.log('[AdCraft] verify stored:', !!sessionStorage.getItem('adcraft_pending_' + data.recordId));
-          } catch(e) { console.error('[AdCraft] sessionStorage write error:', e); }
           window.location.href = '/plan-viewer.html?id=' + data.recordId;
         } else {
           throw new Error('No record ID returned');

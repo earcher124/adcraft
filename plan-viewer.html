@@ -227,29 +227,19 @@
   <script>
     var recordId = new URLSearchParams(window.location.search).get('id');
 
-    // Fire background generation immediately — no auth needed, just recordId + stored prompt
+    // Fire background generation immediately — prompt is stored in Airtable, only recordId needed
     (function() {
       if (!recordId) return;
-      try {
-        var pendingPrompt = sessionStorage.getItem('adcraft_pending_' + recordId);
-        console.log('[AdCraft] recordId:', recordId, 'pendingPrompt found:', !!pendingPrompt);
-        if (pendingPrompt) {
-          sessionStorage.removeItem('adcraft_pending_' + recordId);
-          fetch('/.netlify/functions/trigger-plan', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ recordId: recordId, prompt: pendingPrompt })
-          }).then(function(r) {
-            console.log('[AdCraft] trigger-plan responded:', r.status);
-          }).catch(function(e) {
-            console.error('[AdCraft] trigger-plan fetch error:', e.message);
-          });
-        } else {
-          console.warn('[AdCraft] No pending prompt found in sessionStorage');
-        }
-      } catch(e) {
-        console.error('[AdCraft] sessionStorage error:', e);
-      }
+      console.log('[AdCraft] triggering plan generation for recordId:', recordId);
+      fetch('/.netlify/functions/trigger-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recordId: recordId })
+      }).then(function(r) {
+        console.log('[AdCraft] trigger-plan responded:', r.status);
+      }).catch(function(e) {
+        console.error('[AdCraft] trigger-plan fetch error:', e.message);
+      });
     })();
 
     var pollInterval = null;
