@@ -2,6 +2,7 @@
   "name": "adcraft",
   "version": "1.0.0",
   "dependencies": {
-    "exceljs": "^4.4.0"
+    "exceljs": "^4.4.0",
+    "@anthropic-ai/sdk": "^0.30.0"
   }
 }
