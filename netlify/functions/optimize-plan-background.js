@@ -291,6 +291,13 @@ exports.handler = async function (event) {
       console.log("Optimization returned valid JSON");
     } catch (e) {
       console.warn("Optimization did not return valid JSON:", e.message);
+      console.warn("First 300 chars:", JSON.stringify(planText.slice(0, 300)));
+      // Find the position of the error and log context around it
+      var match = e.message.match(/position (\d+)/);
+      if (match) {
+        var pos = parseInt(match[1]);
+        console.warn("Chars around position " + pos + ":", JSON.stringify(planText.slice(Math.max(0, pos - 30), pos + 30)));
+      }
     }
   } catch (err) {
     console.error("Anthropic error:", err.message);
