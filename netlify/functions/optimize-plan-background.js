@@ -71,7 +71,7 @@ var SYSTEM_PROMPT = [
   "",
   "The JSON must use this exact schema. Every required field must be present. If information is unavailable, use null or an empty array rather than inventing information. All budget numbers must be integers. Recommended channel budgets in budget_reallocation must sum to the total planned budget.",
   "",
-  "Be concise. String fields should be 1-3 sentences maximum unless the schema says otherwise. launch_plan phases should be 2-3 sentences each. assumptions should be 3 items maximum, one sentence each. smart_next_moves should be 3-4 items, one sentence each. The entire JSON response must fit within 7000 tokens.",
+  "Be concise. Every string field must be 1-3 sentences. launch_plan phases must be 2-3 sentences each. assumptions: maximum 3 items, one sentence each. smart_next_moves: maximum 3 items, one sentence each. channel_actions findings and recommendations: 2 sentences each maximum. Keep the total JSON under 6000 words.",
   "",
   "Required JSON schema:",
   "{",
@@ -237,7 +237,7 @@ exports.handler = async function (event) {
     console.log("Calling Claude for optimization, recordId:", recordId);
     var message = await client.messages.create({
       model: "claude-opus-4-5",
-      max_tokens: 8192,
+      max_tokens: 16000,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: prompt }],
     });
