@@ -6,7 +6,7 @@ exports.handler = async function(event) {
   }
 
   const token = process.env.AIRTABLE_TOKEN;
-  const url = `https://api.airtable.com/v0/appCtUgAKIoaa6ECh/Plans/${recordId}`;
+  const url = `https://api.airtable.com/v0/appCtUgAKIoaa6ECh/tblOAtGXbtWewEAm0/${recordId}`;
 
   const response = await fetch(url, {
     headers: { 'Authorization': `Bearer ${token}` }

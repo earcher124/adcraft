@@ -49,11 +49,13 @@ const COVER_IMAGE_MAP = [
 const COVER_IMAGES_DIR = path.join(__dirname, "export", "cover-images");
 const DEFAULT_COVER    = "professional-services.png"; // fallback
 
-function pickCoverImage(plan) {
-  // Only scan typed category fields — Business_Name can contain misleading words
+function pickCoverImage(plan, fields) {
+  // Airtable fields use spaces ("Business Type"), plan JSON uses underscores ("Business_Type")
+  // Check both so this works regardless of where the value lives
+  fields = fields || {};
   var haystack = [
-    plan["Business_Type"] || "",
-    plan["Industry"]      || "",
+    fields["Business Type"] || plan["Business_Type"] || "",
+    fields["Industry"]      || plan["Industry"]      || "",
   ].join(" ").toLowerCase();
   console.log("Cover art: haystack =", JSON.stringify(haystack));
 
@@ -69,9 +71,9 @@ function pickCoverImage(plan) {
   return DEFAULT_COVER;
 }
 
-async function generateCoverArt(plan) {
+async function generateCoverArt(plan, fields) {
   try {
-    var filename = pickCoverImage(plan);
+    var filename = pickCoverImage(plan, fields);
     var filepath = path.join(COVER_IMAGES_DIR, filename);
     if (!fs.existsSync(filepath)) {
       // Try default
@@ -160,9 +162,11 @@ async function buildPresentation(plan, fields, coverDataUrl) {
   }
 
   var meta = {
-    planName: fields["Plan Name"] || plan["plan_name"] || "Advertising Plan",
-    bizName:  fields["Business Name"] || plan["Business_Name"] || "",
-    date:     new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+    planName:  fields["Plan Name"]    || plan["plan_name"]    || "Advertising Plan",
+    bizName:   fields["Business Name"]|| plan["Business_Name"]|| "",
+    date:      new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+    goal:      fields["Goal"]         || plan["primary_goal"] || null,
+    geography: fields["Geography"]    || plan["geography"]    || null,
     coverImageBase64: coverImageBase64,
     coverMime: coverMime,
   };
@@ -216,7 +220,7 @@ async function buildPresentation(plan, fields, coverDataUrl) {
   }
 
   // ── 8. Campaign Approach ────────────────────────────────────────────────────
-  if (plan.messaging && (plan.messaging.territory || plan.messaging.tone || plan.messaging.key_messages)) {
+  if (plan.messaging && (Array.isArray(plan.messaging) ? plan.messaging.length : (plan.messaging.territory || plan.messaging.tone || plan.messaging.key_messages))) {
     layouts.slideCampaign(pptx, plan);
   }
 
@@ -298,7 +302,7 @@ exports.handler = async function(event) {
   var coverArtError = null;
   if (coverType !== "minimal") {
     console.log("Export: generating cover art inline…");
-    var artResult = await generateCoverArt(plan);
+    var artResult = await generateCoverArt(plan, fields);
     coverDataUrl = artResult.image;
     coverArtError = artResult.error;
     console.log("Export: cover art present?", !!coverDataUrl, "error?", coverArtError);

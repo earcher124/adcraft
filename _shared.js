@@ -17,34 +17,6 @@ async function requireAuth() {
   return user;
 }
 
-// Get the current user's Airtable record (cached in sessionStorage)
-async function getAirtableUser() {
-  var cached = sessionStorage.getItem("at_user");
-  if (cached) return JSON.parse(cached);
-
-  await window.__clerkLoaded;
-  var email = window.Clerk.user?.primaryEmailAddress?.emailAddress;
-  if (!email) return null;
-
-  // We store the AT token in a hidden meta tag per page (added by each page that needs it)
-  var keyEl = document.querySelector('meta[name="at-key"]');
-  if (!keyEl) return null;
-  var key = keyEl.content;
-
-  var res = await fetch(
-    "https://api.airtable.com/v0/" + AT_BASE + "/" + AT_USERS_TBL +
-    "?filterByFormula=" + encodeURIComponent('{Email}="' + email + '"'),
-    { headers: { Authorization: "Bearer " + key } }
-  );
-  var data = await res.json();
-  if (data.records && data.records.length) {
-    var rec = { id: data.records[0].id, fields: data.records[0].fields };
-    sessionStorage.setItem("at_user", JSON.stringify(rec));
-    return rec;
-  }
-  return null;
-}
-
 // Render the nav into #nav-mount
 function renderNav(activePage) {
   var navItems = [

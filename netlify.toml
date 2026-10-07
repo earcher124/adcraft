@@ -30,6 +30,9 @@
   timeout = 90
   included_files = ["netlify/functions/export/cover-images/*.png"]
 
+[functions."generate-xlsx"]
+  timeout = 30
+
 [[redirects]]
   from = "/"
   to = "/home.html"

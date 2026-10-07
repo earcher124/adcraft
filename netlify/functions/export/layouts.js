@@ -281,16 +281,17 @@ function slideObjective(pptx, plan) {
     });
   }
 
-  // Strategic POV below — muted, smaller
+  // Strategic POV below the two-column content — advance y past the columns first
   if (plan.your_advertising_strategy) {
-    H.addRule(slide, cx, y, cw * 0.25);
+    var povY = T.margin.footerY - 1.4; // position from bottom, above footer
+    H.addRule(slide, cx, povY, cw * 0.25);
     slide.addText("STRATEGIC POINT OF VIEW", {
-      x: cx, y: y + 0.12, w: cw, h: 0.15,
+      x: cx, y: povY + 0.12, w: cw, h: 0.15,
       fontSize: T.size.sectionLabel, color: T.color.muted,
       fontFace: T.font.body, charSpacing: 2,
     });
     slide.addText(H.trunc(plan.your_advertising_strategy, 280), {
-      x: cx, y: y + 0.28, w: cw, h: 0.9,
+      x: cx, y: povY + 0.28, w: cw, h: 0.9,
       fontSize: T.size.body, color: T.color.muted,
       fontFace: T.font.body, wrap: true,
     });
