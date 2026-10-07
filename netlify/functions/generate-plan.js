@@ -42,7 +42,7 @@ exports.handler = async function (event) {
             "Business Name": body.bizName || "",
             "Primary Goal": body.goal || "",
             "Geography": body.geo || "",
-            "Monthly Ad Budget": body.budget || "",
+            "Monthly Ad Budget": parseFloat(String(body.budget || "0").replace(/[^0-9.]/g, "")) || 0,
             "Status": "Generating",
             "Intake Responses": JSON.stringify(body.formData || {}),
           },
