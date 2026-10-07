@@ -1,5 +1,5 @@
 const AT_BASE = "appCtUgAKIoaa6ECh";
-const AT_PLANS_TBL = "tblOAtGXbtWewEAm0";
+const AT_PLANS_TBL = "tblhHjx0eALtFAut2";
 const AT_PROFILES_TBL = "tblvXoTaqOdiZ4Kzc";
 const AT_USERS_TBL = "tbl7fisATFgQXPOhP";
 const AT_INTAKE_TBL = "tbllflTVOe6gnNP2K";

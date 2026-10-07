@@ -1,5 +1,5 @@
 const AT_BASE = "appCtUgAKIoaa6ECh";
-const AT_PLANS_TBL = "tblOAtGXbtWewEAm0";
+const AT_PLANS_TBL = "tblhHjx0eALtFAut2";
 
 exports.handler = async function (event) {
   if (event.httpMethod !== "POST") {
