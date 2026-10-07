@@ -22,6 +22,10 @@
 [functions."generate-cover-art"]
   timeout = 30
 
+[functions."generate-cover-art-background"]
+  timeout = 900
+  background = true
+
 [functions."generate-export"]
   timeout = 60
 

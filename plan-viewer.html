@@ -724,14 +724,47 @@
         if (coverType === "illustration") {
           btn.textContent = "Creating cover art…";
           try {
-            var artRes = await fetch("/.netlify/functions/generate-cover-art", {
+            // Fire the background function — it returns 202 immediately and
+            // generates the image async, saving it to Airtable when done.
+            // If art is already cached it returns 200 {status:"ready"}.
+            var bgRes = await fetch("/.netlify/functions/generate-cover-art-background", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ recordId: recordId, email: email }),
             });
-            if (artRes.ok) {
-              var artJson = await artRes.json();
-              coverDataUrl = artJson.coverDataUrl || null;
+            if (bgRes.ok || bgRes.status === 202) {
+              var bgJson = await bgRes.json();
+              if (bgJson.status === "ready" && bgJson.cached) {
+                // Already cached — fetch the record to get the data URL
+                var cachedRes = await fetch("/.netlify/functions/get-plan?recordId=" + encodeURIComponent(recordId));
+                if (cachedRes.ok) {
+                  var cachedJson = await cachedRes.json();
+                  var cachedArt = (cachedJson.fields || {})["Cover Art"] || "";
+                  if (cachedArt && cachedArt.startsWith("data:image/")) coverDataUrl = cachedArt;
+                }
+              } else if (bgJson.status === "generating") {
+                // Poll get-plan until the Cover Art field is populated
+                var maxPolls = 30;  // up to 30 × 2s = 60 seconds
+                for (var poll = 0; poll < maxPolls; poll++) {
+                  await new Promise(function(r) { setTimeout(r, 2000); });
+                  var elapsed = (poll + 1) * 2;
+                  btn.textContent = "Creating cover art… (" + elapsed + "s)";
+                  try {
+                    var pollRes = await fetch("/.netlify/functions/get-plan?recordId=" + encodeURIComponent(recordId));
+                    if (pollRes.ok) {
+                      var pollJson = await pollRes.json();
+                      var art = (pollJson.fields || {})["Cover Art"] || "";
+                      if (art && art.startsWith("data:image/")) {
+                        coverDataUrl = art;
+                        break;
+                      }
+                      if (art === "failed") break;  // generation failed — use minimal cover
+                    }
+                  } catch(pollErr) {
+                    console.warn("Cover art poll error:", pollErr);
+                  }
+                }
+              }
             }
           } catch(artErr) {
             // Art failure is non-fatal — fall back to minimal cover
