@@ -269,6 +269,35 @@
     }
     .jump-link:hover, .jump-link.active { color: var(--purple); border-bottom-color: var(--purple); }
 
+    /* Buttons */
+    .btn-primary { background: var(--purple); color: #FAF6ED; }
+    .btn-primary:hover { background: #3a0c30; color: #FAF6ED; }
+    .btn-locked { opacity: 0.65; }
+    .btn-locked:hover { background: transparent !important; color: var(--purple) !important; cursor: pointer; }
+    .lock-icon { font-size: 11px; vertical-align: middle; margin-left: 3px; }
+    .pro-badge { display: inline-flex; align-items: center; padding: 3px 9px; background: var(--purple); color: #FAF6ED; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; }
+    .btn-active { background: var(--purple) !important; color: #FAF6ED !important; }
+    .hero-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
+    /* Export panel */
+    .export-panel-wrap { max-width: 900px; margin: 0 auto; padding: 0 48px; }
+    .export-panel { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 24px 28px; margin-bottom: 8px; }
+    .export-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .export-panel-title { font-size: 16px; font-weight: 700; color: var(--fg); }
+    .export-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--muted); padding: 0 4px; line-height: 1; }
+    .export-close:hover { color: var(--fg); }
+    .export-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .export-opt { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--fg); cursor: pointer; }
+    .export-pro-badge-row { margin-bottom: 14px; }
+    .pro-pill { display: inline-block; background: var(--purple); color: #FAF6ED; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; padding: 2px 8px; border-radius: 20px; }
+    .export-upgrade-btn { width: 100%; justify-content: center; font-size: 14px; }
+    .export-format-list { list-style: none; padding: 0; margin: 0 0 16px; display: flex; flex-direction: column; gap: 8px; }
+    .export-format-item { font-size: 14px; color: var(--fg); }
+    .export-format-item strong { display: block; font-size: 13px; }
+    .export-format-sub { font-size: 11px; color: var(--muted); }
+    .export-generate-btn { margin-top: 20px; width: 100%; justify-content: center; font-size: 14px; }
+    .export-error { background: #FDF0F0; border: 1px solid #E0B0B0; border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #C0392B; margin-top: 12px; }
+
     @media (max-width: 640px) {
       .hero { padding: 32px 20px 24px; }
       .hero-inner { flex-direction: column; gap: 12px; }
@@ -277,6 +306,7 @@
       .plan-tab-content { padding: 20px; }
       .strategy-block { padding: 22px 20px; }
       .jump-nav { padding: 0 20px; }
+      .export-panel-wrap { padding: 0 20px; }
     }
   </style>
 </head>
@@ -291,10 +321,62 @@
         <p class="hero-meta" id="hero-meta" hidden></p>
       </div>
       <div class="hero-right">
-        <a class="btn btn-outline" id="btn-back" href="/my-plans.html">← My Plans</a>
+        <div style="display:flex; align-items:center; gap:8px; justify-content:flex-end; margin-bottom:8px;">
+          <span id="pro-badge" style="display:none;" class="pro-badge">PRO</span>
+        </div>
+        <div class="hero-actions">
+          <a class="btn btn-outline" id="btn-back" href="/my-plans.html">← My Plans</a>
+          <button class="btn btn-outline" id="btn-excel" onclick="downloadExcel()">↓ Excel</button>
+          <button class="btn btn-outline" id="btn-export" onclick="toggleExportPanel()">↓ Export Plan</button>
+        </div>
       </div>
     </div>
     <div class="hero-line"></div>
+  </div>
+
+  <!-- Export Panel -->
+  <div id="export-panel" style="display:none;" class="export-panel-wrap">
+    <div class="export-panel" id="export-panel-inner">
+      <!-- Free user view -->
+      <div id="export-free" style="display:none;">
+        <div class="export-panel-header">
+          <span class="export-panel-title">Export your plan</span>
+          <button class="export-close" onclick="closeExportPanel()" aria-label="Close">✕</button>
+        </div>
+        <ul class="export-format-list">
+          <li class="export-format-item"><strong>PowerPoint (.pptx)</strong><span class="export-format-sub">Presentation-ready slide deck</span></li>
+          <li class="export-format-item"><strong>Excel (.xlsx)</strong><span class="export-format-sub">Budget and channel breakdown spreadsheet</span></li>
+        </ul>
+        <div class="export-pro-badge-row"><span class="pro-pill">PRO</span></div>
+        <button class="btn btn-primary export-upgrade-btn" onclick="window.location.href='/upgrade.html'">Upgrade to Pro</button>
+      </div>
+
+      <!-- Pro user view -->
+      <div id="export-pro" style="display:none;">
+        <div class="export-panel-header">
+          <span class="export-panel-title">Export Optimized Plan</span>
+          <button class="export-close" onclick="closeExportPanel()" aria-label="Close">✕</button>
+        </div>
+        <p style="font-size:14px; color:var(--muted); margin:0 0 14px;">Choose your cover style:</p>
+        <div class="export-options" id="export-cover-opts">
+          <label class="export-opt">
+            <input type="radio" name="coverTypeOpt" value="illustration" checked> Custom business illustration
+          </label>
+          <label class="export-opt">
+            <input type="radio" name="coverTypeOpt" value="minimal"> Minimal
+          </label>
+        </div>
+        <p style="font-size:12px; color:var(--muted); margin:0;">
+          Illustration adds ~30 seconds using AI image generation.
+        </p>
+
+        <div id="export-error" class="export-error" style="display:none;"></div>
+
+        <button class="btn btn-primary export-generate-btn" id="btn-generate-export" onclick="generateExport()">
+          Generate Export
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Sticky section nav (appears after load) -->
@@ -405,6 +487,10 @@
     var intake = null;
     var pollInterval = null;
     var pollCount = 0;
+    var email = "";
+    var userTier = "Free";
+    var exportPanelOpen = false;
+    var exportInProgress = false;
 
     var params = new URLSearchParams(window.location.search);
     recordId = params.get("id");
@@ -830,10 +916,175 @@
       if (msg) document.getElementById("error-msg").textContent = msg;
     }
 
+    // ── Pro gating ────────────────────────────────────────────
+    function requirePro(feature) {
+      if (userTier !== "Pro") {
+        alert("Export is a Pro feature. Upgrade at adcrafthq.com/upgrade.html");
+        return false;
+      }
+      return true;
+    }
+
+    function applyTierUI() {
+      var isPro = (userTier === "Pro");
+      var badge = document.getElementById("pro-badge");
+      if (badge) badge.style.display = isPro ? "" : "none";
+      var excelBtn = document.getElementById("btn-excel");
+      var exportBtn = document.getElementById("btn-export");
+      if (excelBtn) {
+        excelBtn.classList.toggle("btn-locked", !isPro);
+        excelBtn.title = isPro ? "" : "Pro feature";
+      }
+      if (exportBtn) {
+        exportBtn.classList.toggle("btn-locked", !isPro);
+        exportBtn.title = isPro ? "" : "Pro feature";
+      }
+    }
+
+    // ── Excel download ────────────────────────────────────────
+    function downloadExcel() {
+      if (!requirePro("Excel download")) return;
+      if (!plan) { alert("Plan not loaded yet."); return; }
+      var btn = document.getElementById("btn-excel");
+      btn.innerHTML = "Building…";
+      btn.disabled = true;
+      fetch("/.netlify/functions/generate-xlsx", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(plan),
+      })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.xlsxBase64) {
+            var binary = atob(data.xlsxBase64);
+            var bytes = new Uint8Array(binary.length);
+            for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            var blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = data.filename || "AdCraft_Optimized_Plan.xlsx";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          } else {
+            alert("Excel generation failed. Please try again.");
+          }
+        })
+        .catch(function() { alert("Excel generation failed. Please try again."); })
+        .finally(function() {
+          btn.innerHTML = "↓ Excel";
+          btn.disabled = false;
+        });
+    }
+
+    // ── PPTX export panel ─────────────────────────────────────
+    function toggleExportPanel() {
+      if (!requirePro("Export Plan")) return;
+      if (exportPanelOpen) { closeExportPanel(); return; }
+      var panel = document.getElementById("export-panel");
+      var freeDiv = document.getElementById("export-free");
+      var proDiv = document.getElementById("export-pro");
+      if (panel && freeDiv && proDiv) {
+        panel.style.display = "";
+        freeDiv.style.display = userTier === "Pro" ? "none" : "";
+        proDiv.style.display  = userTier === "Pro" ? "" : "none";
+      }
+      exportPanelOpen = true;
+      document.getElementById("btn-export").classList.add("btn-active");
+    }
+
+    function closeExportPanel() {
+      var panel = document.getElementById("export-panel");
+      if (panel) panel.style.display = "none";
+      exportPanelOpen = false;
+      var btn = document.getElementById("btn-export");
+      if (btn) btn.classList.remove("btn-active");
+      var genBtn = document.getElementById("btn-generate-export");
+      if (genBtn) { genBtn.disabled = false; genBtn.textContent = "Generate Export"; }
+      exportInProgress = false;
+    }
+
+    function setExportError(msg) {
+      var el = document.getElementById("export-error");
+      if (!el) return;
+      el.textContent = msg || "";
+      el.style.display = msg ? "" : "none";
+    }
+
+    async function generateExport() {
+      if (exportInProgress) return;
+      if (!plan) { setExportError("Plan not loaded yet."); return; }
+      if (!recordId) { setExportError("Record ID missing."); return; }
+      if (!email) { setExportError("Not signed in."); return; }
+      exportInProgress = true;
+      setExportError("");
+
+      var coverType = "illustration";
+      var radios = document.querySelectorAll("input[name='coverTypeOpt']");
+      radios.forEach(function(r) { if (r.checked) coverType = r.value; });
+
+      var btn = document.getElementById("btn-generate-export");
+      btn.disabled = true;
+      btn.textContent = "Preparing…";
+
+      try {
+        btn.textContent = coverType === "illustration"
+          ? "Creating cover art & building presentation… (this may take ~30s)"
+          : "Building presentation…";
+
+        var res = await fetch("/.netlify/functions/generate-export", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ recordId: recordId, email: email, coverType: coverType }),
+        });
+
+        var data = await res.json();
+        if (!res.ok || !data.pptxBase64) {
+          setExportError(data.error || "Export failed. Please try again.");
+          btn.disabled = false;
+          btn.textContent = "Generate Export";
+          exportInProgress = false;
+          return;
+        }
+
+        var binary = atob(data.pptxBase64);
+        var bytes = new Uint8Array(binary.length);
+        for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        var blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.presentationml.presentation" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = data.filename || "AdCraft_Optimized_Plan.pptx";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        btn.textContent = "Downloaded ✓";
+        setTimeout(function() { closeExportPanel(); }, 1500);
+      } catch(err) {
+        setExportError("Export failed: " + err.message);
+        btn.disabled = false;
+        btn.textContent = "Generate Export";
+        exportInProgress = false;
+      }
+    }
+
     // ── Nav ────────────────────────────────────────────────────
     if (typeof window.__clerkLoaded !== "undefined") {
       window.__clerkLoaded.then(function(clerk) {
-        if (clerk && clerk.user) renderNav("Optimized Plan");
+        if (clerk && clerk.user) {
+          renderNav("Optimized Plan");
+          email = clerk.user.primaryEmailAddress && clerk.user.primaryEmailAddress.emailAddress;
+          if (email) {
+            fetch("/.netlify/functions/get-user?email=" + encodeURIComponent(email))
+              .then(function(r) { return r.json(); })
+              .then(function(d) { userTier = d.tier || "Free"; applyTierUI(); })
+              .catch(function() {});
+          }
+        }
       });
     }
   </script>
