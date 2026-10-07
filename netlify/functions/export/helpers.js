@@ -42,49 +42,58 @@ function totalBudget(plan) {
 // ── Slide helpers ─────────────────────────────────────────────────────────────
 
 /**
- * Editorial header: left accent strip + section tag + slide title.
+ * Editorial header: left accent strip + section tag + slide title + rule.
  * Returns the y position where content should begin.
+ *
+ * Layout (inches):
+ *   0.00 – 0.18  section label
+ *   0.20 – 0.62  title (h=0.42 for 28pt)
+ *   0.70         fine rule
+ *   0.88         content start
  */
 function addSlideHeader(slide, title, sectionLabel) {
-  // Left accent sidebar strip
+  // Left accent sidebar strip — full height
   slide.addShape("rect", {
     x: 0, y: 0, w: T.margin.sidebar, h: T.H,
     fill: { color: T.color.accent },
     line: { color: T.color.accent },
   });
 
-  // Section label (small caps, stacked above title)
+  var labelY  = 0.20;
+  var titleY  = sectionLabel ? 0.40 : 0.24;
+  var titleH  = 0.48;
+  var ruleY   = titleY + titleH + 0.10;  // always below title
+  var contentY = ruleY + 0.20;
+
+  // Section label
   if (sectionLabel) {
     slide.addText(sectionLabel.toUpperCase(), {
-      x: T.margin.x, y: 0.32, w: 6, h: 0.18,
+      x: T.margin.x, y: labelY, w: 6, h: 0.18,
       fontSize: T.size.sectionLabel,
       color: T.color.accent,
       fontFace: T.font.body,
       charSpacing: 2.5,
-      bold: false,
     });
   }
 
   // Slide title
   slide.addText(title, {
-    x: T.margin.x,
-    y: sectionLabel ? 0.5 : 0.38,
-    w: T.W - T.margin.x * 2,
-    h: sectionLabel ? 0.42 : 0.54,
+    x: T.margin.x, y: titleY,
+    w: T.W - T.margin.x * 2, h: titleH,
     fontSize: T.size.slideTitle,
     color: T.color.fg,
     fontFace: T.font.heading,
     bold: true,
   });
 
-  // Fine rule below title
+  // Fine rule — safely below title
   slide.addShape("line", {
-    x: T.margin.x, y: T.margin.titleH,
+    x: T.margin.x, y: ruleY,
     w: T.W - T.margin.x * 2, h: 0,
     line: { color: T.color.border, pt: 0.5 },
   });
 
-  return T.margin.titleH + 0.22; // content start Y
+  return contentY;
 }
 
 /** Add the standard footer */

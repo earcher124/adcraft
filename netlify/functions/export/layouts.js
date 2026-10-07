@@ -171,25 +171,28 @@ function slideAtAGlance(pptx, plan, meta) {
     stats.push({ label: "Channels",        value: String(plan.recommended_channels.length) });
   if (meta && meta.goal)        stats.push({ label: "Primary Goal",     value: H.trunc(meta.goal, 22) });
 
+  var tileH = 1.05;
   if (stats.length) {
     var sw = (cw - 0.2 * (stats.length - 1)) / stats.length;
     stats.forEach(function(s, i) {
-      H.addStatTile(slide, s.label, s.value, cx + i * (sw + 0.2), y, sw, 0.98);
+      H.addStatTile(slide, s.label, s.value, cx + i * (sw + 0.2), y, sw, tileH);
     });
-    y += 1.12;
+    y += tileH + 0.28;
   }
 
-  // Two body text sections
+  // Two body text sections — fill remaining space down to footer
   var bodyW = (cw - 0.3) / 2;
+  var bodyAvailH = T.margin.footerY - 0.1 - y;
+  var textH = bodyAvailH - 0.20; // label height
 
   if (plan.the_opportunity) {
     slide.addText("THE OPPORTUNITY", {
-      x: cx, y: y, w: bodyW, h: 0.15,
+      x: cx, y: y, w: bodyW, h: 0.18,
       fontSize: T.size.sectionLabel, color: T.color.accent,
       fontFace: T.font.body, charSpacing: 2,
     });
-    slide.addText(H.trunc(plan.the_opportunity, 260), {
-      x: cx, y: y + 0.17, w: bodyW, h: 1.5,
+    slide.addText(H.trunc(plan.the_opportunity, 500), {
+      x: cx, y: y + 0.20, w: bodyW, h: textH,
       fontSize: T.size.body, color: T.color.fg,
       fontFace: T.font.body, wrap: true,
     });
@@ -198,12 +201,12 @@ function slideAtAGlance(pptx, plan, meta) {
   if (plan.recommended_approach) {
     var r2x = cx + bodyW + 0.3;
     slide.addText("STRATEGIC APPROACH", {
-      x: r2x, y: y, w: bodyW, h: 0.15,
+      x: r2x, y: y, w: bodyW, h: 0.18,
       fontSize: T.size.sectionLabel, color: T.color.accent,
       fontFace: T.font.body, charSpacing: 2,
     });
-    slide.addText(H.trunc(plan.recommended_approach, 260), {
-      x: r2x, y: y + 0.17, w: bodyW, h: 1.5,
+    slide.addText(H.trunc(plan.recommended_approach, 500), {
+      x: r2x, y: y + 0.20, w: bodyW, h: textH,
       fontSize: T.size.body, color: T.color.fg,
       fontFace: T.font.body, wrap: true,
     });
@@ -224,19 +227,21 @@ function slideObjective(pptx, plan) {
   var hasLeft  = !!(plan.the_opportunity);
   var hasRight = !!(plan.what_advertising_needs_to_do);
 
+  var objAvailH = T.margin.footerY - 0.1 - y;
+
   if (hasLeft && hasRight) {
     var colW = (cw - 0.4) / 2;
     var rightX = cx + colW + 0.4;
+    var textH2 = objAvailH - 0.20;
 
     // Left — opportunity
     slide.addText("THE OPPORTUNITY", {
-      x: cx, y: y, w: colW, h: 0.15,
+      x: cx, y: y, w: colW, h: 0.18,
       fontSize: T.size.sectionLabel, color: T.color.accent,
       fontFace: T.font.body, charSpacing: 2,
     });
-    // Large italic pull quote style
-    slide.addText(H.trunc(plan.the_opportunity, 300), {
-      x: cx, y: y + 0.18, w: colW, h: 2.8,
+    slide.addText(H.trunc(plan.the_opportunity, 500), {
+      x: cx, y: y + 0.20, w: colW, h: textH2,
       fontSize: T.size.h2, color: T.color.fg,
       fontFace: T.font.heading, bold: false,
       wrap: true, italic: true,
@@ -244,38 +249,36 @@ function slideObjective(pptx, plan) {
 
     // Vertical rule
     slide.addShape("line", {
-      x: cx + colW + 0.2, y: y, w: 0, h: 3.5,
+      x: cx + colW + 0.2, y: y, w: 0, h: objAvailH,
       line: { color: T.color.border, pt: 0.75 },
     });
 
     // Right — what advertising needs to do
     slide.addText("WHAT ADVERTISING NEEDS TO DO", {
-      x: rightX, y: y, w: colW, h: 0.15,
+      x: rightX, y: y, w: colW, h: 0.18,
       fontSize: T.size.sectionLabel, color: T.color.accent,
       fontFace: T.font.body, charSpacing: 2,
     });
-    slide.addText(H.trunc(plan.what_advertising_needs_to_do, 300), {
-      x: rightX, y: y + 0.18, w: colW, h: 2.8,
+    slide.addText(H.trunc(plan.what_advertising_needs_to_do, 500), {
+      x: rightX, y: y + 0.20, w: colW, h: textH2,
       fontSize: T.size.body + 1, color: T.color.fg,
       fontFace: T.font.body, wrap: true,
     });
 
-    y += 3.05;
   } else {
     // Single section — full width, large
     var single = plan.the_opportunity || plan.what_advertising_needs_to_do;
     var singleLabel = plan.the_opportunity ? "THE OPPORTUNITY" : "WHAT ADVERTISING NEEDS TO DO";
     slide.addText(singleLabel, {
-      x: cx, y: y, w: cw, h: 0.15,
+      x: cx, y: y, w: cw, h: 0.18,
       fontSize: T.size.sectionLabel, color: T.color.accent,
       fontFace: T.font.body, charSpacing: 2,
     });
-    slide.addText(H.trunc(single, 360), {
-      x: cx, y: y + 0.18, w: cw, h: 1.9,
+    slide.addText(H.trunc(single, 600), {
+      x: cx, y: y + 0.20, w: cw, h: objAvailH - 0.20,
       fontSize: T.size.h2, color: T.color.fg,
       fontFace: T.font.heading, bold: false, wrap: true, italic: true,
     });
-    y += 2.2;
   }
 
   // Strategic POV below — muted, smaller
@@ -375,16 +378,23 @@ function slideStrategy(pptx, plan) {
 
   var cx = T.margin.x, cw = T.W - T.margin.x * 2;
 
+  var totalAvailH = T.margin.footerY - 0.1 - y;
+  var hasCols = !!(plan.campaign_timing || plan.creative);
+
+  // Split: top portion for pull-quote, bottom for detail columns
+  var quoteH = hasCols ? Math.min(totalAvailH * 0.45, 1.65) : totalAvailH;
+  var quoteTextH = quoteH - 0.1;
+
   // Large italic pull-quote approach statement
-  slide.addText(H.trunc(plan.recommended_approach, 280), {
-    x: cx, y: y, w: cw * 0.72, h: 1.6,
+  slide.addText(H.trunc(plan.recommended_approach, 320), {
+    x: cx, y: y, w: cw * 0.76, h: quoteTextH,
     fontSize: T.size.h2 + 2, color: T.color.fg,
     fontFace: T.font.heading, bold: false,
     wrap: true, italic: true,
   });
 
   // Decorative quote mark
-  slide.addText("“", {
+  slide.addText("\u201c", {
     x: T.W - T.margin.x - 1.8, y: y - 0.15,
     w: 1.8, h: 1.2,
     fontSize: 110, color: T.color.accentLight,
@@ -392,27 +402,27 @@ function slideStrategy(pptx, plan) {
     align: "right",
   });
 
-  y += 1.7;
-  H.addRule(slide, cx, y, cw * 0.2);
-  y += 0.15;
+  if (hasCols) {
+    var ruleY = y + quoteH;
+    H.addRule(slide, cx, ruleY, cw * 0.2);
+    var colStartY = ruleY + 0.18;
 
-  // Campaign approach + creative direction side by side
-  var cols = [];
-  if (plan.campaign_timing) cols.push({ label: "CAMPAIGN APPROACH", text: plan.campaign_timing });
-  if (plan.creative)         cols.push({ label: "CREATIVE DIRECTION", text: plan.creative });
+    // Campaign approach + creative direction side by side
+    var cols = [];
+    if (plan.campaign_timing) cols.push({ label: "CAMPAIGN APPROACH", text: plan.campaign_timing });
+    if (plan.creative)         cols.push({ label: "CREATIVE DIRECTION", text: plan.creative });
 
-  if (cols.length) {
     var colW = cols.length === 1 ? cw : (cw - 0.3) / 2;
-    var availH = T.margin.footerY - y - 0.12;
+    var colAvailH = T.margin.footerY - 0.1 - colStartY;
     cols.forEach(function(col, i) {
       var colX = cx + i * (colW + 0.3);
       slide.addText(col.label, {
-        x: colX, y: y, w: colW, h: 0.15,
+        x: colX, y: colStartY, w: colW, h: 0.15,
         fontSize: T.size.sectionLabel, color: T.color.accent,
         fontFace: T.font.body, charSpacing: 2,
       });
-      slide.addText(H.trunc(col.text, 320), {
-        x: colX, y: y + 0.18, w: colW, h: availH - 0.18,
+      slide.addText(H.trunc(col.text, 360), {
+        x: colX, y: colStartY + 0.18, w: colW, h: colAvailH - 0.18,
         fontSize: T.size.body, color: T.color.fg,
         fontFace: T.font.body, wrap: true,
       });
@@ -645,15 +655,17 @@ function slideCampaign(pptx, plan) {
       sections.push({ label: "KEY MESSAGES", text: kmText });
     }
 
+    var secAvailH = T.margin.footerY - 0.1 - y;
+    var secSlotH = secAvailH / Math.max(sections.length, 1);
     sections.forEach(function(sec, i) {
-      var sy = y + i * ((T.margin.footerY - 0.1 - y) / Math.max(sections.length, 1) + 0.02);
+      var sy = y + i * secSlotH;
       slide.addText(sec.label, {
         x: cx, y: sy, w: cw, h: 0.15,
         fontSize: T.size.sectionLabel, color: T.color.accent,
         fontFace: T.font.body, charSpacing: 2,
       });
-      slide.addText(H.trunc(sec.text, 260), {
-        x: cx, y: sy + 0.17, w: cw, h: 0.72,
+      slide.addText(H.trunc(sec.text, 360), {
+        x: cx, y: sy + 0.17, w: cw, h: secSlotH - 0.22,
         fontSize: T.size.body, color: T.color.fg,
         fontFace: T.font.body, wrap: true,
       });
