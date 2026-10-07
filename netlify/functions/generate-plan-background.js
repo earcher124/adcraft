@@ -1,7 +1,12 @@
 const Anthropic = require("@anthropic-ai/sdk");
+const fs = require("fs");
+const path = require("path");
 
 const AT_BASE = "appCtUgAKIoaa6ECh";
 const AT_PLANS_TBL = "tblOAtGXbtWewEAm0";
+
+// Load system prompt from file (avoids Lambda 4KB env var limit)
+const SYSTEM_PROMPT = fs.readFileSync(path.join(__dirname, "system-prompt.txt"), "utf8").trim();
 
 exports.handler = async function (event) {
   let body;
@@ -26,7 +31,7 @@ exports.handler = async function (event) {
     const message = await client.messages.create({
       model: "claude-opus-4-5",
       max_tokens: 4096,
-      system: process.env.SYSTEM_PROMPT,
+      system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: prompt }],
     });
     planText = message.content[0].text;
