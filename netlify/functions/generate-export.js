@@ -61,7 +61,6 @@ async function openaiImageRequest(prompt) {
       prompt: prompt,
       n: 1,
       size: "1024x1024",
-      response_format: "b64_json",
       quality: "standard",
     }),
   });
@@ -82,8 +81,12 @@ async function generateCoverArt(plan) {
     var result = await openaiImageRequest(prompt);
     console.log("Cover art: OpenAI response status:", result.status);
     if (result.status === 200 && result.body.data && result.body.data[0]) {
-      console.log("Cover art: success, got b64 data");
-      return { image: "data:image/png;base64," + result.body.data[0].b64_json, error: null };
+      var imageUrl = result.body.data[0].url;
+      console.log("Cover art: success, fetching image from URL");
+      var imgRes = await fetch(imageUrl);
+      var imgBuf = await imgRes.arrayBuffer();
+      var b64 = Buffer.from(imgBuf).toString("base64");
+      return { image: "data:image/png;base64," + b64, error: null };
     }
     var errMsg = JSON.stringify(result.body).slice(0, 400);
     console.error("Cover art generation failed:", errMsg);
