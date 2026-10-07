@@ -423,22 +423,52 @@
     }
 
     function renderMarkdown(md, f) {
-      // Convert markdown to styled HTML for optimized plans
       var name = f['Plan Name'] || 'Optimized Plan';
       var biz  = f['Business Name'] || '';
       var goal = f['Primary Goal'] || '';
-      // Convert markdown to basic HTML
-      var body = md
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/^#{3}\s+(.+)$/gm, '<h3 style="font-family:var(--font-display);font-size:16px;color:var(--accent);margin:28px 0 8px;font-weight:700;">$1</h3>')
-        .replace(/^#{2}\s+(.+)$/gm, '<h2 style="font-family:var(--font-display);font-size:20px;color:var(--fg);margin:36px 0 10px;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:8px;">$1</h2>')
-        .replace(/^#{1}\s+(.+)$/gm, '<h2 style="font-family:var(--font-display);font-size:24px;color:var(--fg);margin:36px 0 12px;font-weight:700;">$1</h2>')
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        .replace(/^[-•]\s+(.+)$/gm, '<li style="margin-bottom:6px;font-size:14px;color:var(--fg-soft);">$1</li>')
-        .replace(/(<li[^>]*>.*<\/li>\n?)+/g, '<ul style="padding-left:20px;margin:10px 0;">$&</ul>')
-        .replace(/\n\n+/g, '</p><p style="font-size:14px;color:var(--fg-soft);line-height:1.7;margin:0 0 12px;">')
-        .replace(/\n/g, '<br>');
+
+      // Process tables before escaping
+      function processTable(block) {
+        var lines = block.trim().split('\n');
+        var html = '<div style="overflow-x:auto;margin:16px 0;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
+        lines.forEach(function(line, i) {
+          if (/^[\|\-\s]+$/.test(line)) return; // skip separator row
+          var cells = line.split('|').map(function(c){ return c.trim(); }).filter(function(c){ return c !== ''; });
+          if (!cells.length) return;
+          var tag = i === 0 ? 'th' : 'td';
+          var rowStyle = i === 0
+            ? 'background:var(--accent);color:#fff;'
+            : (i % 2 === 0 ? 'background:var(--surface);' : 'background:var(--bg);');
+          html += '<tr style="' + rowStyle + '">';
+          cells.forEach(function(c) {
+            html += '<' + tag + ' style="padding:8px 12px;border:1px solid var(--border);' + (tag==='th'?'font-weight:600;text-align:left;':'color:var(--fg-soft);') + '">' + c + '</' + tag + '>';
+          });
+          html += '</tr>';
+        });
+        html += '</table></div>';
+        return html;
+      }
+
+      // Split on table blocks (lines starting with |), process separately
+      var sections = md.split(/\n(?=\|)/);
+      var body = sections.map(function(block) {
+        if (block.trim().startsWith('|')) {
+          return processTable(block);
+        }
+        // Escape then convert markdown
+        return block
+          .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          .replace(/^#{3}\s+(.+)$/gm, '<h3 style="font-family:var(--font-display);font-size:15px;color:var(--accent);margin:24px 0 6px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">$1</h3>')
+          .replace(/^#{2}\s+(.+)$/gm, '<h2 style="font-family:var(--font-display);font-size:20px;color:var(--fg);margin:36px 0 10px;font-weight:700;border-bottom:2px solid var(--accent);padding-bottom:8px;">$1</h2>')
+          .replace(/^#{1}\s+(.+)$/gm, '<h2 style="font-family:var(--font-display);font-size:24px;color:var(--fg);margin:36px 0 12px;font-weight:700;">$1</h2>')
+          .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--fg);">$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em>$1</em>')
+          .replace(/^[-•]\s+(.+)$/gm, '<li style="margin-bottom:8px;font-size:14px;color:var(--fg-soft);line-height:1.6;">$1</li>')
+          .replace(/(<li[^>]*>[\s\S]*?<\/li>\n?)+/g, '<ul style="padding-left:20px;margin:12px 0;">$&</ul>')
+          .replace(/\n\n+/g, '</p><p style="font-size:14px;color:var(--fg-soft);line-height:1.7;margin:0 0 14px;">')
+          .replace(/\n/g, '<br>');
+      }).join('');
+
       return '<div class="page">' +
         '<div class="hero">' +
           '<div class="hero-eyebrow">Optimized Plan</div>' +
@@ -446,7 +476,7 @@
           (biz ? '<p class="hero-strategy">' + esc(biz) + (goal ? ' · ' + esc(goal) : '') + '</p>' : '') +
         '</div>' +
         '<div class="section">' +
-          '<p style="font-size:14px;color:var(--fg-soft);line-height:1.7;margin:0 0 12px;">' + body + '</p>' +
+          '<p style="font-size:14px;color:var(--fg-soft);line-height:1.7;margin:0 0 14px;">' + body + '</p>' +
         '</div>' +
         (isPro ? '<div class="pro-actions"><button class="btn-pro" onclick="downloadPlan()">⬇ Download Plan</button></div>' : '') +
         '</div>';
