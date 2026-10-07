@@ -224,8 +224,7 @@
       var query = document.getElementById("search-input").value.trim().toLowerCase();
 
       var visible = allPlans.filter(function(plan) {
-        var archived = plan.status === "Archived";
-        if (archived && !showArchived) return false;
+        if (plan.archived && !showArchived) return false;
         if (query) {
           var haystack = ((plan.planName || '') + ' ' + (plan.bizName || '')).toLowerCase();
           return haystack.includes(query);
@@ -253,7 +252,7 @@
       grid.className = "plans-grid";
 
       visible.forEach(function(plan) {
-        var isArchived = plan.status === "Archived";
+        var isArchived = plan.archived;
         var date = plan.created
           ? new Date(plan.created).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
           : "";
@@ -350,7 +349,7 @@
         }
         ids.forEach(function(id) {
           var plan = allPlans.find(function(p) { return p.id === id; });
-          if (plan) plan.status = "Archived";
+          if (plan) plan.archived = true;
         });
         clearSelection();
         renderPlans();

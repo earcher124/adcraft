@@ -19,7 +19,7 @@ exports.handler = async function (event) {
   try {
     const formula = encodeURIComponent(`{Email}="${email}"`);
     const sort = encodeURIComponent(JSON.stringify([{ field: "Created", direction: "desc" }]));
-    const fields = ["Plan Name", "Business Name", "Status", "Monthly Ad Budget", "Created"].map(f => `fields[]=${encodeURIComponent(f)}`).join("&");
+    const fields = ["Plan Name", "Business Name", "Status", "Monthly Ad Budget", "Created", "Archived"].map(f => `fields[]=${encodeURIComponent(f)}`).join("&");
 
     const url = `https://api.airtable.com/v0/${AT_BASE}/${AT_PLANS_TBL}?filterByFormula=${formula}&sort[0][field]=Created&sort[0][direction]=desc&${fields}`;
 
@@ -37,6 +37,7 @@ exports.handler = async function (event) {
       planName: r.fields["Plan Name"] || "Untitled Plan",
       bizName: r.fields["Business Name"] || "",
       status: r.fields["Status"] || "",
+      archived: r.fields["Archived"] || false,
       budget: r.fields["Monthly Ad Budget"] ? "$" + Number(r.fields["Monthly Ad Budget"]).toLocaleString() + "/mo" : "",
       created: r.fields["Created"] || r.createdTime || "",
     }));

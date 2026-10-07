@@ -29,7 +29,7 @@ exports.handler = async function (event) {
           Authorization: `Bearer ${process.env.AIRTABLE_TOKEN}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ fields: { Status: "Archived" } }),
+        body: JSON.stringify({ fields: { Archived: true } }),
       });
       if (!res.ok) {
         const d = await res.json();
