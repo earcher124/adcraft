@@ -18,39 +18,44 @@ const fs   = require("fs");
 const path = require("path");
 
 // Maps category keywords → image filename (in ./export/cover-images/)
-// Keywords are matched against Business_Type, Industry, or Business_Name (case-insensitive).
+// Keywords are matched ONLY against Business_Type and Industry fields (not Business_Name,
+// which can contain misleading words). More specific categories are listed first.
+// Keywords are whole-word or prefix matched via the regex below — no accidental substring hits.
 const COVER_IMAGE_MAP = [
-  { keywords: ["restaurant", "food", "beverage", "cafe", "coffee", "bar", "bakery", "catering", "dining", "eatery", "bistro", "pizz", "sushi", "taco", "brewery", "winery"],    file: "restaurant.png" },
-  { keywords: ["auto", "car", "vehicle", "dealer", "dealership", "mechanic", "garage", "truck", "motor", "fleet"],                                                               file: "automotive.png" },
-  { keywords: ["home service", "cleaning", "maid", "contractor", "plumb", "electric", "hvac", "landscap", "lawn", "pest", "paint", "handy", "roofing", "window", "janitorial"], file: "home-services.png" },
-  { keywords: ["retail", "boutique", "shop", "clothing", "apparel", "fashion", "gift", "store", "merchandise", "accessories", "jewelry"],                                        file: "retail.png" },
-  { keywords: ["travel", "hotel", "hospitality", "resort", "vacation", "tourism", "inn", "lodge", "airbnb", "rental", "motel", "spa resort"],                                    file: "travel.png" },
-  { keywords: ["consulting", "professional service", "agency", "strategy", "advisory", "management", "business service", "accounting", "cpa", "audit", "tax"],                   file: "professional-services.png" },
-  { keywords: ["real estate", "realt", "property", "home buy", "home sell", "mortgage", "housing", "broker", "apartment"],                                                       file: "real-estate.png" },
-  { keywords: ["ecommerce", "e-commerce", "online store", "shopify", "amazon", "marketplace", "direct to consumer", "dtc", "subscription box"],                                  file: "ecommerce.png" },
-  { keywords: ["event", "entertainment", "venue", "wedding", "party", "concert", "festival", "production", "nightclub", "theater", "theatre", "ticketing"],                       file: "events.png" },
-  { keywords: ["beauty", "salon", "hair", "nail", "spa", "skincare", "cosmetic", "makeup", "esthetic", "barber", "wax", "lash", "brow"],                                         file: "beauty.png" },
-  { keywords: ["education", "school", "tutor", "learning", "training", "academy", "college", "university", "course", "coaching", "childcare", "daycare", "preschool"],           file: "education.png" },
-  { keywords: ["fitness", "gym", "crossfit", "yoga", "pilates", "personal train", "sport", "athletic", "wellness center", "cycling", "martial art", "dance"],                    file: "fitness.png" },
-  { keywords: ["wellness", "massage", "meditation", "holistic", "naturopath", "acupuncture", "chiropractic", "mental health", "therapy", "counseling", "mindfulness"],           file: "wellness.png" },
-  { keywords: ["financial", "finance", "invest", "wealth", "insurance", "bank", "credit", "loan", "mortgage broker", "retirement", "fund", "asset"],                             file: "financial.png" },
-  { keywords: ["health", "medical", "clinic", "doctor", "dentist", "dental", "optom", "vision", "pharmacy", "urgent care", "hospital", "physical therapy", "chiropract"],        file: "healthcare.png" },
-  { keywords: ["legal", "law", "attorney", "lawyer", "firm", "paralegal", "notary", "litigation", "court"],                                                                      file: "legal.png" },
-  { keywords: ["nonprofit", "non-profit", "charity", "foundation", "ngo", "association", "community", "social service", "cause", "advocacy", "volunteer"],                       file: "nonprofit.png" },
-  { keywords: ["tech", "software", "saas", "app", "startup", "digital", "it ", "cyber", "cloud", "data", "ai ", "artificial intel", "developer", "platform", "api", "web dev"], file: "technology.png" },
-  { keywords: ["construction", "architect", "building", "contractor", "engineer", "renovation", "remodel", "develop", "infrastructure", "industrial"],                           file: "construction.png" },
-  { keywords: ["pet", "veterinar", "vet ", "animal", "dog", "cat", "grooming", "kennel", "boarding", "paw"],                                                                     file: "pet-services.png" },
+  // ── Technology first — broad terms like "digital" are here, not in consulting ──
+  { keywords: ["saas", "software", "technology", "tech company", "tech startup", "startup", "app ", "mobile app", "web app", "platform", "cybersecurity", "cloud", "ai company", "artificial intel", "machine learn", "data science", "developer tool", "api ", "web dev", "digital agency", "digital marketing agency"], file: "technology.png" },
+  { keywords: ["restaurant", "food", "beverage", "cafe", "coffee shop", "bar ", "bakery", "catering", "dining", "eatery", "bistro", "pizz", "sushi", "taco", "brewery", "winery"],                                                                                                                                         file: "restaurant.png" },
+  { keywords: ["auto dealer", "car dealer", "vehicle dealer", "automotive", "mechanic", "auto repair", "garage", "truck", "motor sport", "fleet manage"],                                                                                                                                                                   file: "automotive.png" },
+  { keywords: ["home service", "cleaning service", "maid service", "plumb", "electrician", "hvac", "landscap", "lawn care", "pest control", "house paint", "handyman", "roofing", "window clean", "janitorial"],                                                                                                            file: "home-services.png" },
+  { keywords: ["retail", "boutique", "clothing store", "apparel", "fashion", "gift shop", "merchandise", "accessories", "jewelry store"],                                                                                                                                                                                   file: "retail.png" },
+  { keywords: ["travel", "hotel", "resort", "vacation", "tourism", "inn ", "lodge", "airbnb", "short-term rental", "motel"],                                                                                                                                                                                                file: "travel.png" },
+  { keywords: ["real estate", "realtor", "realty", "property manage", "home buy", "home sell", "mortgage broker", "housing develop", "apartment complex"],                                                                                                                                                                  file: "real-estate.png" },
+  { keywords: ["ecommerce", "e-commerce", "online store", "shopify", "amazon seller", "marketplace", "direct to consumer", "dtc", "subscription box"],                                                                                                                                                                     file: "ecommerce.png" },
+  { keywords: ["event plan", "event venue", "entertainment", "wedding", "party plan", "concert", "festival", "nightclub", "theater", "theatre", "ticketing"],                                                                                                                                                               file: "events.png" },
+  { keywords: ["beauty salon", "hair salon", "nail salon", "day spa", "skincare", "cosmetic", "makeup", "esthetician", "barber", "wax studio", "lash", "brow bar"],                                                                                                                                                         file: "beauty.png" },
+  { keywords: ["education", "school", "tutoring", "e-learning", "online learning", "training center", "academy", "college", "university", "coaching", "childcare", "daycare", "preschool"],                                                                                                                                 file: "education.png" },
+  { keywords: ["fitness", "gym", "crossfit", "yoga studio", "pilates", "personal train", "athletic", "cycling studio", "martial art", "dance studio", "sports"],                                                                                                                                                            file: "fitness.png" },
+  { keywords: ["wellness", "massage", "meditation", "holistic", "naturopath", "acupuncture", "chiropractic", "mental health", "therapy practice", "counseling", "mindfulness"],                                                                                                                                             file: "wellness.png" },
+  { keywords: ["financial service", "financial advisor", "investment", "wealth manage", "insurance", "bank", "credit union", "mortgage", "retirement plan", "hedge fund", "asset manage"],                                                                                                                                  file: "financial.png" },
+  { keywords: ["medical", "clinic", "doctor", "dentist", "dental", "optometrist", "vision care", "pharmacy", "urgent care", "hospital", "physical therapy", "healthcare"],                                                                                                                                                  file: "healthcare.png" },
+  { keywords: ["law firm", "legal service", "attorney", "lawyer", "paralegal", "notary", "litigation"],                                                                                                                                                                                                                     file: "legal.png" },
+  { keywords: ["nonprofit", "non-profit", "charity", "foundation", "ngo", "community org", "social service", "advocacy", "volunteer"],                                                                                                                                                                                      file: "nonprofit.png" },
+  { keywords: ["construction", "architect", "general contract", "building contract", "engineering", "renovation", "remodel", "infrastructure", "industrial"],                                                                                                                                                               file: "construction.png" },
+  { keywords: ["pet service", "veterinar", "animal hospital", "dog groom", "cat boarding", "kennel", "pet boarding", "pet store"],                                                                                                                                                                                           file: "pet-services.png" },
+  // ── Consulting last — only match when nothing more specific matched ───────────
+  { keywords: ["consulting", "professional service", "advisory", "management consult", "accounting firm", "cpa firm", "audit firm", "tax service"],                                                                                                                                                                         file: "professional-services.png" },
 ];
 
 const COVER_IMAGES_DIR = path.join(__dirname, "export", "cover-images");
 const DEFAULT_COVER    = "professional-services.png"; // fallback
 
 function pickCoverImage(plan) {
+  // Only scan typed category fields — Business_Name can contain misleading words
   var haystack = [
     plan["Business_Type"] || "",
     plan["Industry"]      || "",
-    plan["Business_Name"] || "",
   ].join(" ").toLowerCase();
+  console.log("Cover art: haystack =", JSON.stringify(haystack));
 
   for (var entry of COVER_IMAGE_MAP) {
     for (var kw of entry.keywords) {
