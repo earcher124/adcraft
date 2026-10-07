@@ -1,6 +1,9 @@
 [build]
   command = "npm install"
 
+[build.environment]
+  SECRETS_SCAN_OMIT_PATHS = "netlify/functions/system-prompt.txt"
+
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
