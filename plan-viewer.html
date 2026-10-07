@@ -2,1095 +2,335 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>AdCraft Plan</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600;700&display=swap">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdCraft — Your Plan</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
   <style>
     :root {
       --bg: #FAF6ED;
-      --surface: #F5EFE4;
+      --fg: #1a1a1a;
+      --muted: #6b6270;
       --border: #e8ddd0;
-      --fg: #211F26;
-      --fg-soft: #3a3840;
-      --fg-muted: #6a6870;
-      --accent: #4A1040;
-      --accent-mid: #7a2060;
-      --accent-light: #f0e8ee;
-      --gold: #b87c2a;
-      --font-display: 'Playfair Display', Georgia, serif;
-      --font-body: 'Inter', system-ui, sans-serif;
+      --purple: #4A1040;
+      --coral: #E8603C;
+      --card: #ffffff;
     }
-    /* Always light mode — matches Softr site */
-    * { box-sizing: border-box; }
-    body {
-      background: var(--bg);
-      color: var(--fg);
-      font-family: var(--font-body);
-      font-size: 15px;
-      line-height: 1.65;
-      margin: 0;
-      padding-inline: 20px;
-      padding-block: 32px;
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #1a1518; --fg: #f0ebe6; --muted: #9a8fa0;
+        --border: #3a2f38; --card: #231d22; color-scheme: dark;
+      }
     }
-    .page { max-width: 860px; margin: 0 auto; }
+    :root[data-theme="dark"] {
+      --bg: #1a1518; --fg: #f0ebe6; --muted: #9a8fa0;
+      --border: #3a2f38; --card: #231d22; color-scheme: dark;
+    }
 
-    /* Loading / Error states */
-    .state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 60vh;
-      text-align: center;
-      gap: 12px;
-    }
-    .state-logo {
-      font-family: var(--font-display);
-      font-size: 28px;
-      color: var(--accent);
-      font-weight: 700;
-    }
-    .state-msg {
-      color: var(--fg-muted);
-      font-size: 14px;
-    }
-    .spinner {
-      width: 32px; height: 32px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); font-family: 'Inter', system-ui, sans-serif; color: var(--fg); }
 
     /* Hero */
-    .hero {
-      padding: 48px 0 36px;
-      border-bottom: 2px solid var(--accent);
-      margin-bottom: 40px;
-    }
-    .hero-eyebrow {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      color: var(--accent);
-      margin-bottom: 12px;
-    }
-    .hero-name {
-      font-family: var(--font-display);
-      font-size: clamp(28px, 5vw, 48px);
-      font-weight: 700;
-      color: var(--fg);
-      margin: 0 0 16px;
-      text-wrap: balance;
-      line-height: 1.15;
-    }
-    .hero-strategy {
-      font-size: 16px;
-      color: var(--fg-soft);
-      max-width: 680px;
-      line-height: 1.7;
-      border-left: 3px solid var(--accent);
-      padding-left: 18px;
-      margin: 0;
-    }
+    .hero { padding: 48px 48px 36px; }
+    .hero-inner { max-width: 860px; margin: 0 auto; display: flex; align-items: flex-end; gap: 24px; }
+    .hero-left { flex: 1; }
+    .hero-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: var(--purple); margin-bottom: 10px; }
+    .hero-title { font-family: 'Playfair Display', Georgia, serif; font-size: 42px; font-weight: 800; color: var(--fg); margin: 0; letter-spacing: -0.03em; line-height: 1; }
+    .hero-title em { font-style: italic; font-weight: 400; color: var(--purple); }
+    .hero-right { flex: 1; padding-bottom: 6px; border-left: 1px solid var(--border); padding-left: 24px; }
+    .hero-meta { font-size: 14px; color: var(--muted); margin: 0 0 12px; }
+    .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .hero-line { max-width: 860px; margin: 24px auto 0; height: 2px; background: linear-gradient(to right, var(--purple), transparent); }
 
-    /* Section */
-    .section { margin-bottom: 44px; }
-    .section-label {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: var(--accent);
-      margin-bottom: 12px;
+    .btn {
+      display: inline-block; font-size: 13px; font-weight: 600;
+      padding: 9px 18px; border-radius: 8px; text-decoration: none;
+      cursor: pointer; border: none; font-family: 'Inter', system-ui, sans-serif;
+      transition: background 0.2s;
     }
-    .section-body {
-      color: var(--fg-soft);
-      margin: 0 0 12px;
-      max-width: 720px;
-    }
-    .section-body:last-child { margin-bottom: 0; }
-    .divider {
-      height: 1px;
-      background: var(--border);
-      margin: 44px 0;
-    }
+    .btn-primary { background: var(--purple); color: #FAF6ED; }
+    .btn-primary:hover { background: #6a2060; }
+    .btn-outline { background: transparent; color: var(--purple); border: 1px solid var(--purple); }
+    .btn-outline:hover { background: var(--purple); color: #FAF6ED; }
 
-    /* Cards (channels) */
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 16px;
-    }
-    .card {
-      background: var(--surface);
+    /* Content area */
+    .content { max-width: 860px; margin: 40px auto; padding: 0 48px 80px; }
+
+    /* Generating state */
+    .generating {
+      background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 20px;
+      border-radius: 16px;
+      padding: 80px 40px;
+      text-align: center;
     }
-    .card-name {
-      font-weight: 700;
-      font-size: 13px;
-      color: var(--accent);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
+    .spinner {
+      width: 56px; height: 56px;
+      border: 3px solid var(--border);
+      border-top-color: var(--purple);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 28px;
     }
-    .card-body {
-      font-size: 13px;
-      color: var(--fg-soft);
-      margin-bottom: 10px;
-    }
-    .card-meta {
-      font-size: 12px;
-      color: var(--fg-muted);
-      margin-top: 6px;
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .generating h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 26px; color: var(--fg); margin: 0 0 10px; }
+    .generating p { font-size: 14px; color: var(--muted); margin: 0 0 32px; }
 
-    /* Budget table */
-    .budget-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-    .budget-table th {
-      text-align: left;
-      padding: 8px 12px;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--fg-muted);
-      border-bottom: 1px solid var(--border);
-    }
-    .budget-table td {
-      padding: 12px;
-      border-bottom: 1px solid var(--border);
-      vertical-align: top;
-    }
-    .budget-amount { font-weight: 700; font-variant-numeric: tabular-nums; }
-    .budget-pct { font-size: 11px; color: var(--fg-muted); }
-    .budget-bar-wrap {
-      height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-      margin-top: 6px;
-      max-width: 140px;
-    }
-    .budget-bar {
-      height: 100%;
-      background: var(--accent);
-      border-radius: 2px;
-    }
+    .progress-track { width: 100%; max-width: 360px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 28px; overflow: hidden; }
+    .progress-bar { height: 100%; background: var(--purple); border-radius: 2px; transition: width 1s ease; width: 0%; }
 
-    /* Audience */
-    .audience-item { margin-bottom: 16px; }
-    .audience-name {
-      font-weight: 600;
-      font-size: 13px;
-      color: var(--fg);
-      margin-bottom: 3px;
+    .gen-steps { list-style: none; padding: 0; margin: 0 auto; max-width: 300px; text-align: left; }
+    .gen-steps li {
+      font-size: 13px; color: var(--muted); padding: 7px 0;
+      display: flex; align-items: center; gap: 12px;
+      transition: color 0.3s;
     }
-    .audience-desc { font-size: 13px; color: var(--fg-soft); }
+    .gen-steps li .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--border); flex-shrink: 0;
+      transition: background 0.3s;
+    }
+    .gen-steps li.active { color: var(--fg); }
+    .gen-steps li.active .dot { background: var(--coral); }
+    .gen-steps li.done .dot { background: var(--purple); }
+    .gen-steps li.done { color: var(--muted); }
 
-    /* Messaging */
-    .msg-item {
-      padding: 16px;
-      border-left: 3px solid var(--accent-light);
-      margin-bottom: 12px;
-      background: var(--surface);
-      border-radius: 0 6px 6px 0;
-    }
-    .msg-territory {
-      font-weight: 700;
-      font-size: 13px;
-      color: var(--accent);
-      margin-bottom: 4px;
-    }
-    .msg-rationale { font-size: 13px; color: var(--fg-soft); }
-
-    /* KPI grid */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px;
-    }
-    @media (max-width: 560px) { .kpi-grid { grid-template-columns: 1fr; } }
-    .kpi-col-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--fg-muted);
-      margin-bottom: 10px;
-    }
-    .kpi-list {
-      margin: 0;
-      padding-left: 18px;
-      font-size: 13px;
-      color: var(--fg-soft);
-    }
-    .kpi-list li { margin-bottom: 6px; }
-
-    /* Avoid */
-    .avoid-item {
-      display: flex;
-      gap: 14px;
-      align-items: flex-start;
-      margin-bottom: 14px;
-    }
-    .avoid-x {
-      color: #c0392b;
-      font-weight: 700;
-      font-size: 14px;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-    .avoid-tactic { font-weight: 600; font-size: 13px; color: var(--fg); }
-    .avoid-reason { font-size: 13px; color: var(--fg-soft); margin-top: 2px; }
-
-    /* Moves */
-    .moves-list {
-      margin: 0;
-      padding-left: 20px;
-      font-size: 13px;
-      color: var(--fg-soft);
-    }
-    .moves-list li { margin-bottom: 8px; }
-
-    /* Phase grid */
-    .phase-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-    @media (max-width: 640px) { .phase-grid { grid-template-columns: 1fr; } }
-    .phase-card {
-      background: var(--surface);
+    /* Plan rendered */
+    .plan-card {
+      background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 20px;
+      border-radius: 16px;
+      padding: 48px 56px;
+      display: none;
     }
-    .phase-label {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--accent);
-      margin-bottom: 6px;
-    }
-    .phase-title {
-      font-family: var(--font-display);
-      font-size: 15px;
-      font-weight: 700;
+    .plan-card.visible { display: block; }
+
+    /* Markdown styles */
+    .plan-body h1, .plan-body h2, .plan-body h3 {
+      font-family: 'Playfair Display', Georgia, serif;
       color: var(--fg);
-      margin-bottom: 10px;
+      margin-top: 2em;
+      margin-bottom: 0.5em;
       line-height: 1.3;
     }
-    .phase-body { font-size: 13px; color: var(--fg-soft); line-height: 1.6; }
+    .plan-body h1 { font-size: 28px; margin-top: 0; }
+    .plan-body h2 { font-size: 22px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .plan-body h3 { font-size: 17px; }
+    .plan-body p { font-size: 15px; line-height: 1.75; color: var(--fg); margin: 0 0 1em; }
+    .plan-body ul, .plan-body ol { font-size: 15px; line-height: 1.75; padding-left: 1.5em; margin: 0 0 1em; }
+    .plan-body li { margin-bottom: 4px; }
+    .plan-body strong { font-weight: 700; color: var(--fg); }
+    .plan-body em { color: var(--muted); }
+    .plan-body table {
+      width: 100%; border-collapse: collapse; font-size: 14px;
+      margin: 1.5em 0; border-radius: 8px; overflow: hidden;
+    }
+    .plan-body th {
+      background: var(--purple); color: #FAF6ED;
+      padding: 10px 14px; text-align: left; font-weight: 600; font-size: 12px;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .plan-body td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .plan-body tr:last-child td { border-bottom: none; }
+    .plan-body tr:nth-child(even) td { background: var(--bg); }
+    .plan-body blockquote {
+      border-left: 3px solid var(--coral); margin: 1.5em 0;
+      padding: 12px 20px; background: var(--bg); border-radius: 0 8px 8px 0;
+      font-style: italic; color: var(--muted);
+    }
+    .plan-body hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+    .plan-body code {
+      background: var(--bg); padding: 2px 6px; border-radius: 4px;
+      font-size: 13px; font-family: 'SF Mono', 'Fira Code', monospace;
+    }
 
-    /* Checklist (launch plan) */
-    .checklist {
-      list-style: none;
-      padding: 0;
-      margin: 10px 0 0;
+    /* Error state */
+    .error-state {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 60px 40px; text-align: center; display: none;
     }
-    .checklist li {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      padding: 7px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 13px;
-      color: var(--fg-soft);
-      line-height: 1.5;
-    }
-    .checklist li:last-child { border-bottom: none; }
-    .check-icon {
-      color: var(--accent);
-      font-weight: 700;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
+    .error-state.visible { display: block; }
+    .error-state p { color: var(--muted); font-size: 15px; margin: 0 0 20px; }
 
-    /* Assumptions */
-    .assumptions-list {
-      margin: 0;
-      padding-left: 18px;
-      font-size: 13px;
-      color: var(--fg-muted);
-    }
-    .assumptions-list li { margin-bottom: 6px; }
-
-    /* Pro actions */
-    .pro-actions {
-      display: flex;
-      gap: 12px;
-      margin: 40px 0 0;
-      flex-wrap: wrap;
-    }
-    .btn-pro {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 24px;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-family: var(--font-body);
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background 0.15s;
-    }
-    .btn-pro:hover { background: var(--accent-mid); }
-    .btn-optimize { background: var(--surface); color: var(--accent); border: 2px solid var(--accent); }
-    .btn-optimize:hover { background: var(--accent-light); }
-
-    /* Footer */
-    .footer {
-      margin-top: 60px;
-      padding-top: 24px;
-      border-top: 1px solid var(--border);
-      font-size: 11px;
-      color: var(--fg-muted);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .footer-brand {
-      font-family: var(--font-display);
-      font-weight: 700;
-      color: var(--accent);
-      font-size: 13px;
+    @media (max-width: 640px) {
+      .hero { padding: 32px 20px 24px; }
+      .hero-inner { flex-direction: column; gap: 16px; }
+      .hero-right { border-left: none; border-top: 1px solid var(--border); padding-left: 0; padding-top: 16px; }
+      .content { padding: 0 20px 60px; }
+      .plan-card { padding: 28px 24px; }
     }
   </style>
 </head>
 <body>
-  <div class="page" id="root">
-    <div class="state" id="loading-state">
-      <div class="state-logo">AdCraft</div>
-      <div class="spinner"></div>
-      <div class="state-msg">Loading your plan…</div>
+  <div id="nav-mount"></div>
+
+  <div class="hero" id="hero">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <p class="hero-eyebrow">Advertising Plan</p>
+        <h1 class="hero-title" id="hero-title">Your <em>Plan</em></h1>
+      </div>
+      <div class="hero-right" id="hero-right" style="display:none;">
+        <p class="hero-meta" id="hero-meta"></p>
+        <div class="hero-actions">
+          <button class="btn btn-outline" onclick="printPlan()">Download PDF</button>
+          <a href="/new-plan.html" class="btn btn-primary">New Plan →</a>
+        </div>
+      </div>
     </div>
+    <div class="hero-line"></div>
   </div>
 
+  <div class="content">
+
+    <!-- Generating state -->
+    <div class="generating" id="generating">
+      <div class="spinner"></div>
+      <h2>Building your plan…</h2>
+      <p>This usually takes 30–90 seconds. You can stay on this page or come back later.</p>
+      <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
+      <ul class="gen-steps">
+        <li id="gs1" class="active"><span class="dot"></span>Analyzing your business</li>
+        <li id="gs2"><span class="dot"></span>Selecting the right channels</li>
+        <li id="gs3"><span class="dot"></span>Allocating your budget</li>
+        <li id="gs4"><span class="dot"></span>Writing your strategy</li>
+        <li id="gs5"><span class="dot"></span>Finalizing recommendations</li>
+      </ul>
+    </div>
+
+    <!-- Plan output -->
+    <div class="plan-card" id="plan-card">
+      <div class="plan-body" id="plan-body"></div>
+    </div>
+
+    <!-- Error state -->
+    <div class="error-state" id="error-state">
+      <p>Something went wrong generating your plan.</p>
+      <a href="/new-plan.html" class="btn btn-primary">Try again →</a>
+    </div>
+
+  </div>
+
+  <script src="_shared.js"></script>
   <script>
-    // Token is server-side — calls go through Netlify function
+    var recordId = new URLSearchParams(window.location.search).get('id');
+    var pollInterval = null;
+    var pollCount = 0;
+    var stepIndex = 0;
+    var stepTimers = [];
 
-    function esc(s) {
-      if (!s) return '';
-      return String(s)
-        .replace(/&/g,'&amp;')
-        .replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;')
-        .replace(/"/g,'&quot;');
+    var steps = ['gs1','gs2','gs3','gs4','gs5'];
+    var stepDelays = [0, 12000, 25000, 40000, 60000];
+
+    function advanceStep(i) {
+      if (i > 0) {
+        document.getElementById(steps[i-1]).classList.remove('active');
+        document.getElementById(steps[i-1]).classList.add('done');
+      }
+      if (i < steps.length) {
+        document.getElementById(steps[i]).classList.add('active');
+      }
+      // Update progress bar
+      var pct = Math.min(((i + 1) / steps.length) * 85, 85); // cap at 85% until done
+      document.getElementById('progress-bar').style.width = pct + '%';
     }
 
-    // Convert long text into paragraphs split on sentence boundaries (every 2-3 sentences)
-    function para(s) {
-      if (!s) return '';
-      var escaped = esc(s);
-      // Split into sentences, group into chunks of 2
-      var sentences = escaped.match(/[^.!?]+[.!?]+(\s|$)/g);
-      if (!sentences || sentences.length <= 2) return '<p class="section-body">' + escaped + '</p>';
-      var chunks = [];
-      for (var i = 0; i < sentences.length; i += 2) {
-        chunks.push(sentences.slice(i, i + 2).join('').trim());
-      }
-      return chunks.map(function(c) { return '<p class="section-body">' + c + '</p>'; }).join('');
+    function startStepAnimation() {
+      stepDelays.forEach(function(delay, i) {
+        var t = setTimeout(function() { advanceStep(i); }, delay);
+        stepTimers.push(t);
+      });
     }
 
-    // Convert launch plan text into checklist items split by period or newline
-    function checklist(s) {
-      if (!s) return '';
-      var items = esc(s).split(/\.\s+/).filter(function(x) { return x.trim().length > 3; });
-      return '<ul class="checklist">' + items.map(function(item) {
-        return '<li><span class="check-icon">✓</span><span>' + item.trim().replace(/\.$/,'') + '</span></li>';
-      }).join('') + '</ul>';
+    function stopStepAnimation() {
+      stepTimers.forEach(clearTimeout);
+      // Mark all done, fill bar
+      steps.forEach(function(id) {
+        var el = document.getElementById(id);
+        el.classList.remove('active');
+        el.classList.add('done');
+      });
+      document.getElementById('progress-bar').style.width = '100%';
     }
 
-    function showError(msg) {
-      document.getElementById('root').innerHTML =
-        '<div class="state"><div class="state-logo">AdCraft</div>' +
-        '<div class="state-msg">' + esc(msg) + '</div></div>';
+    function showPlan(planText, bizName) {
+      stopStepAnimation();
+      document.getElementById('generating').style.display = 'none';
+
+      // Update hero
+      if (bizName) {
+        document.getElementById('hero-title').innerHTML =
+          bizName + ' <em>Plan</em>';
+      }
+      document.getElementById('hero-right').style.display = '';
+      document.getElementById('hero-meta').textContent =
+        'Generated ' + new Date().toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' });
+
+      // Render markdown
+      marked.setOptions({ breaks: true });
+      document.getElementById('plan-body').innerHTML = marked.parse(planText);
+      document.getElementById('plan-card').classList.add('visible');
     }
 
-    function renderMarkdown(md, f) {
-      var name = f['Plan Name'] || 'Optimized Plan';
-      var biz  = f['Business Name'] || '';
-      var goal = f['Primary Goal'] || '';
+    function showError() {
+      stopStepAnimation();
+      document.getElementById('generating').style.display = 'none';
+      document.getElementById('error-state').classList.add('visible');
+    }
 
-      // Strip **bold** and *italic* markers from a plain string (for table cells)
-      function stripInline(s) {
-        return s.replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*(.+?)\*/g, '$1');
+    async function pollPlan() {
+      pollCount++;
+      // Give up after 10 minutes (120 polls × 5s)
+      if (pollCount > 120) {
+        clearInterval(pollInterval);
+        showError();
+        return;
       }
 
-      // Convert inline markdown to HTML spans (for non-table text)
-      function inlineHTML(s) {
-        return s
-          .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-          .replace(/\*(.+?)\*/g, '<em>$1</em>');
-      }
+      try {
+        var res = await fetch('/.netlify/functions/poll-plan?id=' + encodeURIComponent(recordId));
+        var data = await res.json();
 
-      // Process a contiguous block of | lines as a table
-      function processTable(tableLines) {
-        // Track whether we've seen the header row
-        var headerDone = false;
-        var rowIndex = 0;
-        var html = '<div style="overflow-x:auto;margin:20px 0;"><table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid var(--border);">';
-        tableLines.forEach(function(line) {
-          // Skip separator rows (e.g. |---|---|)
-          if (/^\|[\s\|\-:]+\|?\s*$/.test(line)) return;
-          var cells = line.split('|').map(function(c){ return stripInline(c.trim()); }).filter(function(c,i,a){ return i > 0 && i < a.length - 1; });
-          if (!cells.length) return;
-          if (!headerDone) {
-            html += '<thead><tr style="background:var(--accent);color:#fff;">';
-            cells.forEach(function(c) {
-              html += '<th style="padding:10px 14px;text-align:left;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap;">' + c + '</th>';
-            });
-            html += '</tr></thead><tbody>';
-            headerDone = true;
-          } else {
-            var bg = rowIndex % 2 === 0 ? 'var(--surface)' : 'var(--bg)';
-            html += '<tr style="background:' + bg + ';">';
-            cells.forEach(function(c) {
-              html += '<td style="padding:9px 14px;border-top:1px solid var(--border);color:var(--fg-soft);vertical-align:top;">' + c + '</td>';
-            });
-            html += '</tr>';
-            rowIndex++;
-          }
-        });
-        html += '</tbody></table></div>';
-        return html;
-      }
-
-      // Parse the full markdown line by line, collecting table runs
-      var lines = md.split('\n');
-      var out = '';
-      var tableAccum = [];
-
-      function flushTable() {
-        if (tableAccum.length) {
-          out += processTable(tableAccum);
-          tableAccum = [];
+        if (data.status === 'Complete' && data.plan) {
+          clearInterval(pollInterval);
+          showPlan(data.plan, data.bizName);
+        } else if (data.status === 'Error') {
+          clearInterval(pollInterval);
+          showError();
         }
-      }
-
-      lines.forEach(function(line) {
-        if (/^\s*\|/.test(line)) {
-          tableAccum.push(line);
-        } else {
-          flushTable();
-          var l = inlineHTML(line);
-          if (/^###\s+/.test(line)) {
-            out += '<h3 style="font-family:var(--font-display);font-size:15px;color:var(--accent);margin:24px 0 6px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">' + l.replace(/^###\s+/,'') + '</h3>';
-          } else if (/^##\s+/.test(line)) {
-            out += '<h2 style="font-family:var(--font-display);font-size:20px;color:var(--fg);margin:36px 0 10px;font-weight:700;border-bottom:2px solid var(--accent);padding-bottom:8px;">' + l.replace(/^##\s+/,'') + '</h2>';
-          } else if (/^#\s+/.test(line)) {
-            out += '<h2 style="font-family:var(--font-display);font-size:24px;color:var(--fg);margin:36px 0 12px;font-weight:700;">' + l.replace(/^#\s+/,'') + '</h2>';
-          } else if (/^[-•]\s+/.test(line)) {
-            out += '<li style="margin-bottom:6px;font-size:14px;color:var(--fg-soft);line-height:1.6;">' + l.replace(/^[-•]\s+/,'') + '</li>';
-          } else if (line.trim() === '' || line.trim() === '---') {
-            out += '<div style="height:8px;"></div>';
-          } else {
-            out += '<p style="font-size:14px;color:var(--fg-soft);line-height:1.7;margin:0 0 10px;">' + l + '</p>';
-          }
-        }
-      });
-      flushTable();
-
-      return '<div class="page">' +
-        '<div class="hero">' +
-          '<div class="hero-eyebrow">Optimized Plan</div>' +
-          '<h1 class="hero-name">' + esc(name) + '</h1>' +
-          (biz ? '<p class="hero-strategy">' + esc(biz) + (goal ? ' · ' + esc(goal) : '') + '</p>' : '') +
-        '</div>' +
-        '<div class="section">' + out + '</div>' +
-        (isPro ? '<div class="pro-actions"><button class="btn-pro" onclick="downloadPlan()">⬇ Download Plan</button></div>' : '') +
-        '</div>';
-    }
-
-    function render(p) {
-      var html = '<div class="page">';
-
-      // Hero
-      html += '<div class="hero">';
-      html += '<div class="hero-eyebrow">AdCraft Advertising Plan</div>';
-      html += '<h1 class="hero-name">' + esc(p.plan_name) + '</h1>';
-      if (p.your_advertising_strategy) {
-        html += '<p class="hero-strategy">' + esc(p.your_advertising_strategy) + '</p>';
-      }
-      html += '</div>';
-
-      if (p.the_opportunity) {
-        html += '<div class="section"><div class="section-label">The Opportunity</div>';
-        html += para(p.the_opportunity) + '</div>';
-      }
-      if (p.what_advertising_needs_to_do) {
-        html += '<div class="section"><div class="section-label">What Advertising Needs to Do</div>';
-        html += para(p.what_advertising_needs_to_do) + '</div>';
-      }
-      if (p.recommended_approach) {
-        html += '<div class="section"><div class="section-label">Recommended Approach</div>';
-        html += para(p.recommended_approach) + '</div>';
-      }
-
-      html += '<div class="divider"></div>';
-
-      // Channels
-      if (p.recommended_channels && p.recommended_channels.length) {
-        html += '<div class="section"><div class="section-label">Where to Advertise</div>';
-        html += '<div class="cards">';
-        p.recommended_channels.forEach(function(ch) {
-          html += '<div class="card">';
-          html += '<div class="card-name">' + esc(ch.channel) + '</div>';
-          html += '<div class="card-body">' + esc(ch.role) + '</div>';
-          if (ch.what_to_run) html += '<div class="card-meta"><strong>What to run:</strong> ' + esc(ch.what_to_run) + '</div>';
-          if (ch.cta) html += '<div class="card-meta"><strong>CTA:</strong> ' + esc(ch.cta) + '</div>';
-          if (ch.why) html += '<div class="card-meta"><strong>Why it earns its place:</strong> ' + esc(ch.why) + '</div>';
-          html += '</div>';
-        });
-        html += '</div></div>';
-      }
-
-      // Budget
-      if (p.budget && p.budget.length) {
-        html += '<div class="section"><div class="section-label">Budget</div>';
-        html += '<table class="budget-table"><thead><tr>';
-        html += '<th>Channel</th><th>Investment</th><th style="min-width:200px">Purpose</th>';
-        html += '</tr></thead><tbody>';
-        p.budget.forEach(function(b) {
-          var pct = parseFloat(b.percentage) || 0;
-          html += '<tr>';
-          html += '<td>' + esc(b.channel) + '</td>';
-          html += '<td><div class="budget-amount">$' + (b.monthly_investment || 0).toLocaleString() + '</div>';
-          html += '<div class="budget-pct">' + esc(b.percentage) + '</div>';
-          html += '<div class="budget-bar-wrap"><div class="budget-bar" style="width:' + Math.min(pct,100) + '%"></div></div></td>';
-          html += '<td>' + esc(b.purpose) + '</td>';
-          html += '</tr>';
-        });
-        html += '</tbody></table></div>';
-      }
-
-      html += '<div class="divider"></div>';
-
-      // Audiences
-      if (p.who_to_target && p.who_to_target.length) {
-        html += '<div class="section"><div class="section-label">Who to Target</div>';
-        p.who_to_target.forEach(function(a) {
-          html += '<div class="audience-item">';
-          html += '<div class="audience-name">' + esc(a.audience_group) + '</div>';
-          html += '<div class="audience-desc">' + esc(a.description) + '</div>';
-          html += '</div>';
-        });
-        html += '</div>';
-      }
-
-      // Messaging
-      if (p.messaging && p.messaging.length) {
-        html += '<div class="section"><div class="section-label">What Your Ads Should Say</div>';
-        p.messaging.forEach(function(m) {
-          html += '<div class="msg-item">';
-          html += '<div class="msg-territory">' + esc(m.territory) + '</div>';
-          html += '<div class="msg-rationale">' + esc(m.rationale) + '</div>';
-          html += '</div>';
-        });
-        html += '</div>';
-      }
-
-      if (p.creative) {
-        html += '<div class="section"><div class="section-label">What the Ads Should Look Like</div>';
-        html += '<p class="section-body">' + esc(p.creative) + '</p></div>';
-      }
-      if (p.campaign_timing) {
-        html += '<div class="section"><div class="section-label">Campaign Timing</div>';
-        html += '<p class="section-body">' + esc(p.campaign_timing) + '</p></div>';
-      }
-
-      html += '<div class="divider"></div>';
-
-      // KPIs
-      if (p.how_to_measure_success) {
-        html += '<div class="section"><div class="section-label">How to Measure Success</div>';
-        html += '<div class="kpi-grid">';
-        if (p.how_to_measure_success.business_outcomes) {
-          html += '<div><div class="kpi-col-label">Business Outcomes</div><ul class="kpi-list">';
-          p.how_to_measure_success.business_outcomes.forEach(function(o) { html += '<li>' + esc(o) + '</li>'; });
-          html += '</ul></div>';
-        }
-        if (p.how_to_measure_success.media_signals) {
-          html += '<div><div class="kpi-col-label">Media Signals</div><ul class="kpi-list">';
-          p.how_to_measure_success.media_signals.forEach(function(s) { html += '<li>' + esc(s) + '</li>'; });
-          html += '</ul></div>';
-        }
-        html += '</div></div>';
-      }
-
-      // What not to do
-      if (p.what_i_would_not_do && p.what_i_would_not_do.length) {
-        html += '<div class="section"><div class="section-label">What I Would Not Do</div>';
-        p.what_i_would_not_do.forEach(function(w) {
-          html += '<div class="avoid-item">';
-          html += '<div class="avoid-x">✕</div>';
-          html += '<div><div class="avoid-tactic">' + esc(w.tactic) + '</div>';
-          html += '<div class="avoid-reason">' + esc(w.reason) + '</div></div>';
-          html += '</div>';
-        });
-        html += '</div>';
-      }
-
-      // Smart moves
-      if (p.smart_next_moves && p.smart_next_moves.length) {
-        html += '<div class="section"><div class="section-label">Smart Next Moves</div>';
-        html += '<ol class="moves-list">';
-        p.smart_next_moves.forEach(function(m) { html += '<li>' + esc(m) + '</li>'; });
-        html += '</ol></div>';
-      }
-
-      // 90-day plan
-      if (p.launch_plan) {
-        html += '<div class="section"><div class="section-label">90-Day Launch Plan</div>';
-        html += '<div class="phase-grid">';
-        var phases = [
-          { key: 'days_1_30', label: 'Phase 1', title: 'Days 1–30: Launch' },
-          { key: 'days_31_60', label: 'Phase 2', title: 'Days 31–60: Optimize' },
-          { key: 'days_61_90', label: 'Phase 3', title: 'Days 61–90: Scale' }
-        ];
-        phases.forEach(function(ph) {
-          if (p.launch_plan[ph.key]) {
-            html += '<div class="phase-card">';
-            html += '<div class="phase-label">' + ph.label + '</div>';
-            html += '<div class="phase-title">' + ph.title + '</div>';
-            html += checklist(p.launch_plan[ph.key]);
-            html += '</div>';
-          }
-        });
-        html += '</div></div>';
-      }
-
-      // Assumptions
-      if (p.assumptions && p.assumptions.length) {
-        html += '<div class="section"><div class="section-label">Assumptions</div>';
-        html += '<ul class="assumptions-list">';
-        p.assumptions.forEach(function(a) { html += '<li>' + esc(a) + '</li>'; });
-        html += '</ul></div>';
-      }
-
-      // Pro actions
-      if (isPro) {
-        html += '<div class="pro-actions">';
-        html += '<button class="btn-pro" onclick="downloadPlan()">⬇ Download Plan</button>';
-        html += '<a class="btn-pro btn-optimize" href="https://adcraft.softr.app/performance-optimization?recordId=' + currentRecordId + '">✦ Optimize This Plan</a>';
-        html += '</div>';
-      }
-
-      // Footer
-      html += '<div class="footer">';
-      html += '<span class="footer-brand">AdCraft</span>';
-      html += '<span>Generated by AdCraft · Powered by Claude</span>';
-      html += '</div>';
-
-      html += '</div>';
-      return html;
-    }
-
-    // Main: get recordId and tier from URL
-    var params = new URLSearchParams(window.location.search);
-    var recordId = params.get('recordId');
-    var currentRecordId = recordId;
-    var isPro = (params.get('tier') || '').toLowerCase() === 'pro';
-
-    function downloadPlan() {
-      if (!window._currentPlan) return;
-      var btn = document.querySelector('.btn-pro');
-      if (btn) { btn.textContent = '⏳ Generating…'; btn.disabled = true; }
-      // Merge Airtable top-level fields into the plan so the xlsx has business name, goal, etc.
-      var payload = Object.assign({}, window._currentPlan, window._airtableFields || {});
-      fetch('/.netlify/functions/generate-xlsx', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      .then(function(r) {
-        if (!r.ok) throw new Error('Server error ' + r.status);
-        return r.blob();
-      })
-      .then(function(blob) {
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        var name = (window._currentPlan.plan_name || 'AdCraft-Plan').replace(/[^a-zA-Z0-9 _\-]/g, '').replace(/\s+/g, '-');
-        a.href = url;
-        a.download = name + '.xlsx';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        if (btn) { btn.textContent = '⬇ Download Plan'; btn.disabled = false; }
-      })
-      .catch(function(err) {
-        alert('Download failed: ' + err.message);
-        if (btn) { btn.textContent = '⬇ Download Plan'; btn.disabled = false; }
-      });
-    }
-
-    // ── (xlsx built server-side via generate-xlsx function) ──
-    function xlRef(c, r) { return String.fromCharCode(65 + c) + (r + 1); }
-
-    function setCell(ws, col, row, value, style) {
-      var ref = xlRef(col, row);
-      if (!ws[ref]) ws[ref] = { t: typeof value === 'number' ? 'n' : 's', v: value == null ? '' : value };
-      else { ws[ref].t = typeof value === 'number' ? 'n' : 's'; ws[ref].v = value == null ? '' : value; }
-      if (style) ws[ref].s = style;
-      // Track range
-      if (!ws['!ref']) { ws['!ref'] = ref + ':' + ref; }
-      else {
-        var parts = ws['!ref'].split(':');
-        var minC = parts[0].charCodeAt(0) - 65, minR = parseInt(parts[0].slice(1)) - 1;
-        var maxC = parts[1].charCodeAt(0) - 65, maxR = parseInt(parts[1].slice(1)) - 1;
-        ws['!ref'] = xlRef(Math.min(minC,col), Math.min(minR,row)) + ':' + xlRef(Math.max(maxC,col), Math.max(maxR,row));
+        // else still "Generating" — keep polling
+      } catch (err) {
+        console.warn('Poll error:', err);
+        // Don't stop polling on a transient network error
       }
     }
 
-    function mergeRange(ws, c1, r1, c2, r2) {
-      if (!ws['!merges']) ws['!merges'] = [];
-      ws['!merges'].push({ s: { c: c1, r: r1 }, e: { c: c2, r: r2 } });
+    function printPlan() {
+      window.print();
     }
 
-    var S = {
-      title: { font: { bold: true, sz: 16, color: { rgb: 'FFFFFF' }, name: 'Arial' }, fill: { fgColor: { rgb: '4A1040' }, patternType: 'solid' }, alignment: { vertical: 'center', wrapText: false } },
-      subtitle: { font: { bold: true, sz: 13, color: { rgb: 'FFFFFF' }, name: 'Arial' }, fill: { fgColor: { rgb: '7A2060' }, patternType: 'solid' }, alignment: { vertical: 'center', wrapText: false } },
-      sectionHdr: { font: { bold: true, sz: 11, color: { rgb: 'FFFFFF' }, name: 'Arial' }, fill: { fgColor: { rgb: '7A2060' }, patternType: 'solid' }, alignment: { vertical: 'center', wrapText: false } },
-      subHdr: { font: { bold: true, sz: 10, color: { rgb: '4A1040' }, name: 'Arial' }, fill: { fgColor: { rgb: 'F0E8EE' }, patternType: 'solid' }, alignment: { vertical: 'top', wrapText: true } },
-      labelA: { font: { bold: true, sz: 10, color: { rgb: '7A2060' }, name: 'Arial' }, fill: { fgColor: { rgb: 'FAF6ED' }, patternType: 'solid' }, alignment: { vertical: 'top', wrapText: false } },
-      labelB: { font: { bold: true, sz: 10, color: { rgb: '7A2060' }, name: 'Arial' }, fill: { fgColor: { rgb: 'F5EFE4' }, patternType: 'solid' }, alignment: { vertical: 'top', wrapText: false } },
-      bodyA: { font: { sz: 10, color: { rgb: '1A1A1A' }, name: 'Arial' }, fill: { fgColor: { rgb: 'FFFFFF' }, patternType: 'solid' }, alignment: { vertical: 'top', wrapText: true } },
-      bodyB: { font: { sz: 10, color: { rgb: '1A1A1A' }, name: 'Arial' }, fill: { fgColor: { rgb: 'FAF8FF' }, patternType: 'solid' }, alignment: { vertical: 'top', wrapText: true } },
-      tblHdr: { font: { bold: true, sz: 10, color: { rgb: 'FFFFFF' }, name: 'Arial' }, fill: { fgColor: { rgb: '7A2060' }, patternType: 'solid' }, alignment: { vertical: 'center', wrapText: false } },
-      rdHdr: { font: { bold: true, sz: 10, color: { rgb: 'FFFFFF' }, name: 'Arial' }, fill: { fgColor: { rgb: '4A1040' }, patternType: 'solid' }, alignment: { vertical: 'center', wrapText: false } },
-      rdLabel: { font: { bold: true, sz: 9, color: { rgb: '7A2060' }, name: 'Arial' }, fill: { fgColor: { rgb: 'FAF8FF' }, patternType: 'solid' }, alignment: { vertical: 'top', wrapText: false } },
-      rdLabelB: { font: { bold: true, sz: 9, color: { rgb: '7A2060' }, name: 'Arial' }, fill: { fgColor: { rgb: 'FFFFFF' }, patternType: 'solid' }, alignment: { vertical: 'top', wrapText: false } },
-      rdVal: { font: { sz: 9, color: { rgb: '1A1A1A' }, name: 'Arial' }, alignment: { vertical: 'top', wrapText: true } }
-    };
+    window.__clerkLoaded.then(async function(clerk) {
+      if (!clerk.user) { window.location.href = "/login.html"; return; }
+      renderNav("");
 
-    function buildXlsx(p) {
-      var wb = XLSX.utils.book_new();
-
-      // ═══════════════════════════════
-      // SHEET 1: Ad Plan
-      // ═══════════════════════════════
-      var ws = {};
-      ws['!cols'] = [{ wch: 24 }, { wch: 72 }, { wch: 20 }, { wch: 20 }];
-      var rows = []; // track row heights: rows[i] = hpt
-      var r = 0;
-
-      function spacer() {
-        rows[r] = 8;
-        r++;
+      if (!recordId) {
+        showError();
+        return;
       }
 
-      function sectionBanner(text) {
-        setCell(ws, 0, r, text, S.sectionHdr);
-        setCell(ws, 1, r, '', S.sectionHdr);
-        setCell(ws, 2, r, '', S.sectionHdr);
-        setCell(ws, 3, r, '', S.sectionHdr);
-        mergeRange(ws, 0, r, 3, r);
-        rows[r] = 24;
-        r++;
-      }
-
-      function bodyRow(text, alt) {
-        var style = alt ? S.bodyB : S.bodyA;
-        setCell(ws, 0, r, text, style);
-        setCell(ws, 1, r, '', style);
-        mergeRange(ws, 0, r, 1, r);
-        rows[r] = estimateHeight(text, 96 * 8); // approx chars per line at col width ~96
-        r++;
-      }
-
-      function labelValueRow(label, value, alt) {
-        setCell(ws, 0, r, label, alt ? S.labelB : S.labelA);
-        setCell(ws, 1, r, value, alt ? S.bodyB : S.bodyA);
-        mergeRange(ws, 1, r, 3, r);
-        rows[r] = 20;
-        r++;
-      }
-
-      function estimateHeight(text, charsPerLine) {
-        if (!text) return 20;
-        var lines = Math.ceil(String(text).length / (charsPerLine || 80));
-        return Math.max(20, Math.min(210, lines * 14 + 10));
-      }
-
-      // ── Title ──
-      setCell(ws, 0, r, 'AdCraft — Advertising Plan', S.title);
-      setCell(ws, 1, r, '', S.title);
-      setCell(ws, 2, r, '', S.title);
-      setCell(ws, 3, r, '', S.title);
-      mergeRange(ws, 0, r, 3, r);
-      rows[r] = 36; r++;
-
-      setCell(ws, 0, r, p.plan_name || '', S.subtitle);
-      setCell(ws, 1, r, '', S.subtitle);
-      setCell(ws, 2, r, '', S.subtitle);
-      setCell(ws, 3, r, '', S.subtitle);
-      mergeRange(ws, 0, r, 3, r);
-      rows[r] = 28; r++;
-
-      spacer();
-
-      // ── Inputs ──
-      var inputs = [
-        ['Business Name', p.business_name || ''],
-        ['Primary Goal', p.primary_goal || ''],
-        ['Geography', p.geography || ''],
-        ['Monthly Budget', p.monthly_ad_budget ? '$' + p.monthly_ad_budget : ''],
-        ['Budget Tier', p.budget_tier || ''],
-        ['Status', p.status || 'Ready']
-      ];
-      inputs.forEach(function(iv, i) {
-        labelValueRow(iv[0], iv[1], i % 2 === 1);
-      });
-
-      spacer();
-
-      // ── Strategy ──
-      sectionBanner('Your Advertising Strategy');
-      bodyRow(p.your_advertising_strategy || '', false);
-      spacer();
-
-      // ── Opportunity ──
-      sectionBanner('The Opportunity');
-      bodyRow(p.the_opportunity || '', false);
-      spacer();
-
-      // ── What Advertising Needs to Do ──
-      sectionBanner('What Advertising Needs to Do');
-      bodyRow(p.what_advertising_needs_to_do || '', false);
-      spacer();
-
-      // ── Recommended Approach ──
-      sectionBanner('Recommended Approach');
-      bodyRow(p.recommended_approach || '', false);
-      spacer();
-
-      // ── Channels ──
-      sectionBanner('Where to Advertise');
-      (p.recommended_channels || []).forEach(function(ch, i) {
-        // sub-header: channel name
-        setCell(ws, 0, r, (i + 1) + '. ' + (ch.channel || ''), S.subHdr);
-        setCell(ws, 1, r, '', S.subHdr);
-        mergeRange(ws, 0, r, 1, r);
-        rows[r] = 20; r++;
-        // body: role + details
-        var detail = (ch.role || '') + (ch.what_to_run ? '\nWhat to run: ' + ch.what_to_run : '') + (ch.cta ? '\nCTA: ' + ch.cta : '') + (ch.why ? '\nWhy it earns its place: ' + ch.why : '');
-        bodyRow(detail, i % 2 === 1);
-      });
-      spacer();
-
-      // ── Budget ──
-      sectionBanner('Budget');
-      // table headers
-      ['Channel', 'Monthly Investment', '% of Budget', 'Purpose'].forEach(function(h, c) {
-        setCell(ws, c, r, h, S.tblHdr);
-      });
-      rows[r] = 20; r++;
-      // budget rows
-      (p.budget || []).forEach(function(b, i) {
-        var style = i % 2 === 0 ? S.bodyA : S.bodyB;
-        setCell(ws, 0, r, b.channel || '', style);
-        setCell(ws, 1, r, b.monthly_investment ? '$' + b.monthly_investment : '', style);
-        setCell(ws, 2, r, b.percentage || '', style);
-        setCell(ws, 3, r, b.purpose || '', style);
-        rows[r] = 20; r++;
-      });
-      spacer();
-
-      // ── Audiences ──
-      sectionBanner('Who to Target');
-      (p.who_to_target || []).forEach(function(a, i) {
-        setCell(ws, 0, r, a.audience_group || '', S.subHdr);
-        setCell(ws, 1, r, a.description || '', i % 2 === 0 ? S.bodyA : S.bodyB);
-        mergeRange(ws, 1, r, 3, r);
-        rows[r] = estimateHeight(a.description, 72);
-        r++;
-      });
-      spacer();
-
-      // ── Messaging ──
-      sectionBanner('What Your Ads Should Say');
-      (p.messaging || []).forEach(function(m, i) {
-        var style = i % 2 === 0 ? S.bodyA : S.bodyB;
-        setCell(ws, 0, r, m.territory || '', S.subHdr);
-        setCell(ws, 1, r, m.rationale || '', style);
-        mergeRange(ws, 1, r, 3, r);
-        rows[r] = estimateHeight(m.rationale, 72);
-        r++;
-      });
-      spacer();
-
-      // ── Creative ──
-      if (p.creative) {
-        sectionBanner('What the Ads Should Look Like');
-        bodyRow(p.creative, false);
-        spacer();
-      }
-
-      // ── Timing ──
-      if (p.campaign_timing) {
-        sectionBanner('Campaign Timing');
-        bodyRow(p.campaign_timing, false);
-        spacer();
-      }
-
-      // ── KPIs ──
-      if (p.how_to_measure_success) {
-        sectionBanner('How to Measure Success');
-        var bo = p.how_to_measure_success.business_outcomes || [];
-        var ms2 = p.how_to_measure_success.media_signals || [];
-        var kpiText = '';
-        if (bo.length) kpiText += 'Business Outcomes:\n' + bo.map(function(x){return '• ' + x;}).join('\n');
-        if (ms2.length) kpiText += '\n\nMedia Signals:\n' + ms2.map(function(x){return '• ' + x;}).join('\n');
-        bodyRow(kpiText, false);
-        spacer();
-      }
-
-      // ── What Not to Do ──
-      if (p.what_i_would_not_do && p.what_i_would_not_do.length) {
-        sectionBanner('What I Would Not Do');
-        p.what_i_would_not_do.forEach(function(w, i) {
-          var style = i % 2 === 0 ? S.bodyA : S.bodyB;
-          setCell(ws, 0, r, w.tactic || '', S.subHdr);
-          setCell(ws, 1, r, w.reason || '', style);
-          mergeRange(ws, 1, r, 3, r);
-          rows[r] = estimateHeight(w.reason, 72);
-          r++;
-        });
-        spacer();
-      }
-
-      // ── Smart Moves ──
-      if (p.smart_next_moves && p.smart_next_moves.length) {
-        sectionBanner('Smart Next Moves');
-        p.smart_next_moves.forEach(function(m, i) {
-          bodyRow((i + 1) + '. ' + m, i % 2 === 1);
-        });
-        spacer();
-      }
-
-      // ── 90-Day Plan ──
-      if (p.launch_plan) {
-        sectionBanner('90-Day Launch Plan');
-        var phases = [
-          ['Days 1–30: Launch', p.launch_plan.days_1_30],
-          ['Days 31–60: Optimize', p.launch_plan.days_31_60],
-          ['Days 61–90: Scale', p.launch_plan.days_61_90]
-        ];
-        phases.forEach(function(ph, i) {
-          setCell(ws, 0, r, ph[0], S.subHdr);
-          setCell(ws, 1, r, ph[1] || '', i % 2 === 0 ? S.bodyA : S.bodyB);
-          mergeRange(ws, 1, r, 3, r);
-          rows[r] = estimateHeight(ph[1], 72);
-          r++;
-        });
-        spacer();
-      }
-
-      // ── Assumptions ──
-      if (p.assumptions && p.assumptions.length) {
-        sectionBanner('Assumptions');
-        p.assumptions.forEach(function(a, i) {
-          bodyRow('• ' + a, i % 2 === 1);
-        });
-      }
-
-      // Set row heights
-      ws['!rows'] = rows.map(function(h) { return h ? { hpt: h } : {}; });
-
-      XLSX.utils.book_append_sheet(wb, ws, 'Ad Plan');
-
-      // ═══════════════════════════════
-      // SHEET 2: Raw Data
-      // ═══════════════════════════════
-      var rd = {};
-      rd['!cols'] = [{ wch: 28 }, { wch: 100 }];
-
-      setCell(rd, 0, 0, 'Field', S.rdHdr);
-      setCell(rd, 1, 0, 'Value', S.rdHdr);
-
-      var rdRows = [
-        ['Plan Name', p.plan_name || ''],
-        ['Business Name', p.business_name || ''],
-        ['Primary Goal', p.primary_goal || ''],
-        ['Geography', p.geography || ''],
-        ['Monthly Ad Budget', p.monthly_ad_budget ? '$' + p.monthly_ad_budget : ''],
-        ['Budget Tier', p.budget_tier || ''],
-        ['Status', p.status || 'Ready'],
-        ['Plan Output', JSON.stringify(p, null, 2)]
-      ];
-
-      rdRows.forEach(function(row, i) {
-        var labelStyle = i % 2 === 0 ? S.rdLabel : S.rdLabelB;
-        setCell(rd, 0, i + 1, row[0], labelStyle);
-        setCell(rd, 1, i + 1, row[1], S.rdVal);
-      });
-
-      rd['!rows'] = [{ hpt: 22 }];
-      for (var ri = 1; ri <= 7; ri++) rd['!rows'].push({ hpt: 15 });
-      rd['!rows'].push({ hpt: 120 });
-
-      XLSX.utils.book_append_sheet(wb, rd, 'Raw Data');
-
-      var filename = (p.plan_name || 'AdCraft-Plan').replace(/[^a-zA-Z0-9 _\-]/g, '').replace(/\s+/g, '-');
-      XLSX.writeFile(wb, filename + '.xlsx', { cellStyles: true });
-    }
-
-    if (!recordId) {
-      showError('No plan selected. Please return to AdCraft and select a plan.');
-    } else {
-      fetch('/.netlify/functions/get-plan?recordId=' + recordId)
-      .then(function(r) {
-        if (!r.ok) throw new Error('Airtable error ' + r.status);
-        return r.json();
-      })
-      .then(function(data) {
-        var raw = data.fields['Plan Output'];
-        if (!raw) throw new Error('Plan JSON field is empty for this record.');
-        // Strip markdown code fences if present
-        var cleaned = raw.trim().replace(/^```[a-z]*\n?/i, '').replace(/```\s*$/,'').trim();
-        // Store Airtable fields for xlsx (field names match Airtable column names)
-        var f = data.fields;
-        window._airtableFields = {
-          business_name: f['Business Name'] || f['business_name'] || '',
-          primary_goal: f['Primary Goal'] || f['Goal'] || f['primary_goal'] || '',
-          geography: f['Geography'] || f['geography'] || '',
-          monthly_ad_budget: f['Monthly Ad Budget'] || f['Budget'] || f['monthly_ad_budget'] || '',
-          budget_tier: f['Budget Tier'] || f['Tier'] || f['budget_tier'] || '',
-          status: f['Status'] || f['status'] || 'Ready'
-        };
-        // Try JSON first; fall back to markdown renderer for optimized plans
-        var plan;
-        try {
-          plan = JSON.parse(cleaned);
-          window._currentPlan = plan;
-          document.getElementById('root').innerHTML = render(plan);
-        } catch(e) {
-          // Raw markdown from optimization — render it directly
-          window._currentPlan = { plan_name: f['Plan Name'] || 'Optimized Plan', _markdown: cleaned };
-          document.getElementById('root').innerHTML = renderMarkdown(cleaned, f);
-        }
-      })
-      .catch(function(err) {
-        showError('Could not load plan: ' + err.message);
-      });
-    }
+      startStepAnimation();
+      // Poll immediately, then every 4 seconds
+      pollPlan();
+      pollInterval = setInterval(pollPlan, 4000);
+    });
   </script>
+
+  <style>
+    @media print {
+      #nav-mount, .hero-actions, .btn { display: none !important; }
+      .plan-card { border: none; padding: 0; box-shadow: none; }
+      body { background: white; }
+    }
+  </style>
 </body>
 </html>

@@ -1,5 +1,3 @@
-const Anthropic = require("@anthropic-ai/sdk");
-
 const AT_BASE = "appCtUgAKIoaa6ECh";
 const AT_PLANS_TBL = "tblOAtGXbtWewEAm0";
 const AT_PROFILES_TBL = "tblvXoTaqOdiZ4Kzc";
@@ -26,33 +24,7 @@ exports.handler = async function (event) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: "Missing prompt" }) };
   }
 
-  // 1. Call Claude
-  let planText;
-  try {
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-    const message = await client.messages.create({
-      model: "claude-sonnet-4-5",
-      max_tokens: 3000,
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      system:
-        "You are an expert advertising strategist with 20 years of experience across digital and traditional media. " +
-        "Create detailed, actionable advertising plans that are specific to the business provided. " +
-        "Format your response in clean markdown with clear sections, tables where appropriate, and concrete recommendations. " +
-        "Be specific about budgets, channels, timing, and messaging — not generic. " +
-        "Write as if you are a senior media director presenting to a client.",
-    });
-    planText = message.content[0].text;
-  } catch (err) {
-    console.error("Anthropic error:", err);
-    return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to generate plan" }) };
-  }
-
-  // 2. Save to Airtable
+  // 1. Create a pending record in Airtable immediately
   let recordId;
   try {
     const atRes = await fetch(
@@ -66,7 +38,6 @@ exports.handler = async function (event) {
         body: JSON.stringify({
           fields: {
             "Plan Name": bizName || "Untitled Plan",
-            "Plan Output": planText,
             "Email": email || "",
             "Business Name": body.bizName || "",
             "Business Type": body.formData?.bizType || "",
@@ -77,7 +48,7 @@ exports.handler = async function (event) {
             "Monthly Ad Budget": body.budget || "",
             "Monthly Revenue": body.formData?.monthlyRevenue || "",
             "Current Advertising": body.formData?.currentAdvertising || "",
-            "Status": "Complete",
+            "Status": "Generating",
             "Intake Responses": JSON.stringify(body.formData || {}),
           },
         }),
@@ -87,32 +58,45 @@ exports.handler = async function (event) {
     const atData = await atRes.json();
     if (!atRes.ok) {
       console.error("Airtable error:", atData);
-      return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to save plan", detail: atData }) };
+      return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to create plan record", detail: atData }) };
     }
     recordId = atData.id;
   } catch (err) {
     console.error("Airtable error:", err);
-    return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to save plan" }) };
+    return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to create plan record" }) };
   }
 
-  // 3. Upsert business profile (fire-and-forget — don't block the response)
+  // 2. Fire background function (non-blocking)
+  try {
+    const bgUrl = `${process.env.URL}/.netlify/functions/generate-plan-background`;
+    fetch(bgUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ recordId, prompt, email, bizName, formData: body.formData }),
+    }).catch(err => console.error("Background trigger error:", err));
+  } catch (err) {
+    console.error("Background trigger error:", err);
+    // Don't fail — record is created, background will be retried or can be polled
+  }
+
+  // 3. Upsert business profile (fire-and-forget)
   if (email) {
-    upsertProfile(email, body.bizName, body.formData).catch(err =>
+    upsertProfile(email, bizName, body.formData).catch(err =>
       console.error("Profile upsert error:", err)
     );
   }
 
+  // 4. Return the record ID immediately — frontend polls for completion
   return {
     statusCode: 200,
     headers,
-    body: JSON.stringify({ recordId, plan: planText }),
+    body: JSON.stringify({ recordId, status: "generating" }),
   };
 };
 
 async function upsertProfile(email, bizName, formData = {}) {
   const token = process.env.AIRTABLE_TOKEN;
 
-  // Check if profile exists
   const searchUrl = `https://api.airtable.com/v0/${AT_BASE}/${AT_PROFILES_TBL}?filterByFormula=${encodeURIComponent(`{Email}="${email}"`)}`;
   const searchRes = await fetch(searchUrl, {
     headers: { Authorization: `Bearer ${token}` },
@@ -131,24 +115,16 @@ async function upsertProfile(email, bizName, formData = {}) {
   };
 
   if (searchData.records && searchData.records.length > 0) {
-    // Update existing record
-    const recordId = searchData.records[0].id;
-    await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_PROFILES_TBL}/${recordId}`, {
+    const rid = searchData.records[0].id;
+    await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_PROFILES_TBL}/${rid}`, {
       method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ fields }),
     });
   } else {
-    // Create new record
     await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_PROFILES_TBL}`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ fields }),
     });
   }
