@@ -58,8 +58,8 @@ exports.handler = async function (event) {
 
     if (!res.ok) {
       const d = await res.json();
-      console.error("save-profile Airtable error:", d);
-      return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to save profile" }) };
+      console.error("save-profile Airtable error:", JSON.stringify(d));
+      return { statusCode: 500, headers, body: JSON.stringify({ error: d?.error?.message || "Failed to save profile", detail: d }) };
     }
 
     return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };

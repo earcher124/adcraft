@@ -288,13 +288,17 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: userEmail, profile })
         });
-        if (!res.ok) throw new Error('Failed');
+        if (!res.ok) {
+          var errData = await res.json().catch(function() { return {}; });
+          throw new Error(errData.error || ('HTTP ' + res.status));
+        }
         status.textContent = '✓ Saved';
         status.classList.add('visible');
         setTimeout(function() { status.classList.remove('visible'); }, 3000);
       } catch(e) {
-        status.textContent = 'Save failed — try again';
+        status.textContent = 'Save failed: ' + (e.message || 'try again');
         status.classList.add('visible', 'error');
+        console.error('save-profile error:', e);
       } finally {
         btn.disabled = false;
         btn.textContent = 'Save Profile';
