@@ -308,12 +308,42 @@
       var body = document.getElementById('plan-body');
       if (plan) {
         body.innerHTML = renderPlanJSON(plan);
+        restoreCheckboxes();
+        // Save checkbox state whenever one changes
+        body.addEventListener('change', function(e) {
+          if (e.target.type === 'checkbox') saveCheckboxes();
+        });
       } else {
         // JSON parse failed — show raw text in a readable way
         console.warn('JSON parse failed, rendering as text');
         body.innerHTML = '<pre style="white-space:pre-wrap;font-size:13px;line-height:1.6;">' + esc(planText) + '</pre>';
       }
       document.getElementById('plan-card').classList.add('visible');
+    }
+
+    function checklistKey() {
+      return 'checklist_' + (recordId || 'unknown');
+    }
+
+    function saveCheckboxes() {
+      try {
+        var state = {};
+        document.querySelectorAll('.checklist input[type="checkbox"]').forEach(function(cb) {
+          if (cb.dataset.task) state[cb.dataset.task] = cb.checked;
+        });
+        localStorage.setItem(checklistKey(), JSON.stringify(state));
+      } catch(e) {}
+    }
+
+    function restoreCheckboxes() {
+      try {
+        var saved = localStorage.getItem(checklistKey());
+        if (!saved) return;
+        var state = JSON.parse(saved);
+        document.querySelectorAll('.checklist input[type="checkbox"]').forEach(function(cb) {
+          if (cb.dataset.task && state[cb.dataset.task]) cb.checked = true;
+        });
+      } catch(e) {}
     }
 
     function esc(str) {
@@ -418,12 +448,12 @@
           // Split paragraph into individual tasks on period+space or newline
           var tasks = text.split(/(?<=\.)\s+(?=[A-Z])|[\n\r]+/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 3; });
           if (tasks.length > 1) {
-            html += '<ul class="checklist">' + tasks.map(function(t){
-              return '<li><label><input type="checkbox"> <span>' + esc(t) + '</span></label></li>';
+            html += '<ul class="checklist">' + tasks.map(function(t, i){
+              return '<li><label><input type="checkbox" data-task="' + phase.key + '_' + i + '"> <span>' + esc(t) + '</span></label></li>';
             }).join('') + '</ul>';
           } else {
             // Fallback if splitting didn't produce multiple items
-            html += '<ul class="checklist"><li><label><input type="checkbox"> <span>' + esc(text) + '</span></label></li></ul>';
+            html += '<ul class="checklist"><li><label><input type="checkbox" data-task="' + phase.key + '_0"> <span>' + esc(text) + '</span></label></li></ul>';
           }
         });
       }
