@@ -30,6 +30,9 @@
   timeout = 90
   included_files = ["netlify/functions/export/cover-images/*.png"]
 
+[functions."budget-advisor"]
+  timeout = 30
+
 [functions."generate-xlsx"]
   timeout = 30
 

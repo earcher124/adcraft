@@ -317,7 +317,7 @@
         <div class="form-row">
           <div class="form-group">
             <label>Monthly Ad Budget</label>
-            <p class="field-hint">Enter your actual monthly budget in dollars</p>
+            <p class="field-hint">Enter your actual monthly budget in dollars — <a href="/budget-advisor.html" style="color:#4A1040;font-weight:600;">help me decide →</a></p>
             <input type="text" id="budget" placeholder="e.g. 500" inputmode="numeric">
           </div>
           <div class="form-group">
@@ -374,7 +374,7 @@
 
       <div class="form-group" style="margin-top:20px;">
         <label>Monthly Ad Budget</label>
-        <p class="field-hint">Enter your actual monthly budget in dollars</p>
+        <p class="field-hint">Enter your actual monthly budget in dollars — <a href="/budget-advisor.html" style="color:#4A1040;font-weight:600;">help me decide →</a></p>
         <input type="text" id="short-budget" placeholder="e.g. 500" inputmode="numeric">
       </div>
 
@@ -643,6 +643,10 @@
 
       var email = clerk.user.primaryEmailAddress?.emailAddress || '';
 
+      // Pre-fill budget from Budget Advisor if passed via query param
+      var urlParams = new URLSearchParams(window.location.search);
+      var advisorBudget = urlParams.get('advisorBudget');
+
       // Check for existing business profile
       try {
         var res = await fetch('/.netlify/functions/get-profile?email=' + encodeURIComponent(email));
@@ -651,6 +655,9 @@
           savedProfile = data.profile;
           renderProfileSummary(savedProfile);
           document.getElementById('short-form-card').classList.add('active');
+          if (advisorBudget) {
+            document.getElementById('short-budget').value = advisorBudget;
+          }
           return; // Don't show full form
         }
       } catch (e) {
@@ -660,6 +667,9 @@
       // No profile — show full form
       document.getElementById('progress-wrap').style.visibility = 'visible';
       document.getElementById('form-card').style.visibility = 'visible';
+      if (advisorBudget) {
+        document.getElementById('budget').value = advisorBudget;
+      }
     });
   </script>
 </body>
