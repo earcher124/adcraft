@@ -124,14 +124,14 @@ exports.handler = async function(event) {
   addTitleRow(p.plan_name || '', MID_PURPLE, WHITE, 13);
   addSpacer();
 
-  // Inputs
+  // Inputs — field names come from Airtable (passed through _airtableFields in index.html)
   const inputs = [
-    ['Business Name', p.business_name || ''],
-    ['Primary Goal', p.primary_goal || ''],
-    ['Geography', p.geography || ''],
-    ['Monthly Budget', p.monthly_ad_budget ? '$' + p.monthly_ad_budget : ''],
-    ['Budget Tier', p.budget_tier || ''],
-    ['Status', p.status || 'Ready']
+    ['Business Name', p.business_name || p['Business Name'] || ''],
+    ['Primary Goal', p.primary_goal || p['Primary Goal'] || p['Goal'] || ''],
+    ['Geography', p.geography || p['Geography'] || ''],
+    ['Monthly Budget', (() => { const v = p.monthly_ad_budget || p['Monthly Ad Budget'] || p['Budget'] || ''; return v ? '$' + v : ''; })()],
+    ['Budget Tier', p.budget_tier || p['Budget Tier'] || ''],
+    ['Status', p.status || p['Status'] || 'Ready']
   ];
   inputs.forEach((iv, i) => addLabelValue(iv[0], iv[1], i % 2 === 1));
   addSpacer();
@@ -287,33 +287,6 @@ exports.handler = async function(event) {
     addSpacer();
   }
 
-  // 90-Day Plan
-  if (p.launch_plan) {
-    addSectionBanner('90-Day Launch Plan');
-    const phases = [
-      ['Days 1–30: Launch', p.launch_plan.days_1_30],
-      ['Days 31–60: Optimize', p.launch_plan.days_31_60],
-      ['Days 61–90: Scale', p.launch_plan.days_61_90]
-    ];
-    phases.forEach((ph, i) => {
-      const row = ws.addRow([ph[0], ph[1] || '', '', '']);
-      ws.mergeCells(row.number, 2, row.number, 4);
-      const len = String(ph[1] || '').length;
-      row.height = Math.max(20, Math.min(210, Math.ceil(len / 72) * 14 + 10));
-      const lc = row.getCell(1);
-      lc.value = ph[0];
-      lc.font = titleFont(DEEP_PURPLE, 10, true);
-      lc.fill = titleFill(LAVENDER);
-      lc.alignment = { vertical: 'top', wrapText: true };
-      const vc = row.getCell(2);
-      vc.value = ph[1] || '';
-      vc.font = titleFont(BODY_TEXT, 10, false);
-      vc.fill = titleFill(i % 2 === 0 ? WHITE : 'FAF8FF');
-      vc.alignment = { vertical: 'top', wrapText: true };
-    });
-    addSpacer();
-  }
-
   // Assumptions
   if (p.assumptions && p.assumptions.length) {
     addSectionBanner('Assumptions');
@@ -321,7 +294,80 @@ exports.handler = async function(event) {
   }
 
   // ══════════════════════════════════════
-  // SHEET 2: Raw Data
+  // SHEET 2: 90-Day Launch Plan (checklist)
+  // ══════════════════════════════════════
+  if (p.launch_plan) {
+    const lp = wb.addWorksheet('90-Day Launch Plan');
+    lp.columns = [
+      { width: 5 },   // checkbox col
+      { width: 55 },  // task
+      { width: 18 },  // phase label
+    ];
+
+    // Title
+    const lpTitle = lp.addRow(['', '90-Day Launch Plan', '']);
+    lp.mergeCells(lpTitle.number, 1, lpTitle.number, 3);
+    lpTitle.height = 36;
+    const lpTitleCell = lpTitle.getCell(1);
+    lpTitleCell.value = '90-Day Launch Plan';
+    lpTitleCell.font = titleFont(WHITE, 16, true);
+    lpTitleCell.fill = titleFill(DEEP_PURPLE);
+    lpTitleCell.alignment = { vertical: 'middle', wrapText: false };
+
+    const lpSub = lp.addRow(['', p.plan_name || '', '']);
+    lp.mergeCells(lpSub.number, 1, lpSub.number, 3);
+    lpSub.height = 24;
+    const lpSubCell = lpSub.getCell(1);
+    lpSubCell.value = p.plan_name || '';
+    lpSubCell.font = titleFont(WHITE, 12, true);
+    lpSubCell.fill = titleFill(MID_PURPLE);
+    lpSubCell.alignment = { vertical: 'middle' };
+
+    function addPhaseBlock(phaseLabel, phaseTitle, text, bgHex) {
+      // Phase header
+      const sp = lp.addRow(['', '', '']);
+      sp.height = 8;
+
+      const hdr = lp.addRow(['', phaseTitle, phaseLabel]);
+      hdr.height = 24;
+      lp.mergeCells(hdr.number, 1, hdr.number, 2);
+      const hc = hdr.getCell(1);
+      hc.value = phaseTitle;
+      hc.font = titleFont(WHITE, 11, true);
+      hc.fill = titleFill(MID_PURPLE);
+      hc.alignment = { vertical: 'middle' };
+      const pc = hdr.getCell(3);
+      pc.value = phaseLabel;
+      pc.font = titleFont(WHITE, 9, true);
+      pc.fill = titleFill(MID_PURPLE);
+      pc.alignment = { vertical: 'middle', horizontal: 'right' };
+
+      // Split text into checklist items (by period or newline)
+      const items = String(text || '').split(/\.\s+|\n/).map(s => s.trim()).filter(s => s.length > 3);
+      items.forEach((item, i) => {
+        const row = lp.addRow(['☐', item.replace(/\.$/,''), '']);
+        lp.mergeCells(row.number, 2, row.number, 3);
+        row.height = Math.max(18, Math.ceil(item.length / 50) * 14 + 6);
+        const chk = row.getCell(1);
+        chk.value = '☐';
+        chk.font = { name: 'Arial', size: 12, color: { argb: 'FF' + MID_PURPLE } };
+        chk.fill = titleFill(i % 2 === 0 ? bgHex : WHITE);
+        chk.alignment = { vertical: 'top', horizontal: 'center' };
+        const tc = row.getCell(2);
+        tc.value = item.replace(/\.$/,'');
+        tc.font = titleFont(BODY_TEXT, 10, false);
+        tc.fill = titleFill(i % 2 === 0 ? bgHex : WHITE);
+        tc.alignment = { vertical: 'top', wrapText: true };
+      });
+    }
+
+    addPhaseBlock('Phase 1', 'Days 1–30: Launch', p.launch_plan.days_1_30, 'F0E8EE');
+    addPhaseBlock('Phase 2', 'Days 31–60: Optimize', p.launch_plan.days_31_60, 'FAF6ED');
+    addPhaseBlock('Phase 3', 'Days 61–90: Scale', p.launch_plan.days_61_90, 'F5EFE4');
+  }
+
+  // ══════════════════════════════════════
+  // SHEET 3: Raw Data
   // ══════════════════════════════════════
   const rd = wb.addWorksheet('Raw Data');
   rd.columns = [{ width: 28 }, { width: 100 }];
@@ -337,12 +383,12 @@ exports.handler = async function(event) {
 
   const rdFields = [
     ['Plan Name', p.plan_name || ''],
-    ['Business Name', p.business_name || ''],
-    ['Primary Goal', p.primary_goal || ''],
-    ['Geography', p.geography || ''],
-    ['Monthly Ad Budget', p.monthly_ad_budget ? '$' + p.monthly_ad_budget : ''],
-    ['Budget Tier', p.budget_tier || ''],
-    ['Status', p.status || 'Ready'],
+    ['Business Name', p.business_name || p['Business Name'] || ''],
+    ['Primary Goal', p.primary_goal || p['Primary Goal'] || p['Goal'] || ''],
+    ['Geography', p.geography || p['Geography'] || ''],
+    ['Monthly Ad Budget', (() => { const v = p.monthly_ad_budget || p['Monthly Ad Budget'] || p['Budget'] || ''; return v ? '$' + v : ''; })()],
+    ['Budget Tier', p.budget_tier || p['Budget Tier'] || ''],
+    ['Status', p.status || p['Status'] || 'Ready'],
     ['Plan Output', JSON.stringify(p, null, 2)]
   ];
 
