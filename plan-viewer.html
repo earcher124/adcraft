@@ -212,12 +212,14 @@
         <h1 class="hero-title" id="hero-title">Your <em>Plan</em></h1>
       </div>
       <div class="hero-right" id="hero-right" style="display:none;">
-        <p class="hero-meta" id="hero-meta"></p>
+        <div style="display:flex; align-items:center; gap:8px; justify-content:flex-end; margin-bottom:8px;">
+          <p class="hero-meta" id="hero-meta" style="margin:0;"></p>
+          <span id="pro-badge" style="display:none;" class="pro-badge">PRO</span>
+        </div>
         <div class="hero-actions">
           <button class="btn btn-outline" id="btn-excel" onclick="downloadExcel()">↓ Excel</button>
           <button class="btn btn-outline" id="btn-export" onclick="toggleExportPanel()">↓ Export Plan</button>
           <button class="btn btn-outline" id="btn-optimize" onclick="optimizePlan()">✦ Optimize Plan</button>
-          <span id="pro-badge" style="display:none;" class="pro-badge">PRO</span>
         </div>
       </div>
     </div>
@@ -734,7 +736,7 @@
             });
             if (bgRes.ok || bgRes.status === 202) {
               var bgJson = await bgRes.json();
-              if (bgJson.status === "ready" && bgJson.cached) {
+              if (bgJson.status === "ready") {
                 // Already cached — fetch the record to get the data URL
                 var cachedRes = await fetch("/.netlify/functions/get-plan?recordId=" + encodeURIComponent(recordId));
                 if (cachedRes.ok) {
@@ -773,16 +775,20 @@
         }
 
         // Step 2 – build PPTX
+        // Don't pass coverDataUrl in the body (can be ~1MB) — the server reads it
+        // from Airtable directly. The polling above ensured it's already saved there.
         btn.textContent = "Building presentation…";
         var exportRes = await fetch("/.netlify/functions/generate-export", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ recordId: recordId, email: email, coverDataUrl: coverDataUrl }),
+          body: JSON.stringify({ recordId: recordId, email: email }),
         });
 
         if (!exportRes.ok) {
-          var errJson = await exportRes.json().catch(function() { return {}; });
-          throw new Error(errJson.error || "Export failed (" + exportRes.status + ")");
+          var errText = await exportRes.text().catch(function() { return ""; });
+          var errMsg = "Export failed (" + exportRes.status + ")";
+          try { errMsg = JSON.parse(errText).error || errMsg; } catch(e) {}
+          throw new Error(errMsg);
         }
 
         var exportJson = await exportRes.json();
