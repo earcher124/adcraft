@@ -104,6 +104,29 @@
     .btn-ghost { background: transparent; color: #6b6270; }
     .btn-ghost:hover { color: #1a1a1a; }
 
+    /* Returning user short form */
+    .short-form-card {
+      background: #fff;
+      border: 1px solid #e8ddd0;
+      border-radius: 16px;
+      padding: 40px;
+      display: none;
+    }
+    .short-form-card.active { display: block; }
+    .profile-summary {
+      background: #FAF6ED;
+      border: 1px solid #e8ddd0;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+    }
+    .profile-summary-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #4A1040; margin-bottom: 10px; }
+    .profile-summary-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; }
+    .profile-summary-field { font-size: 13px; color: #1a1a1a; }
+    .profile-summary-field span { color: #6b6270; }
+    .edit-profile-link { font-size: 12px; color: #6b6270; text-decoration: underline; cursor: pointer; margin-top: 10px; display: inline-block; }
+    .edit-profile-link:hover { color: #4A1040; }
+
     /* Generating state */
     .generating {
       text-align: center;
@@ -293,6 +316,50 @@
 
     </div>
 
+    <!-- Returning user: short form (Goal + Budget only) -->
+    <div class="short-form-card" id="short-form-card">
+      <p class="step-eyebrow">New Plan</p>
+      <h2 class="step-question">What's the goal for this plan?</h2>
+
+      <div class="profile-summary" id="profile-summary">
+        <div class="profile-summary-label">Your Business Profile</div>
+        <div class="profile-summary-fields" id="profile-summary-fields"></div>
+        <a class="edit-profile-link" onclick="showFullForm()">Edit business profile →</a>
+      </div>
+
+      <div class="form-group">
+        <label>Primary Goal</label>
+        <div class="chip-group" id="short-goal-chips">
+          <div class="chip" data-val="Drive website traffic">Drive website traffic</div>
+          <div class="chip" data-val="Generate leads / inquiries">Generate leads</div>
+          <div class="chip" data-val="Increase brand awareness">Brand awareness</div>
+          <div class="chip" data-val="Boost sales / conversions">Boost sales</div>
+          <div class="chip" data-val="Grow social media following">Grow social following</div>
+          <div class="chip" data-val="Promote a specific event or launch">Promote an event / launch</div>
+          <div class="chip" data-val="Drive foot traffic to a physical location">Drive foot traffic</div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:20px;">
+        <label>Monthly Ad Budget</label>
+        <select id="short-budget">
+          <option value="">Select a range…</option>
+          <option>Under $1,000/month</option>
+          <option>$1,000–$3,000/month</option>
+          <option>$3,000–$7,500/month</option>
+          <option>$7,500–$15,000/month</option>
+          <option>$15,000–$30,000/month</option>
+          <option>$30,000–$75,000/month</option>
+          <option>Over $75,000/month</option>
+        </select>
+      </div>
+
+      <div class="form-nav">
+        <span></span>
+        <button class="btn btn-primary" onclick="generateFromProfile()">Generate My Plan →</button>
+      </div>
+    </div>
+
     <!-- Generating state -->
     <div class="generating" id="generating">
       <div class="spinner"></div>
@@ -311,8 +378,9 @@
   <script>
     var formData = {};
     var currentStep = 1;
+    var savedProfile = null;
 
-    // Chip selection (single-select)
+    // Chip selection (single-select) — applies to all chip groups
     document.querySelectorAll('.chip-group').forEach(function(group) {
       group.querySelectorAll('.chip').forEach(function(chip) {
         chip.addEventListener('click', function() {
@@ -383,11 +451,15 @@
       document.getElementById('generating').classList.add('active');
       animateSteps();
 
+      await submitPlan(formData);
+    }
+
+    async function submitPlan(d) {
       try {
         var clerk = await window.__clerkLoaded;
         var email = clerk.user?.primaryEmailAddress?.emailAddress || '';
 
-        var prompt = buildPrompt(formData);
+        var prompt = buildPrompt(d);
 
         var res = await fetch('/.netlify/functions/generate-plan', {
           method: 'POST',
@@ -395,11 +467,11 @@
           body: JSON.stringify({
             prompt: prompt,
             email: email,
-            bizName: formData.bizName,
-            goal: formData.goal,
-            budget: formData.budget,
-            geo: formData.geo,
-            formData: formData
+            bizName: d.bizName,
+            goal: d.goal,
+            budget: d.budget,
+            geo: d.geo,
+            formData: d
           })
         });
 
@@ -451,13 +523,76 @@
       return lines.join('\n');
     }
 
-    // Hide content until auth confirmed
+    // Hide content until auth + profile check complete
     document.getElementById('progress-wrap').style.visibility = 'hidden';
     document.getElementById('form-card').style.visibility = 'hidden';
+
+    function showFullForm() {
+      document.getElementById('short-form-card').classList.remove('active');
+      document.getElementById('progress-wrap').style.visibility = 'visible';
+      document.getElementById('form-card').style.visibility = 'visible';
+      // Pre-fill full form from saved profile
+      if (savedProfile) {
+        document.getElementById('biz-name').value = savedProfile.bizName || '';
+        document.getElementById('biz-type').value = savedProfile.bizType || '';
+        document.getElementById('product-type').value = savedProfile.productType || '';
+        document.getElementById('target-customer').value = savedProfile.targetCustomer || '';
+        document.getElementById('geo').value = savedProfile.geo || '';
+        document.getElementById('monthly-revenue').value = savedProfile.monthlyRevenue || '';
+        document.getElementById('current-advertising').value = savedProfile.currentAdvertising || '';
+      }
+    }
+
+    function renderProfileSummary(profile) {
+      var fields = [
+        ['Business', profile.bizName],
+        ['Type', profile.bizType],
+        ['Product', profile.productType],
+        ['Location', profile.geo],
+        ['Revenue', profile.monthlyRevenue],
+      ].filter(function(f) { return f[1]; });
+
+      var html = fields.map(function(f) {
+        return '<div class="profile-summary-field"><span>' + f[0] + ':</span> ' + f[1] + '</div>';
+      }).join('');
+      document.getElementById('profile-summary-fields').innerHTML = html;
+    }
+
+    async function generateFromProfile() {
+      var goal = (document.querySelector('#short-goal-chips .chip.selected') || {}).dataset?.val || '';
+      var budget = document.getElementById('short-budget').value;
+
+      // Merge profile + new goal/budget into formData
+      formData = Object.assign({}, savedProfile, { goal: goal, budget: budget });
+
+      document.getElementById('short-form-card').classList.remove('active');
+      document.getElementById('generating').classList.add('active');
+      animateSteps();
+
+      await submitPlan(formData);
+    }
 
     window.__clerkLoaded.then(async function(clerk) {
       if (!clerk.user) { window.location.href = "/login.html"; return; }
       renderNav("New Plan");
+
+      var email = clerk.user.primaryEmailAddress?.emailAddress || '';
+
+      // Check for existing business profile
+      try {
+        var res = await fetch('/.netlify/functions/get-profile?email=' + encodeURIComponent(email));
+        var data = await res.json();
+        if (data.profile) {
+          savedProfile = data.profile;
+          renderProfileSummary(savedProfile);
+          document.getElementById('short-form-card').classList.add('active');
+          return; // Don't show full form
+        }
+      } catch (e) {
+        console.warn('Could not fetch profile:', e);
+      }
+
+      // No profile — show full form
       document.getElementById('progress-wrap').style.visibility = 'visible';
       document.getElementById('form-card').style.visibility = 'visible';
     });

@@ -2,6 +2,7 @@ const Anthropic = require("@anthropic-ai/sdk");
 
 const AT_BASE = "appCtUgAKIoaa6ECh";
 const AT_PLANS_TBL = "tblOAtGXbtWewEAm0";
+const AT_PROFILES_TBL = "tblvXoTaqOdiZ4Kzc";
 
 exports.handler = async function (event) {
   if (event.httpMethod !== "POST") {
@@ -94,9 +95,61 @@ exports.handler = async function (event) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to save plan" }) };
   }
 
+  // 3. Upsert business profile (fire-and-forget — don't block the response)
+  if (email) {
+    upsertProfile(email, body.bizName, body.formData).catch(err =>
+      console.error("Profile upsert error:", err)
+    );
+  }
+
   return {
     statusCode: 200,
     headers,
     body: JSON.stringify({ recordId, plan: planText }),
   };
 };
+
+async function upsertProfile(email, bizName, formData = {}) {
+  const token = process.env.AIRTABLE_TOKEN;
+
+  // Check if profile exists
+  const searchUrl = `https://api.airtable.com/v0/${AT_BASE}/${AT_PROFILES_TBL}?filterByFormula=${encodeURIComponent(`{Email}="${email}"`)}`;
+  const searchRes = await fetch(searchUrl, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const searchData = await searchRes.json();
+
+  const fields = {
+    "Email": email,
+    "Business Name": bizName || formData.bizName || "",
+    "Business Type": formData.bizType || "",
+    "Product": formData.productType || "",
+    "Target Customer": formData.targetCustomer || "",
+    "Geography": formData.geo || "",
+    "Monthly Revenue": formData.monthlyRevenue || "",
+    "Current Advertising": formData.currentAdvertising || "",
+  };
+
+  if (searchData.records && searchData.records.length > 0) {
+    // Update existing record
+    const recordId = searchData.records[0].id;
+    await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_PROFILES_TBL}/${recordId}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ fields }),
+    });
+  } else {
+    // Create new record
+    await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_PROFILES_TBL}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ fields }),
+    });
+  }
+}
