@@ -125,15 +125,7 @@ exports.handler = async function (event) {
     console.warn("No email provided, skipping user/profile upsert");
   }
 
-  // 4. Trigger background generation server-side (not from browser, which navigates away)
-  const siteUrl = process.env.URL || process.env.DEPLOY_URL || "https://adcrafthq.com";
-  fetch(`${siteUrl}/.netlify/functions/generate-plan-background`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ recordId, prompt: body.prompt }),
-  }).catch(err => console.error("Background trigger error:", err.message));
-
-  // 5. Return the record ID immediately — frontend polls for completion
+  // 4. Return the record ID immediately — browser triggers background generation and polls for completion
   return {
     statusCode: 200,
     headers,
