@@ -61,22 +61,7 @@ exports.handler = async function (event) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to create plan record" }) };
   }
 
-  // 2. Fire background function (non-blocking)
-  try {
-    const siteUrl = process.env.URL || process.env.DEPLOY_URL || "https://adcrafthq.com";
-    const bgUrl = `${siteUrl}/.netlify/functions/generate-plan-background`;
-    console.log("Triggering background function:", bgUrl);
-    fetch(bgUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ recordId, prompt, email, bizName, formData: body.formData }),
-    }).then(r => console.log("Background trigger response:", r.status))
-      .catch(err => console.error("Background trigger error:", err.message));
-  } catch (err) {
-    console.error("Background trigger error:", err);
-  }
-
-  // 3. Upsert business profile (fire-and-forget)
+  // 2. Upsert business profile (fire-and-forget)
   if (email) {
     upsertProfile(email, bizName, body.formData).catch(err =>
       console.error("Profile upsert error:", err)

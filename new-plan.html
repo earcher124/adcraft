@@ -529,6 +529,19 @@
         var data = await res.json();
 
         if (data.recordId) {
+          // Fire background function directly from frontend (non-blocking)
+          fetch('/.netlify/functions/generate-plan-background', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              recordId: data.recordId,
+              prompt: prompt,
+              email: email,
+              bizName: d.bizName,
+              formData: d
+            })
+          }).catch(function(e) { console.warn('Background trigger error:', e.message); });
+
           window.location.href = '/plan-viewer.html?id=' + data.recordId;
         } else {
           throw new Error('No record ID returned');
