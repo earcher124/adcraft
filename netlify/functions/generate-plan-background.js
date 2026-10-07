@@ -46,7 +46,15 @@ exports.handler = async function (event) {
       JSON.parse(planText);
       console.log("Claude returned valid JSON");
     } catch (e) {
-      console.warn("Claude did not return valid JSON, saving as-is:", e.message);
+      console.warn("Claude did not return valid JSON:", e.message);
+      // Log chars around the failure position for diagnosis
+      const match = e.message.match(/position (\d+)/);
+      if (match) {
+        const pos = parseInt(match[1]);
+        console.warn("Chars at failure (pos", pos, "):", JSON.stringify(planText.substring(pos - 30, pos + 30)));
+        console.warn("First 200 chars:", planText.substring(0, 200));
+        console.warn("Last 200 chars:", planText.substring(planText.length - 200));
+      }
     }
   } catch (err) {
     console.error("Anthropic error:", err.message, err.status);
