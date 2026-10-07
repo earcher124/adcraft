@@ -560,7 +560,7 @@
         var pendingPrompt = sessionStorage.getItem('adcraft_pending_' + recordId);
         if (pendingPrompt) {
           sessionStorage.removeItem('adcraft_pending_' + recordId);
-          fetch('/.netlify/functions/generate-plan-background', {
+          fetch('/.netlify/functions/trigger-plan', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ recordId: recordId, prompt: pendingPrompt })
