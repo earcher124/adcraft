@@ -505,6 +505,7 @@
 
         var prompt = buildPrompt(d);
 
+        console.log('Calling generate-plan, prompt length:', prompt.length, 'email:', email);
         var res = await fetch('/.netlify/functions/generate-plan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -518,6 +519,7 @@
             formData: d
           })
         });
+        console.log('generate-plan response status:', res.status);
 
         if (!res.ok) {
           const errBody = await res.json().catch(() => ({}));
@@ -532,7 +534,7 @@
           throw new Error('No record ID returned');
         }
       } catch (err) {
-        console.error(err);
+        console.error('submitPlan caught:', err.name, err.message, err.stack);
         document.getElementById('generating').innerHTML =
           '<div style="padding:40px;text-align:center;">' +
           '<p style="color:#c0392b;font-size:14px;margin-bottom:12px;">Something went wrong generating your plan.</p>' +
