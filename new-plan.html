@@ -19,8 +19,7 @@
     .hero-desc { font-size: 15px; color: #6b6270; margin: 0; line-height: 1.6; }
     .hero-line { max-width: 860px; margin: 24px auto 0; height: 2px; background: linear-gradient(to right, #4A1040, transparent); }
 
-    .content { max-width: 860px; margin: 40px auto; padding: 0 48px; }
-    .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #4A1040; margin-bottom: 16px; }
+    .content { max-width: 860px; margin: 40px auto; padding: 0 48px 80px; }
 
     /* Progress bar */
     .progress-wrap { margin-bottom: 32px; }
@@ -46,10 +45,13 @@
     .step.active { display: block; }
 
     .step-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #4A1040; margin-bottom: 8px; }
-    .step-question { font-family: 'Playfair Display', Georgia, serif; font-size: 26px; color: #1a1a1a; margin: 0 0 24px; line-height: 1.3; }
+    .step-question { font-family: 'Playfair Display', Georgia, serif; font-size: 26px; color: #1a1a1a; margin: 0 0 28px; line-height: 1.3; }
 
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
     .form-group { margin-bottom: 20px; }
+    .form-group:last-child { margin-bottom: 0; }
     label { display: block; font-size: 12px; font-weight: 600; color: #6b6270; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+    .field-hint { font-size: 11px; color: #a0929a; margin-bottom: 6px; font-weight: 400; text-transform: none; letter-spacing: 0; }
     input[type="text"], textarea, select {
       width: 100%;
       padding: 12px 16px;
@@ -61,9 +63,11 @@
       background: #FAF6ED;
       transition: border-color 0.2s;
       outline: none;
+      -webkit-appearance: none;
     }
-    input[type="text"]:focus, textarea:focus, select:focus { border-color: #4A1040; }
-    textarea { resize: vertical; min-height: 100px; }
+    input[type="text"]:focus, textarea:focus, select:focus { border-color: #4A1040; background: #fff; }
+    textarea { resize: vertical; min-height: 96px; }
+    select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6270' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
 
     .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
     .chip {
@@ -81,7 +85,7 @@
     .chip:hover { border-color: #4A1040; color: #4A1040; }
     .chip.selected { background: #4A1040; color: #FAF6ED; border-color: #4A1040; }
 
-    .form-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; }
+    .form-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 36px; padding-top: 24px; border-top: 1px solid #f0e8e0; }
     .btn {
       display: inline-block;
       font-size: 14px;
@@ -103,8 +107,11 @@
     /* Generating state */
     .generating {
       text-align: center;
-      padding: 60px 24px;
+      padding: 80px 24px;
       display: none;
+      background: #fff;
+      border: 1px solid #e8ddd0;
+      border-radius: 16px;
     }
     .generating.active { display: block; }
     .spinner {
@@ -118,13 +125,18 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .generating h3 { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; color: #1a1a1a; margin: 0 0 8px; }
     .generating p { font-size: 14px; color: #6b6270; margin: 0; }
+    .generating-steps { list-style: none; padding: 0; margin: 24px auto 0; max-width: 280px; text-align: left; }
+    .generating-steps li { font-size: 13px; color: #a0929a; padding: 6px 0; display: flex; align-items: center; gap: 10px; }
+    .generating-steps li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #e8ddd0; flex-shrink: 0; }
+    .generating-steps li.done::before { background: #4A1040; }
 
     @media (max-width: 640px) {
       .hero { padding: 32px 20px 24px; }
       .hero-inner { flex-direction: column; gap: 16px; }
       .hero-right { border-left: none; border-top: 1px solid #e8ddd0; padding-left: 0; padding-top: 16px; }
-      .content { padding: 0 20px; }
+      .content { padding: 0 20px 60px; }
       .form-card { padding: 24px; }
+      .form-row { grid-template-columns: 1fr; gap: 0; }
     }
   </style>
 </head>
@@ -138,141 +150,147 @@
         <h1 class="hero-title">New <em>Plan</em></h1>
       </div>
       <div class="hero-right">
-        <p class="hero-desc">Answer a few questions and we'll generate a complete AI-powered advertising strategy for your business.</p>
+        <p class="hero-desc">Answer a few questions about your business and we'll generate a complete, custom advertising strategy in minutes.</p>
       </div>
     </div>
     <div class="hero-line"></div>
   </div>
 
   <div class="content">
-    <div class="progress-wrap">
+    <div class="progress-wrap" id="progress-wrap">
       <div class="progress-steps">
         <div class="progress-step active" id="ps1"></div>
         <div class="progress-step" id="ps2"></div>
         <div class="progress-step" id="ps3"></div>
-        <div class="progress-step" id="ps4"></div>
       </div>
-      <div class="progress-label" id="progress-label">Step 1 of 4</div>
+      <div class="progress-label" id="progress-label">Step 1 of 3</div>
     </div>
 
     <div class="form-card" id="form-card">
+
       <!-- Step 1: Business basics -->
       <div class="step active" id="step1">
         <p class="step-eyebrow">Step 1 — Your Business</p>
         <h2 class="step-question">Tell us about your business.</h2>
-        <div class="form-group">
-          <label>Business Name</label>
-          <input type="text" id="biz-name" placeholder="e.g. Sunrise Bakery">
-        </div>
-        <div class="form-group">
-          <label>Industry</label>
-          <div class="chip-group" id="industry-chips">
-            <div class="chip" data-val="Retail">Retail</div>
-            <div class="chip" data-val="Restaurant / Food">Restaurant / Food</div>
-            <div class="chip" data-val="Health & Wellness">Health & Wellness</div>
-            <div class="chip" data-val="Professional Services">Professional Services</div>
-            <div class="chip" data-val="Real Estate">Real Estate</div>
-            <div class="chip" data-val="E-commerce">E-commerce</div>
-            <div class="chip" data-val="Travel & Tourism">Travel & Tourism</div>
-            <div class="chip" data-val="Other">Other</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Business Name</label>
+            <input type="text" id="biz-name" placeholder="e.g. Sunrise Bakery">
+          </div>
+          <div class="form-group">
+            <label>Business Type</label>
+            <select id="biz-type">
+              <option value="">Select a category…</option>
+              <option>Retail (brick &amp; mortar)</option>
+              <option>E-commerce</option>
+              <option>Restaurant / Food &amp; Beverage</option>
+              <option>Professional Services</option>
+              <option>Health &amp; Wellness</option>
+              <option>Real Estate</option>
+              <option>Home Services</option>
+              <option>Travel &amp; Tourism</option>
+              <option>Education &amp; Training</option>
+              <option>Technology / SaaS</option>
+              <option>Non-profit</option>
+              <option>Other</option>
+            </select>
           </div>
         </div>
+
         <div class="form-group">
-          <label>What do you sell or offer?</label>
-          <textarea id="biz-desc" placeholder="Briefly describe your products or services…"></textarea>
+          <label>Type of Product or Service</label>
+          <p class="field-hint">What do you actually sell or offer?</p>
+          <textarea id="product-type" placeholder="e.g. Handmade soaps and skincare products sold online and at farmers markets"></textarea>
         </div>
+
         <div class="form-nav">
           <span></span>
           <button class="btn btn-primary" onclick="goStep(2)">Next →</button>
         </div>
       </div>
 
-      <!-- Step 2: Audience & Goals -->
+      <!-- Step 2: Audience, Goal & Geography -->
       <div class="step" id="step2">
-        <p class="step-eyebrow">Step 2 — Audience & Goals</p>
-        <h2 class="step-question">Who are you trying to reach?</h2>
+        <p class="step-eyebrow">Step 2 — Audience &amp; Goals</p>
+        <h2 class="step-question">Who are you reaching, and what do you want?</h2>
+
         <div class="form-group">
-          <label>Target Audience</label>
-          <input type="text" id="audience" placeholder="e.g. Women 25–45 in Toronto interested in wellness">
+          <label>Target Customer</label>
+          <p class="field-hint">Describe your ideal customer — who they are, their age, interests, lifestyle.</p>
+          <textarea id="target-customer" placeholder="e.g. Women 30–55 interested in natural beauty, sustainability, and self-care. Often shop online and follow wellness influencers."></textarea>
         </div>
+
         <div class="form-group">
           <label>Primary Goal</label>
           <div class="chip-group" id="goal-chips">
-            <div class="chip" data-val="Drive store / website traffic">Drive traffic</div>
-            <div class="chip" data-val="Generate leads">Generate leads</div>
+            <div class="chip" data-val="Drive website traffic">Drive website traffic</div>
+            <div class="chip" data-val="Generate leads / inquiries">Generate leads</div>
             <div class="chip" data-val="Increase brand awareness">Brand awareness</div>
             <div class="chip" data-val="Boost sales / conversions">Boost sales</div>
-            <div class="chip" data-val="Grow social following">Grow social following</div>
-            <div class="chip" data-val="Promote an event">Promote an event</div>
+            <div class="chip" data-val="Grow social media following">Grow social following</div>
+            <div class="chip" data-val="Promote a specific event or launch">Promote an event / launch</div>
+            <div class="chip" data-val="Drive foot traffic to a physical location">Drive foot traffic</div>
           </div>
         </div>
+
         <div class="form-group">
-          <label>Geographic Focus</label>
-          <input type="text" id="geo" placeholder="e.g. Toronto, Ontario or National">
+          <label>Geography</label>
+          <p class="field-hint">Where are your customers located?</p>
+          <input type="text" id="geo" placeholder="e.g. Greater Toronto Area, or Canada-wide, or US National">
         </div>
+
         <div class="form-nav">
           <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
           <button class="btn btn-primary" onclick="goStep(3)">Next →</button>
         </div>
       </div>
 
-      <!-- Step 3: Budget & Timeline -->
+      <!-- Step 3: Budget & Context -->
       <div class="step" id="step3">
-        <p class="step-eyebrow">Step 3 — Budget & Timeline</p>
-        <h2 class="step-question">What's your budget and timeframe?</h2>
-        <div class="form-group">
-          <label>Monthly Ad Budget</label>
-          <div class="chip-group" id="budget-chips">
-            <div class="chip" data-val="Under $1,000/month">Under $1K</div>
-            <div class="chip" data-val="$1,000–$5,000/month">$1K–$5K</div>
-            <div class="chip" data-val="$5,000–$15,000/month">$5K–$15K</div>
-            <div class="chip" data-val="$15,000–$50,000/month">$15K–$50K</div>
-            <div class="chip" data-val="Over $50,000/month">Over $50K</div>
+        <p class="step-eyebrow">Step 3 — Budget &amp; Context</p>
+        <h2 class="step-question">Last step — your budget and background.</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Monthly Ad Budget</label>
+            <select id="budget">
+              <option value="">Select a range…</option>
+              <option>Under $1,000/month</option>
+              <option>$1,000–$3,000/month</option>
+              <option>$3,000–$7,500/month</option>
+              <option>$7,500–$15,000/month</option>
+              <option>$15,000–$30,000/month</option>
+              <option>$30,000–$75,000/month</option>
+              <option>Over $75,000/month</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Monthly Revenue (approx.)</label>
+            <select id="monthly-revenue">
+              <option value="">Select a range…</option>
+              <option>Pre-revenue / just starting</option>
+              <option>Under $10,000/month</option>
+              <option>$10,000–$50,000/month</option>
+              <option>$50,000–$150,000/month</option>
+              <option>$150,000–$500,000/month</option>
+              <option>Over $500,000/month</option>
+            </select>
           </div>
         </div>
+
         <div class="form-group">
-          <label>Campaign Duration</label>
-          <div class="chip-group" id="duration-chips">
-            <div class="chip" data-val="1 month">1 month</div>
-            <div class="chip" data-val="3 months">3 months</div>
-            <div class="chip" data-val="6 months">6 months</div>
-            <div class="chip" data-val="Ongoing / always-on">Ongoing</div>
-          </div>
+          <label>Current Advertising</label>
+          <p class="field-hint">What are you running today? What's working or not working?</p>
+          <textarea id="current-advertising" placeholder="e.g. Running Meta ads with ~$2K/month, decent reach but low conversion. Tried Google Search briefly — too expensive. No email marketing yet."></textarea>
         </div>
+
         <div class="form-nav">
           <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
-          <button class="btn btn-primary" onclick="goStep(4)">Next →</button>
+          <button class="btn btn-primary" id="generate-btn" onclick="generatePlan()">Generate My Plan →</button>
         </div>
       </div>
 
-      <!-- Step 4: Channels & Notes -->
-      <div class="step" id="step4">
-        <p class="step-eyebrow">Step 4 — Channels</p>
-        <h2 class="step-question">Any channels or notes to include?</h2>
-        <div class="form-group">
-          <label>Preferred Channels (optional)</label>
-          <div class="chip-group" id="channel-chips">
-            <div class="chip" data-val="Meta (Facebook/Instagram)">Meta</div>
-            <div class="chip" data-val="Google Search">Google Search</div>
-            <div class="chip" data-val="Google Display">Google Display</div>
-            <div class="chip" data-val="YouTube">YouTube</div>
-            <div class="chip" data-val="TikTok">TikTok</div>
-            <div class="chip" data-val="LinkedIn">LinkedIn</div>
-            <div class="chip" data-val="Pinterest">Pinterest</div>
-            <div class="chip" data-val="Programmatic Display">Programmatic</div>
-            <div class="chip" data-val="Email">Email</div>
-            <div class="chip" data-val="Radio / Streaming Audio">Audio</div>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Anything else we should know?</label>
-          <textarea id="notes" placeholder="Seasonal promotions, competitors, past learnings…"></textarea>
-        </div>
-        <div class="form-nav">
-          <button class="btn btn-ghost" onclick="goStep(3)">← Back</button>
-          <button class="btn btn-primary" id="generate-btn" onclick="generatePlan()">Generate My Plan ✨</button>
-        </div>
-      </div>
     </div>
 
     <!-- Generating state -->
@@ -280,6 +298,12 @@
       <div class="spinner"></div>
       <h3>Building your plan…</h3>
       <p>Our AI is crafting a custom advertising strategy for your business.</p>
+      <ul class="generating-steps">
+        <li id="gs1">Analyzing your business profile</li>
+        <li id="gs2">Selecting optimal channels</li>
+        <li id="gs3">Allocating your budget</li>
+        <li id="gs4">Writing your strategy</li>
+      </ul>
     </div>
   </div>
 
@@ -288,67 +312,83 @@
     var formData = {};
     var currentStep = 1;
 
-    // Chip selection
+    // Chip selection (single-select)
     document.querySelectorAll('.chip-group').forEach(function(group) {
-      var multi = group.id === 'channel-chips';
       group.querySelectorAll('.chip').forEach(function(chip) {
         chip.addEventListener('click', function() {
-          if (multi) {
-            chip.classList.toggle('selected');
-          } else {
-            group.querySelectorAll('.chip').forEach(function(c) { c.classList.remove('selected'); });
-            chip.classList.add('selected');
-          }
+          group.querySelectorAll('.chip').forEach(function(c) { c.classList.remove('selected'); });
+          chip.classList.add('selected');
         });
       });
     });
 
     function getChipVal(groupId) {
-      var selected = document.querySelectorAll('#' + groupId + ' .chip.selected');
-      return Array.from(selected).map(function(c) { return c.dataset.val; }).join(', ');
+      var sel = document.querySelector('#' + groupId + ' .chip.selected');
+      return sel ? sel.dataset.val : '';
+    }
+
+    function collectStep(n) {
+      if (n === 1) {
+        formData.bizName    = document.getElementById('biz-name').value.trim();
+        formData.bizType    = document.getElementById('biz-type').value;
+        formData.productType = document.getElementById('product-type').value.trim();
+      } else if (n === 2) {
+        formData.targetCustomer = document.getElementById('target-customer').value.trim();
+        formData.goal           = getChipVal('goal-chips');
+        formData.geo            = document.getElementById('geo').value.trim();
+      } else if (n === 3) {
+        formData.budget           = document.getElementById('budget').value;
+        formData.monthlyRevenue   = document.getElementById('monthly-revenue').value;
+        formData.currentAdvertising = document.getElementById('current-advertising').value.trim();
+      }
     }
 
     function goStep(n) {
-      // Collect current step data
-      if (currentStep === 1) {
-        formData.bizName = document.getElementById('biz-name').value;
-        formData.industry = getChipVal('industry-chips');
-        formData.bizDesc = document.getElementById('biz-desc').value;
-      } else if (currentStep === 2) {
-        formData.audience = document.getElementById('audience').value;
-        formData.goal = getChipVal('goal-chips');
-        formData.geo = document.getElementById('geo').value;
-      } else if (currentStep === 3) {
-        formData.budget = getChipVal('budget-chips');
-        formData.duration = getChipVal('duration-chips');
-      }
-
+      collectStep(currentStep);
       document.getElementById('step' + currentStep).classList.remove('active');
       document.getElementById('step' + n).classList.add('active');
       currentStep = n;
 
-      // Update progress
-      for (var i = 1; i <= 4; i++) {
+      var total = 3;
+      for (var i = 1; i <= total; i++) {
         var el = document.getElementById('ps' + i);
         if (el) el.classList.toggle('active', i <= n);
       }
-      document.getElementById('progress-label').textContent = 'Step ' + n + ' of 4';
+      document.getElementById('progress-label').textContent = 'Step ' + n + ' of ' + total;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // Animate generating steps
+    function animateSteps() {
+      var steps = ['gs1','gs2','gs3','gs4'];
+      steps.forEach(function(id, i) {
+        setTimeout(function() {
+          document.getElementById(id).classList.add('done');
+        }, i * 3500);
+      });
+    }
+
     async function generatePlan() {
-      formData.channels = getChipVal('channel-chips');
-      formData.notes = document.getElementById('notes').value;
+      collectStep(3);
+
+      // Basic validation
+      if (!formData.bizName) {
+        alert('Please enter your business name before generating.');
+        goStep(1);
+        return;
+      }
 
       document.getElementById('form-card').style.display = 'none';
+      document.getElementById('progress-wrap').style.display = 'none';
       document.getElementById('generating').classList.add('active');
-      document.querySelector('.progress-wrap').style.display = 'none';
+      animateSteps();
 
       try {
         var clerk = await window.__clerkLoaded;
         var email = clerk.user?.primaryEmailAddress?.emailAddress || '';
 
         var prompt = buildPrompt(formData);
+
         var res = await fetch('/.netlify/functions/generate-plan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -366,35 +406,49 @@
         if (!res.ok) throw new Error('Generation failed');
         var data = await res.json();
 
-        // Save plan ID and redirect to viewer
         if (data.recordId) {
           window.location.href = '/plan-viewer.html?id=' + data.recordId;
         } else {
           throw new Error('No record ID returned');
         }
       } catch (err) {
+        console.error(err);
         document.getElementById('generating').innerHTML =
-          '<div style="color:#c0392b;font-size:14px;">Something went wrong. <a href="/new-plan.html" style="color:#4A1040;">Try again</a></div>';
+          '<div style="padding:40px;text-align:center;">' +
+          '<p style="color:#c0392b;font-size:14px;margin-bottom:12px;">Something went wrong generating your plan.</p>' +
+          '<a href="/new-plan.html" style="color:#4A1040;font-weight:600;font-size:14px;">Try again →</a>' +
+          '</div>';
       }
     }
 
     function buildPrompt(d) {
-      return [
-        'Create a detailed advertising plan for the following business:',
+      var lines = [
+        'Create a detailed, actionable advertising plan for the following business. Be specific — not generic. Tailor every recommendation to the details provided.',
         '',
-        'Business Name: ' + (d.bizName || 'Not specified'),
-        'Industry: ' + (d.industry || 'Not specified'),
-        'Description: ' + (d.bizDesc || 'Not specified'),
-        'Target Audience: ' + (d.audience || 'Not specified'),
-        'Primary Goal: ' + (d.goal || 'Not specified'),
-        'Geography: ' + (d.geo || 'Not specified'),
-        'Monthly Budget: ' + (d.budget || 'Not specified'),
-        'Campaign Duration: ' + (d.duration || 'Not specified'),
-        'Preferred Channels: ' + (d.channels || 'No preference — recommend best mix'),
-        'Additional Notes: ' + (d.notes || 'None'),
+        '--- BUSINESS PROFILE ---',
+        'Business Name: ' + (d.bizName || 'Not provided'),
+        'Business Type: ' + (d.bizType || 'Not provided'),
+        'Type of Product/Service: ' + (d.productType || 'Not provided'),
+        'Target Customer: ' + (d.targetCustomer || 'Not provided'),
+        'Primary Goal: ' + (d.goal || 'Not provided'),
+        'Geography: ' + (d.geo || 'Not provided'),
+        'Monthly Ad Budget: ' + (d.budget || 'Not provided'),
+        'Monthly Revenue: ' + (d.monthlyRevenue || 'Not provided'),
+        'Current Advertising: ' + (d.currentAdvertising || 'None described'),
         '',
-        'Please provide a comprehensive advertising plan including: executive summary, recommended channel mix with budget allocation, monthly flight plan, key messages and creative direction, KPIs to track, and implementation timeline. Format with clear sections and include a budget breakdown table.'
-      ].join('\n');
+        '--- DELIVERABLE ---',
+        'Please provide a comprehensive advertising plan that includes:',
+        '1. Executive Summary (2–3 sentences tailored to this business)',
+        '2. Recommended Channel Mix — which channels to use and why, given this business type and budget',
+        '3. Budget Allocation — a table showing how to split the monthly budget across channels',
+        '4. 90-Day Flight Plan — month-by-month priorities and tactics',
+        '5. Creative Direction — key messages and ad formats for each channel',
+        '6. KPIs & Success Metrics — what to track, with realistic benchmark targets',
+        '7. Quick Wins — 3 things they can do in the first 30 days',
+        '',
+        'Write in a direct, confident tone as a senior media director presenting to this client. Use markdown formatting with clear headers and tables.'
+      ];
+      return lines.join('\n');
     }
 
     window.__clerkLoaded.then(async function(clerk) {
