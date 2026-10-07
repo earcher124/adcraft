@@ -29,12 +29,20 @@ exports.handler = async function (event) {
 
   const siteUrl = process.env.URL || process.env.DEPLOY_URL || "https://adcrafthq.com";
 
-  // Fire background function server-to-server — no CORS, no browser abort
-  fetch(`${siteUrl}/.netlify/functions/generate-plan-background`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ recordId, prompt }),
-  }).catch(err => console.error("Background trigger error:", err.message));
+  // Fire background function server-to-server.
+  // We await the fetch initiation (not the response) so Netlify doesn't kill
+  // this process before the HTTP request is actually sent.
+  try {
+    const bgRes = await fetch(`${siteUrl}/.netlify/functions/generate-plan-background`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ recordId, prompt }),
+    });
+    console.log("Background function triggered, status:", bgRes.status);
+  } catch (err) {
+    console.error("Background trigger error:", err.message);
+    // Don't fail the response — background may still be running
+  }
 
   return {
     statusCode: 202,
