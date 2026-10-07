@@ -125,11 +125,6 @@
         <div class="action-title">View My Plans</div>
         <p class="action-desc">See all your saved advertising plans and pick up where you left off.</p>
       </a>
-      <a class="action-card" href="/upgrade.html" id="pro-card">
-        <div class="action-icon">📊</div>
-        <div class="action-title">Optimize a Plan</div>
-        <p class="action-desc">Upload your ad performance data and get AI-driven recommendations.</p>
-      </a>
     </div>
   </div>
 
@@ -145,27 +140,6 @@
       var firstName = clerk.user.firstName || clerk.user.primaryEmailAddress?.emailAddress?.split("@")[0] || "";
       if (firstName) {
         document.getElementById("first-name-greeting").textContent = ", " + firstName;
-      }
-
-      // Fetch tier and update Optimize card accordingly
-      var email = clerk.user.primaryEmailAddress && clerk.user.primaryEmailAddress.emailAddress;
-      if (email) {
-        try {
-          var res = await fetch("/.netlify/functions/get-user?email=" + encodeURIComponent(email));
-          var data = await res.json();
-          var proCard = document.getElementById("pro-card");
-          if (data.tier === "Pro") {
-            proCard.href = "/optimize.html";
-            proCard.querySelector(".action-title").textContent = "Optimize a Plan";
-            proCard.querySelector(".action-desc").textContent = "Upload your ad performance data and get AI-driven recommendations.";
-          } else {
-            // Free user — show lock indicator
-            proCard.querySelector(".action-icon").textContent = "🔒";
-            proCard.querySelector(".action-title").innerHTML = "Optimize a Plan <span style=\"font-size:11px;font-weight:400;color:#9b7fa0;\">PRO</span>";
-          }
-        } catch(e) {
-          // Leave as upgrade link on error
-        }
       }
     });
   </script>
