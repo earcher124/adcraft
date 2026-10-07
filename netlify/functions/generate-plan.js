@@ -41,6 +41,8 @@ exports.handler = async function (event) {
             "Plan Name": bizName || "Untitled Plan",
             "Email": email || "",
             "Business Name": body.bizName || "",
+            "Primary Goal": body.goal || "",
+            "Geography": body.geo || "",
             "Monthly Ad Budget": parseFloat(String(body.budget || "0").replace(/[^0-9.]/g, "")) || 0,
             "Status": "Generating",
             "Intake Responses": JSON.stringify(body.formData || {}),
