@@ -52,7 +52,7 @@ exports.handler = async function (event) {
     console.log("Saving plan to Airtable, length:", planText.length);
     await updateRecord(token, recordId, {
       "Plan Output": planText,
-      "Status": "Complete",
+      "Status": "Ready",
     });
     console.log("Plan saved successfully");
   } catch (err) {

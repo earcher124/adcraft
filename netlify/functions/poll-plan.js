@@ -27,7 +27,8 @@ exports.handler = async function (event) {
       return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to fetch record" }) };
     }
 
-    const status = data.fields?.["Status"] || "Generating";
+    const rawStatus = data.fields?.["Status"] || "Generating";
+    const status = rawStatus === "Ready" ? "Complete" : rawStatus;
     const plan = data.fields?.["Plan Output"] || null;
     const bizName = data.fields?.["Business Name"] || "";
 
