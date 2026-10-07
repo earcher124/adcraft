@@ -87,16 +87,13 @@ function renderNav(activePage) {
 window.__clerkLoaded = new Promise(function(resolve) {
   var script = document.createElement("script");
   script.async = true;
-  script.crossOrigin = "anonymous";
   script.src = "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js";
+  script.setAttribute("data-clerk-publishable-key", CLERK_KEY);
   script.onload = async function() {
-    // clerk-js attaches itself as window.Clerk when loaded via script tag
-    var Clerk = window.Clerk;
-    if (typeof Clerk !== "function" && Clerk && Clerk.default) Clerk = Clerk.default;
-    var clerk = new Clerk(CLERK_KEY);
-    await clerk.load();
-    window.Clerk = clerk;
-    resolve(clerk);
+    // When loaded with data-clerk-publishable-key, clerk-js auto-initializes
+    // and exposes the instance at window.Clerk
+    await window.Clerk.load();
+    resolve(window.Clerk);
   };
   document.head.appendChild(script);
 });
