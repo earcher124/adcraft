@@ -558,15 +558,24 @@
       // Fire background generation if we have a pending prompt stored from new-plan.html
       try {
         var pendingPrompt = sessionStorage.getItem('adcraft_pending_' + recordId);
+        console.log('[AdCraft] pendingPrompt found:', !!pendingPrompt, 'recordId:', recordId);
         if (pendingPrompt) {
           sessionStorage.removeItem('adcraft_pending_' + recordId);
           fetch('/.netlify/functions/trigger-plan', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ recordId: recordId, prompt: pendingPrompt })
-          }).catch(function(e) { console.warn('Background trigger error:', e.message); });
+          }).then(function(r) {
+            console.log('[AdCraft] trigger-plan status:', r.status);
+          }).catch(function(e) {
+            console.error('[AdCraft] trigger-plan error:', e.message);
+          });
+        } else {
+          console.warn('[AdCraft] No pending prompt in sessionStorage — plan may already be generating or was triggered elsewhere');
         }
-      } catch(e) {}
+      } catch(e) {
+        console.error('[AdCraft] sessionStorage error:', e);
+      }
 
       // Poll immediately, then every 4 seconds
       pollPlan();
