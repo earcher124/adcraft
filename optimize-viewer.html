@@ -1046,6 +1046,11 @@
           return;
         }
 
+        // Surface cover art error if image gen failed
+        if (data.coverArtError) {
+          setExportError("Note: cover art skipped — " + data.coverArtError + ". Downloading with minimal cover.");
+        }
+
         var binary = atob(data.pptxBase64);
         var bytes = new Uint8Array(binary.length);
         for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
@@ -1060,7 +1065,7 @@
         URL.revokeObjectURL(url);
 
         btn.textContent = "Downloaded ✓";
-        setTimeout(function() { closeExportPanel(); }, 1500);
+        setTimeout(function() { if (!data.coverArtError) closeExportPanel(); }, 1500);
       } catch(err) {
         setExportError("Export failed: " + err.message);
         btn.disabled = false;

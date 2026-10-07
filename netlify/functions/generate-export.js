@@ -70,20 +70,28 @@ async function openaiImageRequest(prompt) {
 }
 
 async function generateCoverArt(plan) {
-  if (!OPENAI_KEY) return null;
+  if (!OPENAI_KEY) {
+    console.error("COVER ART SKIP: OPENAI_API_KEY env var not set");
+    return { image: null, error: "OPENAI_API_KEY not configured" };
+  }
   try {
     var coverArt = plan["Cover_Art"];
     if (!coverArt || !coverArt.subject) coverArt = deriveCoverArt(plan);
     var prompt = buildCoverPrompt(coverArt);
+    console.log("Cover art: calling DALL-E 3, prompt length:", prompt.length);
     var result = await openaiImageRequest(prompt);
+    console.log("Cover art: OpenAI response status:", result.status);
     if (result.status === 200 && result.body.data && result.body.data[0]) {
-      return "data:image/png;base64," + result.body.data[0].b64_json;
+      console.log("Cover art: success, got b64 data");
+      return { image: "data:image/png;base64," + result.body.data[0].b64_json, error: null };
     }
-    console.error("Cover art generation failed:", JSON.stringify(result.body).slice(0, 200));
+    var errMsg = JSON.stringify(result.body).slice(0, 400);
+    console.error("Cover art generation failed:", errMsg);
+    return { image: null, error: "OpenAI error (status " + result.status + "): " + errMsg };
   } catch(err) {
-    console.error("Cover art error:", err.message);
+    console.error("Cover art exception:", err.message);
+    return { image: null, error: "Cover art exception: " + err.message };
   }
-  return null;
 }
 
 // ── Airtable helpers ──────────────────────────────────────────────────────────
@@ -291,19 +299,19 @@ exports.handler = async function(event) {
   }
 
   // Generate cover art inline when requested (DALL-E 3 takes ~20s).
-  // Airtable long-text fields can't store a full base64 image (~1.7MB), so we skip
-  // Airtable caching and generate fresh each export. Falls back to minimal cover on failure.
+  var coverArtError = null;
   if (coverType !== "minimal") {
     console.log("Export: generating cover art inline…");
-    coverDataUrl = await generateCoverArt(plan);
-    console.log("Export: cover art present?", !!coverDataUrl);
+    var artResult = await generateCoverArt(plan);
+    coverDataUrl = artResult.image;
+    coverArtError = artResult.error;
+    console.log("Export: cover art present?", !!coverDataUrl, "error?", coverArtError);
   }
 
   try {
     var pptxBase64 = await buildPresentation(plan, fields, coverDataUrl || null);
 
     var planName = fields["Plan Name"] || plan["plan_name"] || "AdCraft Plan";
-    // Sanitize filename
     var filename = planName.replace(/[^a-zA-Z0-9\s\-_]/g, "").trim().replace(/\s+/g, "_");
     filename = (filename || "AdCraft_Plan") + ".pptx";
 
@@ -313,6 +321,7 @@ exports.handler = async function(event) {
       body: JSON.stringify({
         pptxBase64,
         filename,
+        coverArtError: coverArtError || null,  // null = success, string = what went wrong
       }),
     };
   } catch(err) {

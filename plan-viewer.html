@@ -744,6 +744,11 @@
         var b64 = exportJson.pptxBase64;
         var filename = exportJson.filename || "AdCraft_Plan.pptx";
 
+        // Surface cover art error if image gen failed (PPTX still downloads)
+        if (exportJson.coverArtError) {
+          setExportError("Note: cover art skipped — " + exportJson.coverArtError + ". Downloading with minimal cover.");
+        }
+
         // Trigger download
         var byteChars = atob(b64);
         var bytes = new Uint8Array(byteChars.length);
@@ -756,7 +761,7 @@
         a.click();
         URL.revokeObjectURL(url);
 
-        closeExportPanel();
+        if (!exportJson.coverArtError) closeExportPanel();
 
       } catch(err) {
         setExportError(err.message || "Export failed. Please try again.");
