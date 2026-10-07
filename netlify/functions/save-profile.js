@@ -43,8 +43,6 @@ exports.handler = async function (event) {
       { headers: { Authorization: `Bearer ${process.env.AIRTABLE_TOKEN}` } }
     );
     const searchData = await searchRes.json();
-    console.log("save-profile search result:", searchRes.status, JSON.stringify(searchData).slice(0, 200));
-
     let res;
     if (searchData.records && searchData.records.length > 0) {
       const rid = searchData.records[0].id;
@@ -67,8 +65,7 @@ exports.handler = async function (event) {
       return { statusCode: 500, headers, body: JSON.stringify({ error: responseData?.error?.message || "Failed to save profile", detail: responseData }) };
     }
 
-    console.log("save-profile success, record id:", responseData.id);
-    return { statusCode: 200, headers, body: JSON.stringify({ ok: true, id: responseData.id }) };
+    return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
   } catch (err) {
     console.error("save-profile error:", err);
     return { statusCode: 500, headers, body: JSON.stringify({ error: String(err) }) };
