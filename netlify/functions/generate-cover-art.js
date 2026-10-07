@@ -202,12 +202,14 @@ exports.handler = async function(event) {
   // ── No cache — generate cover art ────────────────────────────────────────
   // Only generate if OPENAI_API_KEY is configured
   if (!OPENAI_KEY) {
+    console.error("OPENAI_API_KEY is not set — skipping cover art generation");
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ coverDataUrl: null, cached: false, fallback: true }),
+      body: JSON.stringify({ coverDataUrl: null, cached: false, fallback: true, reason: "no_api_key" }),
     };
   }
+  console.log("Cover art: OPENAI_KEY present, proceeding with generation");
 
   // Parse plan output to get Cover_Art
   var planOutputRaw = fields["Plan Output"] || "";
@@ -228,7 +230,9 @@ exports.handler = async function(event) {
   var prompt = buildImagePrompt(coverArt);
 
   try {
+    console.log("Cover art: sending prompt to OpenAI, length:", prompt.length);
     var imgResult = await openaiImageRequest(prompt);
+    console.log("Cover art: OpenAI response status:", imgResult.status);
     if (imgResult.status !== 200 || !imgResult.body.data || !imgResult.body.data[0]) {
       console.error("OpenAI image generation failed:", JSON.stringify(imgResult.body));
       return {

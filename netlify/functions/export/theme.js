@@ -32,10 +32,10 @@ const THEME = {
     },
   },
 
-  // Typography
+  // Typography — universally available fonts (work on Windows, Mac, Linux)
   font: {
-    heading:  "Garamond",     // editorial serif heading face
-    body:     "Gill Sans",    // clean sans body
+    heading:  "Georgia",      // serif heading face — universal
+    body:     "Trebuchet MS", // clean humanist sans — universal
     fallback: "Arial",
   },
 

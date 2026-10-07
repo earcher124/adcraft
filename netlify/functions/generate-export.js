@@ -233,6 +233,7 @@ exports.handler = async function(event) {
   if (!coverDataUrl && fields["Cover Art"]) {
     coverDataUrl = fields["Cover Art"];
   }
+  console.log("Export: coverDataUrl present?", !!coverDataUrl, coverDataUrl ? coverDataUrl.slice(0, 30) : "none");
 
   try {
     var pptxBase64 = await buildPresentation(plan, fields, coverDataUrl || null);
