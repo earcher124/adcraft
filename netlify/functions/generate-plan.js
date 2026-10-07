@@ -38,7 +38,7 @@ exports.handler = async function (event) {
         },
         body: JSON.stringify({
           fields: {
-            "Plan Name": bizName || "Untitled Plan",
+            "Plan Name": [bizName, body.goal].filter(Boolean).join(" · ") || "Untitled Plan",
             "Email": email || "",
             "Business Name": body.bizName || "",
             "Primary Goal": body.goal || "",
