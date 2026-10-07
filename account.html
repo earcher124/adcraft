@@ -239,7 +239,8 @@
         setField("p-product",   "p-product-row",   profile.productType);
         setField("p-geo",       "p-geo-row",       profile.geo);
         setField("p-customer",  "p-customer-row",  profile.targetCustomer);
-        setField("p-revenue",   "p-revenue-row",   profile.monthlyRevenue ? "$" + Number(String(profile.monthlyRevenue).replace(/[^0-9.]/g,"")).toLocaleString() + "/mo" : "");
+        var revNum = profile.monthlyRevenue !== "" && profile.monthlyRevenue != null ? parseFloat(String(profile.monthlyRevenue).replace(/[^0-9.]/g,"")) : NaN;
+        setField("p-revenue", "p-revenue-row", !isNaN(revNum) ? "$" + revNum.toLocaleString("en-US", {maximumFractionDigits:0}) + "/mo" : (profile.monthlyRevenue ? String(profile.monthlyRevenue) : ""));
         setField("p-ads",       "p-ads-row",       profile.currentAdvertising);
       }
     });

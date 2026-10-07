@@ -207,7 +207,7 @@ exports.handler = async function(event) {
   if (!user) {
     return { statusCode: 401, headers, body: JSON.stringify({ error: "User not found" }) };
   }
-  if ((user.tier || "Free") !== "Pro") {
+  if ((user["Tier"] || user.tier || "Free") !== "Pro") {
     return { statusCode: 403, headers, body: JSON.stringify({ error: "Pro subscription required" }) };
   }
 
