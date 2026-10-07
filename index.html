@@ -616,10 +616,12 @@
       if (!window._currentPlan) return;
       var btn = document.querySelector('.btn-pro');
       if (btn) { btn.textContent = '⏳ Generating…'; btn.disabled = true; }
+      // Merge Airtable top-level fields into the plan so the xlsx has business name, goal, etc.
+      var payload = Object.assign({}, window._currentPlan, window._airtableFields || {});
       fetch('/.netlify/functions/generate-xlsx', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(window._currentPlan)
+        body: JSON.stringify(payload)
       })
       .then(function(r) {
         if (!r.ok) throw new Error('Server error ' + r.status);
@@ -969,6 +971,16 @@
         var cleaned = raw.trim().replace(/^```[a-z]*\n?/i, '').replace(/```\s*$/,'').trim();
         var plan = JSON.parse(cleaned);
         window._currentPlan = plan;
+        // Store Airtable fields for xlsx (field names match Airtable column names)
+        var f = data.fields;
+        window._airtableFields = {
+          business_name: f['Business Name'] || f['business_name'] || '',
+          primary_goal: f['Primary Goal'] || f['Goal'] || f['primary_goal'] || '',
+          geography: f['Geography'] || f['geography'] || '',
+          monthly_ad_budget: f['Monthly Ad Budget'] || f['Budget'] || f['monthly_ad_budget'] || '',
+          budget_tier: f['Budget Tier'] || f['Tier'] || f['budget_tier'] || '',
+          status: f['Status'] || f['status'] || 'Ready'
+        };
         document.getElementById('root').innerHTML = render(plan);
       })
       .catch(function(err) {
