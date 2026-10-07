@@ -278,12 +278,13 @@ exports.handler = async function (event) {
       return { statusCode: 200, body: "Truncated" };
     }
 
-    // Sanitize smart quotes using safe unicode escapes
+    // Sanitize smart quotes using unicode code point escapes
     planText = planText
-      .replace(/"|"/g, '"')
-      .replace(/'|'/g, "'")
-      .replace(/-|-/g, "-")
-      .replace(/.../g, "...");
+      .replace(/\u201c|\u201d/g, '"')
+      .replace(/\u2018|\u2019/g, "'")
+      .replace(/\u2013|\u2014/g, "-")
+      .replace(/\u2026/g, "...")
+      .replace(/\u200b|\u200c|\u200d|\ufeff/g, "");
 
     // Validate JSON
     try {
@@ -291,21 +292,11 @@ exports.handler = async function (event) {
       console.log("Optimization returned valid JSON");
     } catch (e) {
       console.warn("Optimization did not return valid JSON:", e.message);
-      // Log char codes around position 2 to find invisible characters
       var codes = [];
       for (var ci = 0; ci < Math.min(20, planText.length); ci++) {
         codes.push(planText.charCodeAt(ci));
       }
       console.warn("First 20 char codes:", codes.join(","));
-      var match = e.message.match(/position (\d+)/);
-      if (match) {
-        var pos = parseInt(match[1]);
-        var around = [];
-        for (var ci2 = Math.max(0, pos - 5); ci2 < Math.min(planText.length, pos + 10); ci2++) {
-          around.push(planText.charCodeAt(ci2));
-        }
-        console.warn("Char codes around position " + pos + ":", around.join(","));
-      }
     }
   } catch (err) {
     console.error("Anthropic error:", err.message);
