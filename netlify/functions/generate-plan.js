@@ -2,6 +2,7 @@ const AT_BASE = "appCtUgAKIoaa6ECh";
 const AT_PLANS_TBL = "tblOAtGXbtWewEAm0";
 const AT_PROFILES_TBL = "tblvXoTaqOdiZ4Kzc";
 const AT_USERS_TBL = "tbl7fisATFgQXPOhP";
+const AT_INTAKE_TBL = "tbllflTVOe6gnNP2K";
 
 exports.handler = async function (event) {
   console.log("generate-plan invoked", event.httpMethod);
@@ -62,7 +63,40 @@ exports.handler = async function (event) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to create plan record" }) };
   }
 
-  // 2. Upsert user record + business profile (fire-and-forget)
+  // 2. Create Intake Responses record linked to the Plan
+  try {
+    const intakeFields = {
+      "Email": email || "",
+      "Business Name": body.bizName || "",
+      "Business Type": body.formData?.bizType || "",
+      "Product": body.formData?.productType || "",
+      "Target Customer": body.formData?.targetCustomer || "",
+      "Geography": body.geo || "",
+      "Primary Goal": body.goal || "",
+      "Current Advertising": body.formData?.currentAdvertising || "",
+      "Plan": [recordId], // linked record
+    };
+    const revenueRaw = body.formData?.monthlyRevenue ? String(body.formData.monthlyRevenue).replace(/[^0-9.]/g, "") : "";
+    if (revenueRaw) intakeFields["Monthly Revenue"] = parseFloat(revenueRaw);
+    const budgetRaw = body.budget ? String(body.budget).replace(/[^0-9.]/g, "") : "";
+    if (budgetRaw) intakeFields["Monthly Ad Budget"] = parseFloat(budgetRaw);
+
+    const intakeRes = await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_INTAKE_TBL}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${process.env.AIRTABLE_TOKEN}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ fields: intakeFields }),
+    });
+    const intakeData = await intakeRes.json();
+    if (!intakeRes.ok) {
+      console.error("Intake record error:", JSON.stringify(intakeData));
+    } else {
+      console.log("Intake record created:", intakeData.id);
+    }
+  } catch (err) {
+    console.error("Intake record error:", err.message);
+  }
+
+  // 3. Upsert user record + business profile (fire-and-forget)
   if (email) {
     upsertUser(email, userName).catch(err =>
       console.error("User upsert error:", err.message)
@@ -74,7 +108,7 @@ exports.handler = async function (event) {
     console.warn("No email provided, skipping user/profile upsert");
   }
 
-  // 3. Trigger background generation server-side (not from browser, which navigates away)
+  // 4. Trigger background generation server-side (not from browser, which navigates away)
   const siteUrl = process.env.URL || process.env.DEPLOY_URL || "https://adcrafthq.com";
   fetch(`${siteUrl}/.netlify/functions/generate-plan-background`, {
     method: "POST",
@@ -82,7 +116,7 @@ exports.handler = async function (event) {
     body: JSON.stringify({ recordId, prompt: body.prompt }),
   }).catch(err => console.error("Background trigger error:", err.message));
 
-  // 4. Return the record ID immediately — frontend polls for completion
+  // 5. Return the record ID immediately — frontend polls for completion
   return {
     statusCode: 200,
     headers,
