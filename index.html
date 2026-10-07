@@ -427,47 +427,85 @@
       var biz  = f['Business Name'] || '';
       var goal = f['Primary Goal'] || '';
 
-      // Process tables before escaping
-      function processTable(block) {
-        var lines = block.trim().split('\n');
-        var html = '<div style="overflow-x:auto;margin:16px 0;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
-        lines.forEach(function(line, i) {
-          if (/^[\|\-\s]+$/.test(line)) return; // skip separator row
-          var cells = line.split('|').map(function(c){ return c.trim(); }).filter(function(c){ return c !== ''; });
+      // Strip **bold** and *italic* markers from a plain string (for table cells)
+      function stripInline(s) {
+        return s.replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*(.+?)\*/g, '$1');
+      }
+
+      // Convert inline markdown to HTML spans (for non-table text)
+      function inlineHTML(s) {
+        return s
+          .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em>$1</em>');
+      }
+
+      // Process a contiguous block of | lines as a table
+      function processTable(tableLines) {
+        // Track whether we've seen the header row
+        var headerDone = false;
+        var rowIndex = 0;
+        var html = '<div style="overflow-x:auto;margin:20px 0;"><table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid var(--border);">';
+        tableLines.forEach(function(line) {
+          // Skip separator rows (e.g. |---|---|)
+          if (/^\|[\s\|\-:]+\|?\s*$/.test(line)) return;
+          var cells = line.split('|').map(function(c){ return stripInline(c.trim()); }).filter(function(c,i,a){ return i > 0 && i < a.length - 1; });
           if (!cells.length) return;
-          var tag = i === 0 ? 'th' : 'td';
-          var rowStyle = i === 0
-            ? 'background:var(--accent);color:#fff;'
-            : (i % 2 === 0 ? 'background:var(--surface);' : 'background:var(--bg);');
-          html += '<tr style="' + rowStyle + '">';
-          cells.forEach(function(c) {
-            html += '<' + tag + ' style="padding:8px 12px;border:1px solid var(--border);' + (tag==='th'?'font-weight:600;text-align:left;':'color:var(--fg-soft);') + '">' + c + '</' + tag + '>';
-          });
-          html += '</tr>';
+          if (!headerDone) {
+            html += '<thead><tr style="background:var(--accent);color:#fff;">';
+            cells.forEach(function(c) {
+              html += '<th style="padding:10px 14px;text-align:left;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap;">' + c + '</th>';
+            });
+            html += '</tr></thead><tbody>';
+            headerDone = true;
+          } else {
+            var bg = rowIndex % 2 === 0 ? 'var(--surface)' : 'var(--bg)';
+            html += '<tr style="background:' + bg + ';">';
+            cells.forEach(function(c) {
+              html += '<td style="padding:9px 14px;border-top:1px solid var(--border);color:var(--fg-soft);vertical-align:top;">' + c + '</td>';
+            });
+            html += '</tr>';
+            rowIndex++;
+          }
         });
-        html += '</table></div>';
+        html += '</tbody></table></div>';
         return html;
       }
 
-      // Split on table blocks (lines starting with |), process separately
-      var sections = md.split(/\n(?=\|)/);
-      var body = sections.map(function(block) {
-        if (block.trim().startsWith('|')) {
-          return processTable(block);
+      // Parse the full markdown line by line, collecting table runs
+      var lines = md.split('\n');
+      var out = '';
+      var tableAccum = [];
+
+      function flushTable() {
+        if (tableAccum.length) {
+          out += processTable(tableAccum);
+          tableAccum = [];
         }
-        // Escape then convert markdown
-        return block
-          .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-          .replace(/^#{3}\s+(.+)$/gm, '<h3 style="font-family:var(--font-display);font-size:15px;color:var(--accent);margin:24px 0 6px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">$1</h3>')
-          .replace(/^#{2}\s+(.+)$/gm, '<h2 style="font-family:var(--font-display);font-size:20px;color:var(--fg);margin:36px 0 10px;font-weight:700;border-bottom:2px solid var(--accent);padding-bottom:8px;">$1</h2>')
-          .replace(/^#{1}\s+(.+)$/gm, '<h2 style="font-family:var(--font-display);font-size:24px;color:var(--fg);margin:36px 0 12px;font-weight:700;">$1</h2>')
-          .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--fg);">$1</strong>')
-          .replace(/\*(.+?)\*/g, '<em>$1</em>')
-          .replace(/^[-•]\s+(.+)$/gm, '<li style="margin-bottom:8px;font-size:14px;color:var(--fg-soft);line-height:1.6;">$1</li>')
-          .replace(/(<li[^>]*>[\s\S]*?<\/li>\n?)+/g, '<ul style="padding-left:20px;margin:12px 0;">$&</ul>')
-          .replace(/\n\n+/g, '</p><p style="font-size:14px;color:var(--fg-soft);line-height:1.7;margin:0 0 14px;">')
-          .replace(/\n/g, '<br>');
-      }).join('');
+      }
+
+      lines.forEach(function(line) {
+        if (/^\s*\|/.test(line)) {
+          tableAccum.push(line);
+        } else {
+          flushTable();
+          var l = inlineHTML(line);
+          if (/^###\s+/.test(line)) {
+            out += '<h3 style="font-family:var(--font-display);font-size:15px;color:var(--accent);margin:24px 0 6px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">' + l.replace(/^###\s+/,'') + '</h3>';
+          } else if (/^##\s+/.test(line)) {
+            out += '<h2 style="font-family:var(--font-display);font-size:20px;color:var(--fg);margin:36px 0 10px;font-weight:700;border-bottom:2px solid var(--accent);padding-bottom:8px;">' + l.replace(/^##\s+/,'') + '</h2>';
+          } else if (/^#\s+/.test(line)) {
+            out += '<h2 style="font-family:var(--font-display);font-size:24px;color:var(--fg);margin:36px 0 12px;font-weight:700;">' + l.replace(/^#\s+/,'') + '</h2>';
+          } else if (/^[-•]\s+/.test(line)) {
+            out += '<li style="margin-bottom:6px;font-size:14px;color:var(--fg-soft);line-height:1.6;">' + l.replace(/^[-•]\s+/,'') + '</li>';
+          } else if (line.trim() === '' || line.trim() === '---') {
+            out += '<div style="height:8px;"></div>';
+          } else {
+            out += '<p style="font-size:14px;color:var(--fg-soft);line-height:1.7;margin:0 0 10px;">' + l + '</p>';
+          }
+        }
+      });
+      flushTable();
 
       return '<div class="page">' +
         '<div class="hero">' +
@@ -475,9 +513,7 @@
           '<h1 class="hero-name">' + esc(name) + '</h1>' +
           (biz ? '<p class="hero-strategy">' + esc(biz) + (goal ? ' · ' + esc(goal) : '') + '</p>' : '') +
         '</div>' +
-        '<div class="section">' +
-          '<p style="font-size:14px;color:var(--fg-soft);line-height:1.7;margin:0 0 14px;">' + body + '</p>' +
-        '</div>' +
+        '<div class="section">' + out + '</div>' +
         (isPro ? '<div class="pro-actions"><button class="btn-pro" onclick="downloadPlan()">⬇ Download Plan</button></div>' : '') +
         '</div>';
     }
