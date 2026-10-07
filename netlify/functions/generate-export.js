@@ -11,85 +11,74 @@ const AT_BASE      = "appCtUgAKIoaa6ECh";
 const AT_PLANS_TBL = "tblOAtGXbtWewEAm0";
 const AT_USERS_TBL = "tbl7fisATFgQXPOhP";
 const AT_TOKEN     = process.env.AIRTABLE_TOKEN;
-const OPENAI_KEY   = process.env.OPENAI_API_KEY;
 
-// ── Cover art prompt helpers (mirrors generate-cover-art.js) ─────────────────
+// ── Cover art: curated static image library ───────────────────────────────────
 
-const STYLE_RULES = `STYLE RULES:
-Minimal editorial illustration.
-Sophisticated geometric forms.
-Subtle organic texture.
-Premium but approachable.
-No text. No letters. No logos. No charts. No photorealism.
-Avoid people unless essential to representing the business category.
-Generous negative space. Neutral warm background.
-Designed for a modern professional presentation.
-Maintain a consistent visual language across all AdCraft plans.`;
+const fs   = require("fs");
+const path = require("path");
 
-function deriveCoverArt(plan) {
-  var category = plan["Business_Type"] || plan["Industry"] || plan["Business_Name"] || "Professional business";
-  return {
-    business_category: String(category).slice(0, 80),
-    subject: "A refined editorial composition representing " + String(category).slice(0, 60),
-    mood: "Professional, confident, and forward-looking",
-    accent_palette: "Warm ivory and deep aubergine with charcoal accents",
-  };
-}
+// Maps category keywords → image filename (in ./export/cover-images/)
+// Keywords are matched against Business_Type, Industry, or Business_Name (case-insensitive).
+const COVER_IMAGE_MAP = [
+  { keywords: ["restaurant", "food", "beverage", "cafe", "coffee", "bar", "bakery", "catering", "dining", "eatery", "bistro", "pizz", "sushi", "taco", "brewery", "winery"],    file: "restaurant.png" },
+  { keywords: ["auto", "car", "vehicle", "dealer", "dealership", "mechanic", "garage", "truck", "motor", "fleet"],                                                               file: "automotive.png" },
+  { keywords: ["home service", "cleaning", "maid", "contractor", "plumb", "electric", "hvac", "landscap", "lawn", "pest", "paint", "handy", "roofing", "window", "janitorial"], file: "home-services.png" },
+  { keywords: ["retail", "boutique", "shop", "clothing", "apparel", "fashion", "gift", "store", "merchandise", "accessories", "jewelry"],                                        file: "retail.png" },
+  { keywords: ["travel", "hotel", "hospitality", "resort", "vacation", "tourism", "inn", "lodge", "airbnb", "rental", "motel", "spa resort"],                                    file: "travel.png" },
+  { keywords: ["consulting", "professional service", "agency", "strategy", "advisory", "management", "business service", "accounting", "cpa", "audit", "tax"],                   file: "professional-services.png" },
+  { keywords: ["real estate", "realt", "property", "home buy", "home sell", "mortgage", "housing", "broker", "apartment"],                                                       file: "real-estate.png" },
+  { keywords: ["ecommerce", "e-commerce", "online store", "shopify", "amazon", "marketplace", "direct to consumer", "dtc", "subscription box"],                                  file: "ecommerce.png" },
+  { keywords: ["event", "entertainment", "venue", "wedding", "party", "concert", "festival", "production", "nightclub", "theater", "theatre", "ticketing"],                       file: "events.png" },
+  { keywords: ["beauty", "salon", "hair", "nail", "spa", "skincare", "cosmetic", "makeup", "esthetic", "barber", "wax", "lash", "brow"],                                         file: "beauty.png" },
+  { keywords: ["education", "school", "tutor", "learning", "training", "academy", "college", "university", "course", "coaching", "childcare", "daycare", "preschool"],           file: "education.png" },
+  { keywords: ["fitness", "gym", "crossfit", "yoga", "pilates", "personal train", "sport", "athletic", "wellness center", "cycling", "martial art", "dance"],                    file: "fitness.png" },
+  { keywords: ["wellness", "massage", "meditation", "holistic", "naturopath", "acupuncture", "chiropractic", "mental health", "therapy", "counseling", "mindfulness"],           file: "wellness.png" },
+  { keywords: ["financial", "finance", "invest", "wealth", "insurance", "bank", "credit", "loan", "mortgage broker", "retirement", "fund", "asset"],                             file: "financial.png" },
+  { keywords: ["health", "medical", "clinic", "doctor", "dentist", "dental", "optom", "vision", "pharmacy", "urgent care", "hospital", "physical therapy", "chiropract"],        file: "healthcare.png" },
+  { keywords: ["legal", "law", "attorney", "lawyer", "firm", "paralegal", "notary", "litigation", "court"],                                                                      file: "legal.png" },
+  { keywords: ["nonprofit", "non-profit", "charity", "foundation", "ngo", "association", "community", "social service", "cause", "advocacy", "volunteer"],                       file: "nonprofit.png" },
+  { keywords: ["tech", "software", "saas", "app", "startup", "digital", "it ", "cyber", "cloud", "data", "ai ", "artificial intel", "developer", "platform", "api", "web dev"], file: "technology.png" },
+  { keywords: ["construction", "architect", "building", "contractor", "engineer", "renovation", "remodel", "develop", "infrastructure", "industrial"],                           file: "construction.png" },
+  { keywords: ["pet", "veterinar", "vet ", "animal", "dog", "cat", "grooming", "kennel", "boarding", "paw"],                                                                     file: "pet-services.png" },
+];
 
-function buildCoverPrompt(coverArt) {
-  return [
-    "Create a sophisticated editorial illustration for the cover of a professional advertising strategy presentation.",
-    "",
-    "Business category: " + coverArt.business_category,
-    "Subject: " + coverArt.subject,
-    "Mood: " + coverArt.mood,
-    "Accent palette: " + coverArt.accent_palette,
-    "",
-    STYLE_RULES,
-  ].join("\n");
-}
+const COVER_IMAGES_DIR = path.join(__dirname, "export", "cover-images");
+const DEFAULT_COVER    = "professional-services.png"; // fallback
 
-async function openaiImageRequest(prompt) {
-  var res = await fetch("https://api.openai.com/v1/images/generations", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + OPENAI_KEY,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "dall-e-2",
-      prompt: prompt,
-      n: 1,
-      size: "1024x1024",
-    }),
-  });
-  var body = await res.json();
-  return { status: res.status, body: body };
+function pickCoverImage(plan) {
+  var haystack = [
+    plan["Business_Type"] || "",
+    plan["Industry"]      || "",
+    plan["Business_Name"] || "",
+  ].join(" ").toLowerCase();
+
+  for (var entry of COVER_IMAGE_MAP) {
+    for (var kw of entry.keywords) {
+      if (haystack.includes(kw)) {
+        console.log("Cover art: matched keyword '" + kw + "' → " + entry.file);
+        return entry.file;
+      }
+    }
+  }
+  console.log("Cover art: no keyword match, using default →", DEFAULT_COVER);
+  return DEFAULT_COVER;
 }
 
 async function generateCoverArt(plan) {
-  if (!OPENAI_KEY) {
-    console.error("COVER ART SKIP: OPENAI_API_KEY env var not set");
-    return { image: null, error: "OPENAI_API_KEY not configured" };
-  }
   try {
-    var coverArt = plan["Cover_Art"];
-    if (!coverArt || !coverArt.subject) coverArt = deriveCoverArt(plan);
-    var prompt = buildCoverPrompt(coverArt);
-    console.log("Cover art: calling DALL-E 3, prompt length:", prompt.length);
-    var result = await openaiImageRequest(prompt);
-    console.log("Cover art: OpenAI response status:", result.status);
-    if (result.status === 200 && result.body.data && result.body.data[0]) {
-      var imageUrl = result.body.data[0].url;
-      console.log("Cover art: success, fetching image from URL");
-      var imgRes = await fetch(imageUrl);
-      var imgBuf = await imgRes.arrayBuffer();
-      var b64 = Buffer.from(imgBuf).toString("base64");
-      return { image: "data:image/png;base64," + b64, error: null };
+    var filename = pickCoverImage(plan);
+    var filepath = path.join(COVER_IMAGES_DIR, filename);
+    if (!fs.existsSync(filepath)) {
+      // Try default
+      filepath = path.join(COVER_IMAGES_DIR, DEFAULT_COVER);
     }
-    var errMsg = JSON.stringify(result.body).slice(0, 400);
-    console.error("Cover art generation failed:", errMsg);
-    return { image: null, error: "OpenAI error (status " + result.status + "): " + errMsg };
+    if (!fs.existsSync(filepath)) {
+      return { image: null, error: "Cover image file not found: " + filename };
+    }
+    var buf = fs.readFileSync(filepath);
+    var b64 = buf.toString("base64");
+    console.log("Cover art: loaded static image", filename, buf.length, "bytes");
+    return { image: "data:image/png;base64," + b64, error: null };
   } catch(err) {
     console.error("Cover art exception:", err.message);
     return { image: null, error: "Cover art exception: " + err.message };
