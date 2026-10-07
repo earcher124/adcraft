@@ -28,6 +28,7 @@
 
 [functions."generate-export"]
   timeout = 90
+  included_files = ["netlify/functions/export/cover-images/*.png"]
 
 [[redirects]]
   from = "/"
