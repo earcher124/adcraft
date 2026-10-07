@@ -247,6 +247,7 @@
 <script>
   var planId = null;
   var planName = "";
+  var intake = null;
   var selectedFiles = [];
 
   // Parse query param
@@ -271,6 +272,8 @@
         } else {
           document.getElementById("plan-name").textContent = "Your Advertising Plan";
         }
+        // Store intake for passing to optimization record
+        intake = (d && d.intake) || null;
       })
       .catch(function() {
         document.getElementById("plan-name").textContent = "Your Advertising Plan";
@@ -375,7 +378,10 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: email,
-          bizName: "",
+          bizName: (intake && intake["Business Name"]) || "",
+          primaryGoal: (intake && intake["Primary Goal"]) || "",
+          geography: (intake && intake["Geography"]) || "",
+          monthlyAdBudget: (intake && intake["Monthly Ad Budget"]) || "",
           originalPlanName: planName || "Your Plan"
         })
       });

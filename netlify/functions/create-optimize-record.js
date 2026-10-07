@@ -21,8 +21,11 @@ exports.handler = async function (event) {
 
   var email = body.email || "";
   var bizName = body.bizName || "";
+  var primaryGoal = body.primaryGoal || "";
+  var geography = body.geography || "";
+  var monthlyAdBudget = body.monthlyAdBudget ? Number(body.monthlyAdBudget) : null;
   var originalPlanName = body.originalPlanName || "Untitled Plan";
-  var planName = originalPlanName + " — Optimized";
+  var planName = originalPlanName + " - Optimized";
 
   try {
     var res = await fetch("https://api.airtable.com/v0/" + AT_BASE + "/" + AT_PLANS_TBL, {
@@ -32,12 +35,14 @@ exports.handler = async function (event) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        fields: {
+        fields: Object.assign({
           "Plan Name": planName,
           "Email": email,
           "Business Name": bizName,
           "Status": "Generating",
-        },
+        }, primaryGoal ? { "Primary Goal": primaryGoal } : {},
+           geography ? { "Geography": geography } : {},
+           monthlyAdBudget ? { "Monthly Ad Budget": monthlyAdBudget } : {}),
       }),
     });
 
