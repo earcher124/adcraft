@@ -13,7 +13,7 @@
 
 [functions."generate-plan-background"]
   timeout = 900
-  type = "background"
+  background = true
 
 [[redirects]]
   from = "/"
