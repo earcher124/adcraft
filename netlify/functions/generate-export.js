@@ -3,7 +3,6 @@
 // Builds a PPTX presentation from a saved AdCraft plan.
 // Pro-only endpoint. Verifies authentication, ownership, and Pro status server-side.
 
-const https = require("https");
 const PptxGenJS = require("pptxgenjs");
 const layouts  = require("./export/layouts");
 const T        = require("./export/theme");
@@ -50,38 +49,24 @@ function buildCoverPrompt(coverArt) {
   ].join("\n");
 }
 
-function openaiImageRequest(prompt) {
-  return new Promise(function(resolve, reject) {
-    var payload = JSON.stringify({
+async function openaiImageRequest(prompt) {
+  var res = await fetch("https://api.openai.com/v1/images/generations", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + OPENAI_KEY,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
       model: "dall-e-3",
       prompt: prompt,
       n: 1,
       size: "1024x1024",
       response_format: "b64_json",
       quality: "standard",
-    });
-    var options = {
-      hostname: "api.openai.com",
-      path: "/v1/images/generations",
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + OPENAI_KEY,
-        "Content-Type": "application/json",
-        "Content-Length": Buffer.byteLength(payload),
-      },
-    };
-    var req = https.request(options, function(res) {
-      var data = "";
-      res.on("data", function(c) { data += c; });
-      res.on("end", function() {
-        try { resolve({ status: res.statusCode, body: JSON.parse(data) }); }
-        catch(e) { resolve({ status: res.statusCode, body: data }); }
-      });
-    });
-    req.on("error", reject);
-    req.write(payload);
-    req.end();
+    }),
   });
+  var body = await res.json();
+  return { status: res.status, body: body };
 }
 
 async function generateCoverArt(plan) {
@@ -103,30 +88,17 @@ async function generateCoverArt(plan) {
 
 // ── Airtable helpers ──────────────────────────────────────────────────────────
 
-function atRequest(method, path, body) {
-  return new Promise(function(resolve, reject) {
-    var payload = body ? JSON.stringify(body) : null;
-    var options = {
-      hostname: "api.airtable.com",
-      path: "/v0/" + AT_BASE + "/" + path,
-      method: method,
-      headers: {
-        Authorization: "Bearer " + AT_TOKEN,
-        "Content-Type": "application/json",
-      },
-    };
-    var req = https.request(options, function(res) {
-      var data = "";
-      res.on("data", function(c) { data += c; });
-      res.on("end", function() {
-        try { resolve({ status: res.statusCode, body: JSON.parse(data) }); }
-        catch(e) { resolve({ status: res.statusCode, body: data }); }
-      });
-    });
-    req.on("error", reject);
-    if (payload) req.write(payload);
-    req.end();
+async function atRequest(method, path, body) {
+  var res = await fetch("https://api.airtable.com/v0/" + AT_BASE + "/" + path, {
+    method: method,
+    headers: {
+      Authorization: "Bearer " + AT_TOKEN,
+      "Content-Type": "application/json",
+    },
+    body: body ? JSON.stringify(body) : undefined,
   });
+  var data = await res.json().catch(function() { return res.text(); });
+  return { status: res.status, body: data };
 }
 
 async function getPlan(recordId) {
