@@ -281,6 +281,12 @@
           console.log('Plan type:', typeof planText, '| length:', cleanText.length);
           console.log('Plan first 200 chars:', cleanText.substring(0, 200));
           console.log('Plan last 100 chars:', cleanText.substring(cleanText.length - 100));
+          // Replace smart quotes and curly apostrophes that break JSON.parse
+          cleanText = cleanText
+            .replace(/“|”/g, '"')   // " "  → "
+            .replace(/‘|’/g, "'")   // ' '  → '
+            .replace(/–|—/g, '-')   // – —  → -
+            .replace(/…/g, '...');        // …   → ...
           plan = JSON.parse(cleanText);
         }
       } catch (e) {

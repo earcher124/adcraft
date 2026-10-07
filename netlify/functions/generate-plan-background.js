@@ -34,12 +34,19 @@ exports.handler = async function (event) {
     planText = message.content[0].text;
     console.log("Claude response length:", planText.length);
 
+    // Sanitize smart quotes and special chars that break JSON.parse in browsers
+    planText = planText
+      .replace(/“|”/g, '"')
+      .replace(/‘|’/g, "'")
+      .replace(/–|—/g, '-')
+      .replace(/…/g, '...');
+
     // Validate it's JSON as expected
     try {
       JSON.parse(planText);
       console.log("Claude returned valid JSON");
     } catch (e) {
-      console.warn("Claude did not return valid JSON, saving as-is");
+      console.warn("Claude did not return valid JSON, saving as-is:", e.message);
     }
   } catch (err) {
     console.error("Anthropic error:", err.message, err.status);
