@@ -269,14 +269,20 @@
       // Try to parse as JSON (structured plan), fall back to markdown
       var plan;
       try {
-        // Strip markdown code fences if present (e.g. ```json ... ```)
-        var cleanText = planText.trim();
-        if (cleanText.startsWith('```')) {
-          cleanText = cleanText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '');
+        // If already an object (shouldn't happen but handle it)
+        if (planText && typeof planText === 'object') {
+          plan = planText;
+        } else {
+          // Strip markdown code fences if present (e.g. ```json ... ```)
+          var cleanText = String(planText).trim();
+          if (cleanText.startsWith('```')) {
+            cleanText = cleanText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '');
+          }
+          console.log('Plan type:', typeof planText, '| length:', cleanText.length);
+          console.log('Plan first 200 chars:', cleanText.substring(0, 200));
+          console.log('Plan last 100 chars:', cleanText.substring(cleanText.length - 100));
+          plan = JSON.parse(cleanText);
         }
-        console.log('Plan text first 100 chars:', cleanText.substring(0, 100));
-        console.log('Plan text type:', typeof cleanText);
-        plan = JSON.parse(cleanText);
       } catch (e) {
         console.warn('JSON parse failed:', e.message);
         plan = null;
