@@ -1,9 +1,15 @@
+[build]
+  command = "npm install"
+
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
 [functions."generate-plan"]
   timeout = 26
+
+[functions."generate-plan-background"]
+  timeout = 900
 
 [[redirects]]
   from = "/"
