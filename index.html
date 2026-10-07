@@ -568,7 +568,9 @@
       .then(function(data) {
         var raw = data.fields['Plan Output'];
         if (!raw) throw new Error('Plan JSON field is empty for this record.');
-        var plan = JSON.parse(raw);
+        // Strip markdown code fences if present
+        var cleaned = raw.trim().replace(/^```[a-z]*\n?/i, '').replace(/```\s*$/,'').trim();
+        var plan = JSON.parse(cleaned);
         document.getElementById('root').innerHTML = render(plan);
       })
       .catch(function(err) {
