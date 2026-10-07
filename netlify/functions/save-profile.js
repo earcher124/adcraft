@@ -43,6 +43,7 @@ exports.handler = async function (event) {
       { headers: { Authorization: `Bearer ${process.env.AIRTABLE_TOKEN}` } }
     );
     const searchData = await searchRes.json();
+    console.log("save-profile search result:", searchRes.status, JSON.stringify(searchData).slice(0, 200));
 
     let res;
     if (searchData.records && searchData.records.length > 0) {
@@ -60,15 +61,16 @@ exports.handler = async function (event) {
       });
     }
 
+    const responseData = await res.json();
     if (!res.ok) {
-      const d = await res.json();
-      console.error("save-profile Airtable error:", JSON.stringify(d));
-      return { statusCode: 500, headers, body: JSON.stringify({ error: d?.error?.message || "Failed to save profile", detail: d }) };
+      console.error("save-profile Airtable error:", JSON.stringify(responseData));
+      return { statusCode: 500, headers, body: JSON.stringify({ error: responseData?.error?.message || "Failed to save profile", detail: responseData }) };
     }
 
-    return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
+    console.log("save-profile success, record id:", responseData.id);
+    return { statusCode: 200, headers, body: JSON.stringify({ ok: true, id: responseData.id }) };
   } catch (err) {
     console.error("save-profile error:", err);
-    return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to save profile" }) };
+    return { statusCode: 500, headers, body: JSON.stringify({ error: String(err) }) };
   }
 };
