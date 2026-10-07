@@ -128,10 +128,7 @@
 
     /* Plan rendered */
     .plan-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 48px 56px;
+      background: transparent;
       display: none;
     }
     .plan-card.visible { display: block; }
@@ -147,44 +144,155 @@
     }
     .checklist input[type="checkbox"]:checked + span { text-decoration: line-through; color: var(--muted); }
 
-    /* Markdown styles */
-    .plan-body h1, .plan-body h2, .plan-body h3 {
-      font-family: 'Playfair Display', Georgia, serif;
-      color: var(--fg);
-      margin-top: 2em;
-      margin-bottom: 0.5em;
-      line-height: 1.3;
+    /* ── Rich Plan Renderer ────────────────────────────────────────────── */
+
+    /* Section blocks */
+    .ps { margin-bottom: 28px; }
+
+    /* Section label */
+    .ps-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--purple);
+      margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
     }
-    .plan-body h1 { font-size: 28px; margin-top: 0; }
-    .plan-body h2 { font-size: 22px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
-    .plan-body h3 { font-size: 17px; }
-    .plan-body p { font-size: 15px; line-height: 1.75; color: var(--fg); margin: 0 0 1em; }
-    .plan-body ul, .plan-body ol { font-size: 15px; line-height: 1.75; padding-left: 1.5em; margin: 0 0 1em; }
-    .plan-body li { margin-bottom: 4px; }
-    .plan-body strong { font-weight: 700; color: var(--fg); }
-    .plan-body em { color: var(--muted); }
-    .plan-body table {
-      width: 100%; border-collapse: collapse; font-size: 14px;
-      margin: 1.5em 0; border-radius: 8px; overflow: hidden;
+    .ps-label::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
     }
-    .plan-body th {
+
+    /* Strategy summary banner */
+    .ps-strategy {
       background: var(--purple); color: #FAF6ED;
-      padding: 10px 14px; text-align: left; font-weight: 600; font-size: 12px;
-      text-transform: uppercase; letter-spacing: 0.06em;
+      border-radius: 12px; padding: 24px 28px; margin-bottom: 28px;
     }
-    .plan-body td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
-    .plan-body tr:last-child td { border-bottom: none; }
-    .plan-body tr:nth-child(even) td { background: var(--bg); }
-    .plan-body blockquote {
-      border-left: 3px solid var(--coral); margin: 1.5em 0;
-      padding: 12px 20px; background: var(--bg); border-radius: 0 8px 8px 0;
-      font-style: italic; color: var(--muted);
+    .ps-strategy-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.65; margin-bottom: 8px; }
+    .ps-strategy-text { font-family: 'Playfair Display', Georgia, serif; font-size: 18px; line-height: 1.55; font-style: italic; margin: 0; }
+
+    /* Text card */
+    .ps-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px 24px;
     }
-    .plan-body hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
-    .plan-body code {
-      background: var(--bg); padding: 2px 6px; border-radius: 4px;
-      font-size: 13px; font-family: 'SF Mono', 'Fira Code', monospace;
+    .ps-card p { font-size: 15px; line-height: 1.75; margin: 0; }
+
+    /* Two-col opportunity layout */
+    .ps-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+    @media (max-width: 640px) { .ps-two-col { grid-template-columns: 1fr; } }
+    .ps-two-col .ps-card { margin-bottom: 0; }
+    .ps-card-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--purple); margin-bottom: 8px;
     }
+
+    /* Audience persona cards */
+    .ps-audience-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+    .ps-persona {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px 20px;
+    }
+    .ps-persona-name {
+      font-weight: 700; font-size: 15px; color: var(--fg); margin-bottom: 6px;
+    }
+    .ps-persona-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+    /* Channel cards */
+    .ps-channel-list { display: flex; flex-direction: column; gap: 12px; }
+    .ps-channel {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px 20px;
+    }
+    .ps-channel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .ps-channel-name { font-weight: 700; font-size: 16px; color: var(--fg); display: flex; align-items: center; gap: 8px; }
+    .ps-channel-icon { font-size: 20px; }
+    .ps-channel-role-badge {
+      font-size: 11px; font-weight: 600; background: var(--bg);
+      border: 1px solid var(--border); color: var(--muted);
+      padding: 3px 10px; border-radius: 20px;
+    }
+    .ps-channel-body { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+    @media (max-width: 520px) { .ps-channel-body { grid-template-columns: 1fr; } }
+    .ps-channel-field label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); display: block; margin-bottom: 3px;
+    }
+    .ps-channel-field p { font-size: 13px; line-height: 1.5; margin: 0; color: var(--fg); }
+    .ps-channel-cta {
+      font-size: 12px; font-weight: 600; color: var(--purple);
+      background: #F0E8EE; padding: 4px 12px; border-radius: 20px;
+      display: inline-block; margin-top: 10px;
+    }
+
+    /* Budget bars */
+    .ps-budget-list { display: flex; flex-direction: column; gap: 10px; }
+    .ps-budget-row { display: flex; align-items: center; gap: 12px; }
+    .ps-budget-label { font-size: 13px; font-weight: 600; width: 140px; flex-shrink: 0; color: var(--fg); }
+    .ps-budget-bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .ps-budget-bar { height: 100%; background: var(--purple); border-radius: 4px; transition: width 0.6s ease; }
+    .ps-budget-right { font-size: 12px; color: var(--muted); white-space: nowrap; width: 90px; text-align: right; flex-shrink: 0; }
+
+    /* Messaging tiles */
+    .ps-messaging-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+    .ps-message-tile {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px 20px;
+      border-left: 3px solid var(--purple);
+    }
+    .ps-message-territory {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 15px; font-style: italic; color: var(--fg);
+      margin-bottom: 8px; font-weight: 700;
+    }
+    .ps-message-rationale { font-size: 13px; color: var(--muted); line-height: 1.55; }
+    .ps-message-key {
+      font-size: 12px; font-weight: 600; color: var(--purple);
+      margin-top: 10px; line-height: 1.4;
+    }
+
+    /* Measurement KPIs */
+    .ps-kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+    .ps-kpi {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px;
+    }
+    .ps-kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    .ps-kpi-value { font-size: 14px; font-weight: 600; color: var(--fg); line-height: 1.35; }
+
+    /* Not-to-do & smart moves */
+    .ps-list { list-style: none; padding: 0; margin: 0; }
+    .ps-list li {
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+      font-size: 14px; line-height: 1.6; color: var(--fg);
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .ps-list li:last-child { border-bottom: none; }
+    .ps-list .ps-bullet {
+      width: 6px; height: 6px; background: var(--purple);
+      border-radius: 50%; flex-shrink: 0; margin-top: 7px;
+    }
+    .ps-list .ps-bullet-x {
+      width: 16px; height: 16px; background: #FDE8E0;
+      color: #C0392B; border-radius: 50%; flex-shrink: 0;
+      font-size: 9px; display: flex; align-items: center; justify-content: center;
+      font-weight: 900; margin-top: 2px;
+    }
+
+    /* Launch plan phases */
+    .ps-phases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media (max-width: 640px) { .ps-phases { grid-template-columns: 1fr; } }
+    .ps-phase {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px 18px;
+    }
+    .ps-phase-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--purple); margin-bottom: 10px;
+    }
+
+    /* Approach card */
+    .ps-approach {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px 24px; margin-bottom: 28px;
+    }
+    .ps-approach p { font-size: 15px; line-height: 1.75; margin: 0; }
 
     /* Error state */
     .error-state {
@@ -312,7 +420,7 @@
 
     <!-- Plan output -->
     <div class="plan-card" id="plan-card">
-      <div class="plan-body" id="plan-body"></div>
+      <div class="plan-body" id="plan-body" style="max-width:860px;margin:0 auto;"></div>
     </div>
 
     <!-- Error state -->
@@ -464,117 +572,250 @@
       return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
+    // Channel icon map
+    var CHANNEL_ICONS = {
+      'instagram': '📸', 'facebook': '👥', 'google': '🔍', 'youtube': '▶️',
+      'tiktok': '🎵', 'twitter': '🐦', 'x': '🐦', 'linkedin': '💼',
+      'email': '✉️', 'seo': '🌐', 'search': '🔍', 'display': '🖼️',
+      'radio': '📻', 'podcast': '🎙️', 'print': '📰', 'outdoor': '🏙️',
+      'direct mail': '📬', 'pinterest': '📌', 'snapchat': '👻',
+      'streaming': '📺', 'tv': '📺', 'ott': '📺', 'connected tv': '📺',
+      'influencer': '✨', 'affiliate': '🤝', 'content': '📝',
+      'programmatic': '⚙️', 'retargeting': '🔄', 'referral': '🔗',
+    };
+
+    function channelIcon(name) {
+      if (!name) return '📢';
+      var lower = name.toLowerCase();
+      for (var key in CHANNEL_ICONS) {
+        if (lower.indexOf(key) !== -1) return CHANNEL_ICONS[key];
+      }
+      return '📢';
+    }
+
+    function sectionLabel(text) {
+      return '<div class="ps-label">' + esc(text) + '</div>';
+    }
+
+    function parsePct(val) {
+      if (!val && val !== 0) return 0;
+      var n = parseFloat(String(val).replace('%',''));
+      return isNaN(n) ? 0 : Math.min(100, Math.max(0, n));
+    }
+
     function renderPlanJSON(p) {
       var html = '';
 
-      // Title + strategy
-      if (p.plan_name) html += '<h1>' + esc(p.plan_name) + '</h1>';
-      if (p.your_advertising_strategy) html += '<p><strong>Strategy:</strong> ' + esc(p.your_advertising_strategy) + '</p>';
-
-      // Key sections
-      if (p.the_opportunity) html += '<h2>The Opportunity</h2><p>' + esc(p.the_opportunity) + '</p>';
-      if (p.what_advertising_needs_to_do) html += '<h2>What Advertising Needs to Do</h2><p>' + esc(p.what_advertising_needs_to_do) + '</p>';
-      if (p.recommended_approach) html += '<h2>Recommended Approach</h2><p>' + esc(p.recommended_approach) + '</p>';
-
-      // Channels
-      if (p.recommended_channels && p.recommended_channels.length) {
-        html += '<h2>Recommended Channels</h2>';
-        p.recommended_channels.forEach(function(c) {
-          html += '<h3>' + esc(c.channel) + '</h3>';
-          html += '<table><tr><th>Role</th><td>' + esc(c.role) + '</td></tr>';
-          if (c.audience) html += '<tr><th>Audience</th><td>' + esc(c.audience) + '</td></tr>';
-          if (c.what_to_run) html += '<tr><th>What to Run</th><td>' + esc(c.what_to_run) + '</td></tr>';
-          if (c.cta) html += '<tr><th>CTA</th><td>' + esc(c.cta) + '</td></tr>';
-          if (c.why) html += '<tr><th>Why</th><td>' + esc(c.why) + '</td></tr>';
-          html += '</table>';
-        });
+      // ── Strategy banner ────────────────────────────────────────────
+      if (p.your_advertising_strategy) {
+        html += '<div class="ps-strategy">';
+        html += '<div class="ps-strategy-eyebrow">Advertising Strategy</div>';
+        html += '<p class="ps-strategy-text">' + esc(p.your_advertising_strategy) + '</p>';
+        html += '</div>';
       }
 
-      // Budget
-      if (p.budget && p.budget.length) {
-        html += '<h2>Budget Allocation</h2>';
-        html += '<table><tr><th>Channel</th><th>Monthly</th><th>%</th><th>Purpose</th></tr>';
-        p.budget.forEach(function(b) {
-          html += '<tr><td>' + esc(b.channel) + '</td><td>$' + esc(b.monthly_investment) + '</td><td>' + esc(b.percentage) + '</td><td>' + esc(b.purpose) + '</td></tr>';
-        });
-        html += '</table>';
+      // ── Opportunity + What Advertising Needs to Do (side by side) ──
+      var hasOpp = !!p.the_opportunity;
+      var hasNeeds = !!p.what_advertising_needs_to_do;
+      if (hasOpp || hasNeeds) {
+        html += '<div class="ps">' + sectionLabel('The Brief');
+        html += '<div class="ps-two-col">';
+        if (hasOpp) {
+          html += '<div class="ps-card"><div class="ps-card-title">The Opportunity</div><p>' + esc(p.the_opportunity) + '</p></div>';
+        }
+        if (hasNeeds) {
+          html += '<div class="ps-card"><div class="ps-card-title">What Advertising Must Do</div><p>' + esc(p.what_advertising_needs_to_do) + '</p></div>';
+        }
+        html += '</div></div>';
       }
 
-      // Targeting
+      // ── Recommended Approach ────────────────────────────────────────
+      if (p.recommended_approach) {
+        html += '<div class="ps">' + sectionLabel('Strategic Approach');
+        html += '<div class="ps-approach"><p>' + esc(p.recommended_approach) + '</p></div>';
+        html += '</div>';
+      }
+
+      // ── Target Audience ─────────────────────────────────────────────
       if (p.who_to_target && p.who_to_target.length) {
-        html += '<h2>Who to Target</h2>';
+        html += '<div class="ps">' + sectionLabel('Target Audience');
+        html += '<div class="ps-audience-grid">';
         p.who_to_target.forEach(function(t) {
-          html += '<h3>' + esc(t.audience_group) + '</h3><p>' + esc(t.description) + '</p>';
+          html += '<div class="ps-persona">';
+          html += '<div class="ps-persona-name">' + esc(t.audience_group || t.group || '') + '</div>';
+          html += '<div class="ps-persona-desc">' + esc(t.description || t.why || '') + '</div>';
+          html += '</div>';
         });
+        html += '</div></div>';
       }
 
-      // Messaging
-      if (p.messaging && p.messaging.length) {
-        html += '<h2>Messaging</h2>';
-        p.messaging.forEach(function(m) {
-          html += '<h3>' + esc(m.territory) + '</h3><p>' + esc(m.rationale) + '</p>';
+      // ── Recommended Channels ────────────────────────────────────────
+      if (p.recommended_channels && p.recommended_channels.length) {
+        html += '<div class="ps">' + sectionLabel('Recommended Channels');
+        html += '<div class="ps-channel-list">';
+        p.recommended_channels.forEach(function(c) {
+          var name = c.channel || '';
+          html += '<div class="ps-channel">';
+          html += '<div class="ps-channel-header">';
+          html += '<div class="ps-channel-name"><span class="ps-channel-icon">' + channelIcon(name) + '</span>' + esc(name) + '</div>';
+          if (c.role) html += '<div class="ps-channel-role-badge">' + esc(c.role) + '</div>';
+          html += '</div>';
+          html += '<div class="ps-channel-body">';
+          if (c.audience) {
+            html += '<div class="ps-channel-field"><label>Audience</label><p>' + esc(c.audience) + '</p></div>';
+          }
+          if (c.what_to_run) {
+            html += '<div class="ps-channel-field"><label>What to Run</label><p>' + esc(c.what_to_run) + '</p></div>';
+          }
+          if (c.why) {
+            html += '<div class="ps-channel-field" style="grid-column:1/-1;"><label>Why It Works</label><p>' + esc(c.why) + '</p></div>';
+          }
+          html += '</div>';
+          if (c.cta) html += '<div class="ps-channel-cta">✦ ' + esc(c.cta) + '</div>';
+          html += '</div>';
         });
+        html += '</div></div>';
       }
 
-      // Creative
-      if (p.creative) html += '<h2>Creative Direction</h2><p>' + esc(p.creative) + '</p>';
+      // ── Budget Allocation ────────────────────────────────────────────
+      if (p.budget && p.budget.length) {
+        // Find max pct for bar scaling
+        var maxPct = 0;
+        p.budget.forEach(function(b) {
+          var n = parsePct(b.percentage);
+          if (n > maxPct) maxPct = n;
+        });
 
-      // Timing
-      if (p.campaign_timing) html += '<h2>Campaign Timing</h2><p>' + esc(p.campaign_timing) + '</p>';
+        html += '<div class="ps">' + sectionLabel('Budget Allocation');
+        html += '<div class="ps-card" style="padding:20px 24px;">';
+        html += '<div class="ps-budget-list">';
+        p.budget.forEach(function(b) {
+          var pct = parsePct(b.percentage);
+          var barW = maxPct > 0 ? Math.round((pct / maxPct) * 100) : pct;
+          var monthly = b.monthly_investment ? '$' + esc(String(b.monthly_investment)) : '';
+          var pctLabel = b.percentage ? esc(String(b.percentage).replace('%','').trim()) + '%' : '';
+          html += '<div class="ps-budget-row">';
+          html += '<div class="ps-budget-label">' + esc(b.channel || '') + '</div>';
+          html += '<div class="ps-budget-bar-wrap"><div class="ps-budget-bar" style="width:' + barW + '%"></div></div>';
+          html += '<div class="ps-budget-right">' + (monthly ? monthly + '/mo' : pctLabel) + '</div>';
+          html += '</div>';
+          if (b.purpose) {
+            html += '<div style="font-size:12px;color:var(--muted);margin:-4px 0 6px 152px;line-height:1.4;">' + esc(b.purpose) + '</div>';
+          }
+        });
+        html += '</div></div></div>';
+      }
 
-      // Measurement
+      // ── Messaging / Creative Territory ──────────────────────────────
+      var hasMsg = p.messaging && (Array.isArray(p.messaging) ? p.messaging.length > 0 : p.messaging.territory);
+      if (hasMsg) {
+        html += '<div class="ps">' + sectionLabel('Messaging & Creative');
+        html += '<div class="ps-messaging-grid">';
+        var msgs = Array.isArray(p.messaging) ? p.messaging : [p.messaging];
+        msgs.forEach(function(m) {
+          html += '<div class="ps-message-tile">';
+          if (m.territory) html += '<div class="ps-message-territory">' + esc(m.territory) + '</div>';
+          if (m.tone) html += '<div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Tone: ' + esc(m.tone) + '</div>';
+          if (m.rationale) html += '<div class="ps-message-rationale">' + esc(m.rationale) + '</div>';
+          if (m.key_messages && m.key_messages.length) {
+            html += '<div class="ps-message-key">';
+            m.key_messages.forEach(function(k) { html += '→ ' + esc(k) + '<br>'; });
+            html += '</div>';
+          }
+          html += '</div>';
+        });
+        html += '</div></div>';
+      }
+
+      // ── Creative Direction (standalone) ─────────────────────────────
+      if (p.creative && typeof p.creative === 'string') {
+        html += '<div class="ps">' + sectionLabel('Creative Direction');
+        html += '<div class="ps-card"><p>' + esc(p.creative) + '</p></div>';
+        html += '</div>';
+      }
+
+      // ── How to Measure Success ───────────────────────────────────────
       if (p.how_to_measure_success) {
-        html += '<h2>How to Measure Success</h2>';
         var m = p.how_to_measure_success;
+        html += '<div class="ps">' + sectionLabel('How to Measure Success');
+        var kpis = [];
         if (m.business_outcomes && m.business_outcomes.length) {
-          html += '<h3>Business Outcomes</h3><ul>' + m.business_outcomes.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('') + '</ul>';
+          m.business_outcomes.forEach(function(x) { kpis.push({ label: 'Business Outcome', value: x }); });
         }
         if (m.media_signals && m.media_signals.length) {
-          html += '<h3>Media Signals</h3><ul>' + m.media_signals.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('') + '</ul>';
+          m.media_signals.forEach(function(x) { kpis.push({ label: 'Media Signal', value: x }); });
         }
+        if (kpis.length) {
+          html += '<div class="ps-kpi-grid">';
+          kpis.forEach(function(k) {
+            html += '<div class="ps-kpi"><div class="ps-kpi-label">' + esc(k.label) + '</div><div class="ps-kpi-value">' + esc(k.value) + '</div></div>';
+          });
+          html += '</div>';
+        } else {
+          html += '<div class="ps-card"><p>' + esc(String(p.how_to_measure_success)) + '</p></div>';
+        }
+        html += '</div>';
       }
 
-      // What not to do
+      // ── What I Would Not Do ──────────────────────────────────────────
       if (p.what_i_would_not_do && p.what_i_would_not_do.length) {
-        html += '<h2>What I Would Not Do</h2>';
+        html += '<div class="ps">' + sectionLabel('What to Avoid');
+        html += '<ul class="ps-list">';
         p.what_i_would_not_do.forEach(function(w) {
-          html += '<h3>' + esc(w.tactic) + '</h3><p>' + esc(w.reason) + '</p>';
+          html += '<li><span class="ps-bullet-x">✕</span><div><strong>' + esc(w.tactic || '') + '</strong>';
+          if (w.reason) html += ' — <span style="color:var(--muted);">' + esc(w.reason) + '</span>';
+          html += '</div></li>';
         });
+        html += '</ul></div>';
       }
 
-      // Smart next moves
+      // ── Smart Next Moves ─────────────────────────────────────────────
       if (p.smart_next_moves && p.smart_next_moves.length) {
-        html += '<h2>Smart Next Moves</h2><ul>' + p.smart_next_moves.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('') + '</ul>';
+        html += '<div class="ps">' + sectionLabel('Smart Next Moves');
+        html += '<ul class="ps-list">';
+        p.smart_next_moves.forEach(function(x) {
+          html += '<li><span class="ps-bullet"></span>' + esc(x) + '</li>';
+        });
+        html += '</ul></div>';
       }
 
-      // Launch plan — rendered as a checklist
+      // ── Launch Plan ──────────────────────────────────────────────────
       if (p.launch_plan) {
-        html += '<h2>Launch Plan</h2>';
+        html += '<div class="ps">' + sectionLabel('90-Day Launch Plan');
         var launchPhases = [
           { label: 'Days 1–30', key: 'days_1_30' },
           { label: 'Days 31–60', key: 'days_31_60' },
-          { label: 'Days 61–90', key: 'days_61_90' }
+          { label: 'Days 61–90', key: 'days_61_90' },
         ];
+        html += '<div class="ps-phases">';
         launchPhases.forEach(function(phase) {
           var text = p.launch_plan[phase.key];
           if (!text) return;
-          html += '<h3>' + phase.label + '</h3>';
-          // Split paragraph into individual tasks on period+space or newline
+          html += '<div class="ps-phase">';
+          html += '<div class="ps-phase-label">' + phase.label + '</div>';
           var tasks = text.split(/(?<=\.)\s+(?=[A-Z])|[\n\r]+/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 3; });
           if (tasks.length > 1) {
-            html += '<ul class="checklist">' + tasks.map(function(t, i){
-              return '<li><label><input type="checkbox" data-task="' + phase.key + '_' + i + '"> <span>' + esc(t) + '</span></label></li>';
-            }).join('') + '</ul>';
+            html += '<ul class="checklist" style="margin:0;">';
+            tasks.forEach(function(t, i) {
+              html += '<li><label><input type="checkbox" data-task="' + esc(phase.key) + '_' + i + '"> <span>' + esc(t) + '</span></label></li>';
+            });
+            html += '</ul>';
           } else {
-            // Fallback if splitting didn't produce multiple items
-            html += '<ul class="checklist"><li><label><input type="checkbox" data-task="' + phase.key + '_0"> <span>' + esc(text) + '</span></label></li></ul>';
+            html += '<ul class="checklist" style="margin:0;"><li><label><input type="checkbox" data-task="' + esc(phase.key) + '_0"> <span>' + esc(text) + '</span></label></li></ul>';
           }
+          html += '</div>';
         });
+        html += '</div></div>';
       }
 
-      // Assumptions
+      // ── Assumptions ──────────────────────────────────────────────────
       if (p.assumptions && p.assumptions.length) {
-        html += '<h2>Assumptions</h2><ul>' + p.assumptions.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('') + '</ul>';
+        html += '<div class="ps">' + sectionLabel('Assumptions');
+        html += '<ul class="ps-list">';
+        p.assumptions.forEach(function(x) {
+          html += '<li><span class="ps-bullet"></span>' + esc(x) + '</li>';
+        });
+        html += '</ul></div>';
       }
 
       return html;
