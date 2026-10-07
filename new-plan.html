@@ -498,7 +498,7 @@
       await submitPlan(formData);
     }
 
-    async function submitPlan(d) {
+    async function submitPlan(d, isShortForm) {
       try {
         var clerk = await window.__clerkLoaded;
         var email = clerk.user?.primaryEmailAddress?.emailAddress || '';
@@ -518,7 +518,8 @@
             goal: d.goal,
             budget: d.budget,
             geo: d.geo,
-            formData: d
+            formData: d,
+            isShortForm: !!isShortForm
           })
         });
         console.log('generate-plan response status:', res.status);
@@ -621,7 +622,7 @@
       document.getElementById('generating').classList.add('active');
       animateSteps();
 
-      await submitPlan(formData);
+      await submitPlan(formData, true); // true = short form path
     }
 
     window.__clerkLoaded.then(async function(clerk) {

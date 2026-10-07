@@ -64,8 +64,8 @@ exports.handler = async function (event) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to create plan record" }) };
   }
 
-  // 2. Write to New Plan Requests table (fire-and-forget)
-  {
+  // 2. Write to New Plan Requests table — only for short form (returning users with saved profile)
+  if (body.isShortForm) {
     const budgetNum = parseFloat(String(body.budget || "0").replace(/[^0-9.]/g, "")) || 0;
     fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_NEW_PLAN_REQUESTS_TBL}`, {
       method: "POST",
