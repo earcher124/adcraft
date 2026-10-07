@@ -25,12 +25,7 @@ exports.handler = async function (event) {
     const message = await client.messages.create({
       model: "claude-opus-4-5",
       max_tokens: 4096,
-      system:
-        "You are an expert advertising strategist with 20 years of experience across digital and traditional media. " +
-        "Create detailed, actionable advertising plans that are specific to the business provided. " +
-        "Format your response in clean markdown with clear sections, tables where appropriate, and concrete recommendations. " +
-        "Be specific about budgets, channels, timing, and messaging — not generic. " +
-        "Write as if you are a senior media director presenting to a client.",
+      system: process.env.SYSTEM_PROMPT,
       messages: [{ role: "user", content: prompt }],
     });
     planText = message.content[0].text;
