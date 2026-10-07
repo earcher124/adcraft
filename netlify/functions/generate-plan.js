@@ -80,8 +80,8 @@ exports.handler = async function (event) {
     }).catch(err => console.error("New Plan Request record error:", err.message));
   }
 
-  // 3. Create Intake Responses record linked to the Plan
-  try {
+  // 3. Create Intake Responses record — only for full intake form (first-time users)
+  if (!body.isShortForm) try {
     const intakeFields = {
       "Email": email || "",
       "Business Name": body.bizName || "",
