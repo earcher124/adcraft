@@ -23,32 +23,51 @@
 
     .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #4A1040; margin-bottom: 16px; }
 
-    .plans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .plans-list { display: flex; flex-direction: column; gap: 0; border: 1px solid #e8ddd0; border-radius: 12px; overflow: hidden; }
+
+    .plan-row {
+      background: #fff;
+      border-bottom: 1px solid #e8ddd0;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.15s;
+    }
+    .plan-row:last-child { border-bottom: none; }
+    .plan-row:hover { background: #faf8ff; }
+
+    .plan-row-main { flex: 1; min-width: 0; }
+    .plan-name { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .plan-meta { font-size: 12px; color: #6b6270; }
+
+    .plan-row-badges { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+    .plan-tag { font-size: 11px; font-weight: 600; background: #F0E8EE; color: #4A1040; border-radius: 20px; padding: 3px 10px; white-space: nowrap; }
+    .tag-ready { background: #e8f5e9; color: #2e7d32; }
+    .tag-generating { background: #fff8e1; color: #f57f17; }
+    .tag-error { background: #fce4ec; color: #c62828; }
+
+    .btn-view {
+      flex-shrink: 0;
+      font-size: 12px; font-weight: 600;
+      padding: 7px 16px; border-radius: 7px;
+      background: transparent; color: #4A1040;
+      border: 1px solid #4A1040;
+      cursor: pointer; text-decoration: none;
+      white-space: nowrap; transition: background 0.15s, color 0.15s;
+    }
+    .btn-view:hover { background: #4A1040; color: #FAF6ED; }
+
     @media (max-width: 640px) {
-      .plans-grid { grid-template-columns: 1fr; }
       .hero { padding: 32px 20px 24px; }
       .hero-inner { flex-direction: column; gap: 16px; }
       .hero-right { border-left: none; border-top: 1px solid #e8ddd0; padding-left: 0; padding-top: 16px; }
       .content { padding: 0 20px; }
+      .plan-row { flex-wrap: wrap; }
+      .btn-view { width: 100%; text-align: center; }
     }
-
-    .plan-card {
-      background: #fff;
-      border: 1px solid #e8ddd0;
-      border-top: 3px solid #4A1040;
-      border-radius: 12px;
-      padding: 20px 24px;
-      text-decoration: none;
-      color: inherit;
-      display: block;
-      transition: box-shadow 0.2s, transform 0.2s;
-      cursor: pointer;
-    }
-    .plan-card:hover { box-shadow: 0 4px 16px rgba(74,16,64,0.1); transform: translateY(-2px); }
-    .plan-name { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
-    .plan-meta { font-size: 12px; color: #6b6270; margin-bottom: 12px; }
-    .plan-tags { display: flex; gap: 6px; flex-wrap: wrap; }
-    .plan-tag { font-size: 11px; font-weight: 600; background: #F0E8EE; color: #4A1040; border-radius: 20px; padding: 3px 10px; }
 
     .empty-state {
       text-align: center;
@@ -129,37 +148,38 @@
           return;
         }
 
-        var grid = document.createElement("div");
-        grid.className = "plans-grid";
+        var list = document.createElement("div");
+        list.className = "plans-list";
         plans.forEach(function(plan) {
-          var card = document.createElement("a");
-          card.className = "plan-card";
-          card.href = "/plan-viewer.html?id=" + plan.id;
+          var row = document.createElement("div");
+          row.className = "plan-row";
 
           var date = plan.created
             ? new Date(plan.created).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
             : "";
 
-          var statusBadge = plan.status === "Ready" || plan.status === "Complete"
-            ? '<span class="plan-tag" style="background:#e8f5e9;color:#2e7d32;">Ready</span>'
-            : plan.status === "Generating"
-            ? '<span class="plan-tag" style="background:#fff8e1;color:#f57f17;">Generating…</span>'
-            : plan.status === "Error"
-            ? '<span class="plan-tag" style="background:#fce4ec;color:#c62828;">Error</span>'
-            : '';
+          var statusClass = (plan.status === "Ready" || plan.status === "Complete") ? "tag-ready"
+            : plan.status === "Generating" ? "tag-generating"
+            : plan.status === "Error" ? "tag-error" : "";
+          var statusLabel = (plan.status === "Ready" || plan.status === "Complete") ? "Ready"
+            : plan.status === "Generating" ? "Generating…"
+            : plan.status === "Error" ? "Error" : plan.status || "";
 
-          card.innerHTML =
-            '<div class="plan-name">' + (plan.planName || 'Untitled Plan') + '</div>' +
-            '<div class="plan-meta">' + (plan.bizName ? plan.bizName + ' · ' : '') + (date || '') + '</div>' +
-            '<div class="plan-tags">' +
-              statusBadge +
+          row.innerHTML =
+            '<div class="plan-row-main">' +
+              '<div class="plan-name">' + (plan.planName || 'Untitled Plan') + '</div>' +
+              '<div class="plan-meta">' + (plan.bizName ? plan.bizName + ' · ' : '') + (date || '') + '</div>' +
+            '</div>' +
+            '<div class="plan-row-badges">' +
+              (statusLabel ? '<span class="plan-tag ' + statusClass + '">' + statusLabel + '</span>' : '') +
               (plan.budget ? '<span class="plan-tag">' + plan.budget + '</span>' : '') +
-            '</div>';
+            '</div>' +
+            '<a class="btn-view" href="/plan-viewer.html?id=' + plan.id + '">View Plan →</a>';
 
-          grid.appendChild(card);
+          list.appendChild(row);
         });
 
-        container.appendChild(grid);
+        container.appendChild(list);
 
       } catch (err) {
         container.innerHTML = '<div class="empty-state"><p>Failed to load plans. Please refresh.</p></div>';
