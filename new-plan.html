@@ -352,7 +352,15 @@
         var res = await fetch('/.netlify/functions/generate-plan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: prompt, email: email, bizName: formData.bizName })
+          body: JSON.stringify({
+            prompt: prompt,
+            email: email,
+            bizName: formData.bizName,
+            goal: formData.goal,
+            budget: formData.budget,
+            geo: formData.geo,
+            formData: formData
+          })
         });
 
         if (!res.ok) throw new Error('Generation failed');

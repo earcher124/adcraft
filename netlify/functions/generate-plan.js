@@ -64,10 +64,15 @@ exports.handler = async function (event) {
         },
         body: JSON.stringify({
           fields: {
-            Name: bizName || "Untitled Plan",
-            Plan: planText,
-            Email: email || "",
-            "Created At": new Date().toISOString(),
+            "Plan Name": bizName || "Untitled Plan",
+            "Plan Output": planText,
+            "Email": email || "",
+            "Business Name": body.bizName || "",
+            "Primary Goal": body.goal || "",
+            "Monthly Ad Budget": body.budget || "",
+            "Geography": body.geo || "",
+            "Status": "Complete",
+            "Intake Responses": JSON.stringify(body.formData || {}),
           },
         }),
       }
