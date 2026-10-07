@@ -52,6 +52,10 @@
     .btn-primary:hover { background: #6a2060; }
     .btn-outline { background: transparent; color: var(--purple); border: 1px solid var(--purple); }
     .btn-outline:hover { background: var(--purple); color: #FAF6ED; }
+    .btn-locked { opacity: 0.65; }
+    .btn-locked:hover { background: transparent !important; color: var(--purple) !important; cursor: pointer; }
+    .lock-icon { font-size: 11px; vertical-align: middle; margin-left: 3px; }
+    .pro-badge { display: inline-flex; align-items: center; padding: 3px 9px; background: var(--purple); color: #FAF6ED; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; }
 
     /* Content area */
     .content { max-width: 860px; margin: 40px auto; padding: 0 48px 80px; }
@@ -187,6 +191,7 @@
           <button class="btn btn-outline" id="btn-excel" onclick="downloadExcel()">↓ Excel</button>
           <button class="btn btn-outline" id="btn-pdf" onclick="downloadPDF()">↓ PDF</button>
           <button class="btn btn-outline" id="btn-optimize" onclick="optimizePlan()">✦ Optimize Plan</button>
+          <span id="pro-badge" style="display:none;" class="pro-badge">PRO</span>
         </div>
       </div>
     </div>
@@ -229,6 +234,7 @@
 
     // Background generation is triggered from new-plan.html before redirect — nothing to do here.
 
+    var userTier = "Free"; // default until get-user resolves
     var pollInterval = null;
     var pollCount = 0;
     var currentPlan = null;
@@ -513,10 +519,38 @@
       }
     }
 
+    function requirePro(featureName) {
+      if (userTier === "Pro") return true;
+      window.location.href = "/upgrade.html";
+      return false;
+    }
+
+    function applyTierUI() {
+      var isPro = (userTier === "Pro");
+      var proEls = ["btn-excel", "btn-pdf", "btn-optimize"];
+      var labels = { "btn-excel": "↓ Excel", "btn-pdf": "↓ PDF", "btn-optimize": "✦ Optimize Plan" };
+      proEls.forEach(function(id) {
+        var btn = document.getElementById(id);
+        if (!btn) return;
+        if (isPro) {
+          btn.innerHTML = labels[id];
+          btn.classList.remove("btn-locked");
+          btn.title = "";
+        } else {
+          btn.innerHTML = labels[id] + ' <span class="lock-icon">🔒</span>';
+          btn.classList.add("btn-locked");
+          btn.title = "Upgrade to AdCraft Pro to unlock";
+        }
+      });
+      var badge = document.getElementById("pro-badge");
+      if (badge) badge.style.display = isPro ? "" : "none";
+    }
+
     function downloadExcel() {
+      if (!requirePro("Excel download")) return;
       if (!currentPlan) { alert('Plan not loaded yet.'); return; }
       var btn = document.getElementById('btn-excel');
-      btn.textContent = 'Building…';
+      btn.innerHTML = 'Building…';
       btn.disabled = true;
       fetch('/.netlify/functions/generate-xlsx', {
         method: 'POST',
@@ -536,16 +570,16 @@
           URL.revokeObjectURL(url);
         })
         .catch(function() { alert('Excel export failed. Please try again.'); })
-        .finally(function() { btn.textContent = '↓ Excel'; btn.disabled = false; });
+        .finally(function() { btn.innerHTML = '↓ Excel'; btn.disabled = false; });
     }
 
     function downloadPDF() {
-      // Placeholder — will be a beautifully formatted PDF/PPT export
+      if (!requirePro("PDF download")) return;
       alert('Beautiful PDF export coming soon!');
     }
 
     function optimizePlan() {
-      // Placeholder — will allow refining the plan with follow-up questions
+      if (!requirePro("Optimize Plan")) return;
       alert('Plan optimization coming soon!');
     }
 
@@ -562,19 +596,35 @@
         return;
       }
 
-      // Check status immediately — if already complete, show plan without animation
-      try {
-        var initRes = await fetch('/.netlify/functions/poll-plan?id=' + encodeURIComponent(recordId));
-        var initData = await initRes.json();
-        console.log('[AdCraft] initial status:', initData.status, '| has plan:', !!initData.plan);
+      // Fetch user tier and plan status in parallel
+      var email = clerk.user.primaryEmailAddress && clerk.user.primaryEmailAddress.emailAddress;
+      var tierPromise = email
+        ? fetch('/.netlify/functions/get-user?email=' + encodeURIComponent(email))
+            .then(function(r) { return r.json(); })
+            .then(function(d) { userTier = d.tier || "Free"; })
+            .catch(function() { userTier = "Free"; })
+        : Promise.resolve();
+
+      var planPromise = fetch('/.netlify/functions/poll-plan?id=' + encodeURIComponent(recordId))
+        .then(function(r) { return r.json(); })
+        .catch(function() { return null; });
+
+      var results = await Promise.all([tierPromise, planPromise]);
+      var initData = results[1];
+
+      // Apply tier UI to buttons (even before plan is shown)
+      applyTierUI();
+
+      if (initData) {
+        console.log('[AdCraft] initial status:', initData.status, '| has plan:', !!initData.plan, '| tier:', userTier);
         if (initData.status === 'Complete' && initData.plan) {
           currentIntake = initData.intake || null;
           showPlan(initData.plan, initData.bizName);
-          return; // done — no need to poll
+          return;
         }
         if (initData.status === 'Error') { showError(); return; }
-      } catch(e) {
-        console.warn('[AdCraft] initial poll error:', e.message);
+      } else {
+        console.warn('[AdCraft] initial poll error');
       }
 
       // Plan is still generating — show animation and poll
