@@ -8,63 +8,70 @@ const THEME = {
 
   // Color palette (hex, no #)
   color: {
-    bg:         "FAF6ED", // warm ivory — slide background
-    fg:         "1A1A1A", // charcoal — primary text
-    muted:      "6B6270", // muted aubergine-grey — labels, secondary text
-    accent:     "4A1040", // deep aubergine — headings, rules, accents
-    accentLight:"F0E8EE", // pale aubergine — card fills, highlights
-    white:      "FFFFFF",
-    border:     "D8CCB8", // warm border
+    bg:          "FAF6ED", // warm ivory — slide background
+    bgWhite:     "FFFFFF", // true white — card fills
+    fg:          "1A1A1A", // charcoal — primary text
+    muted:       "7A6C74", // muted aubergine-grey — labels, secondary text
+    mutedLight:  "B5A9B1", // lighter muted — fine details
+    accent:      "4A1040", // deep aubergine — headings, rules, accents
+    accentLight: "F0E8EE", // pale aubergine — subtle highlights
+    accentMid:   "7A2060", // mid aubergine — secondary accent
+    white:       "FFFFFF",
+    border:      "E2D8CC", // warm border
+    borderLight: "EDE7DF", // very light border
     scale: {
-      increase:  "2D7A4F", // green
-      decrease:  "C0392B", // red
-      neutral:   "6B6270", // grey
+      increase:  "2E7D52", // forest green
+      decrease:  "B5351F", // terracotta red
+      neutral:   "7A6C74", // grey
     },
     action: {
-      scale:    "2D7A4F",
+      scale:    "2E7D52",
       maintain: "4A5568",
-      optimize: "B7791F",
-      reduce:   "C0392B",
+      optimize: "B97A1C",
+      reduce:   "B5351F",
     },
   },
 
   // Typography
   font: {
-    heading:  "Gill Sans",      // primary heading face
-    body:     "Calibri",        // body / table / label face
+    heading:  "Garamond",     // editorial serif heading face
+    body:     "Gill Sans",    // clean sans body
     fallback: "Arial",
   },
 
   // Font sizes (pt)
   size: {
-    coverTitle:   36,
-    coverSubtitle: 18,
-    coverMeta:    12,
-    slideTitle:   24,
-    sectionLabel: 9,
-    h2:           18,
-    h3:           14,
-    body:         11,
-    small:        9,
-    tag:          8,
-    footer:       8,
-    kpi:          28,
-    kpiLabel:     9,
+    coverTitle:    40,
+    coverSubtitle: 16,
+    coverMeta:     11,
+    slideTitle:    28,
+    slideSub:      10,
+    sectionLabel:  8,
+    h2:            20,
+    h3:            13,
+    body:          10,
+    small:         8,
+    tag:           7,
+    footer:        7,
+    kpi:           32,
+    kpiLabel:      8,
+    stat:          24,
   },
 
   // Margins and spacing (inches)
   margin: {
-    x:    0.55,  // left/right slide margin
-    y:    0.5,   // top margin (below title bar)
-    titleH: 0.7, // height of the slide title bar
-    footerY: 7.15, // y position of footer row
-    footerH: 0.25,
+    x:       0.55,  // left/right slide margin
+    y:       0.5,   // generic top margin
+    titleH:  0.82,  // height of the header area
+    footerY: 7.18,  // y position of footer row
+    footerH: 0.22,
+    sidebar: 0.08,  // left accent sidebar width
   },
 
   // Card style
   card: {
-    r:   0.06,  // corner radius
-    pad: 0.15,  // internal padding
+    r:   0.05,  // corner radius
+    pad: 0.18,  // internal padding
   },
 };
 

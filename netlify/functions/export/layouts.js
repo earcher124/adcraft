@@ -1,144 +1,153 @@
-// AdCraft Slide Layouts
+// AdCraft Slide Layouts — Editorial redesign
 // Each function receives a pptx instance, the plan object, and any extras.
-// Returns nothing — adds slides to pptx in place.
 
 var T = require("./theme");
 var H = require("./helpers");
 
 // ── 1. COVER ─────────────────────────────────────────────────────────────────
 function slideCover(pptx, plan, meta) {
-  // meta: { planName, bizName, date, coverImageBase64, coverMime }
   var slide = pptx.addSlide();
   slide.background = { color: T.color.bg };
 
-  var planName = H.trunc(meta.planName || plan.plan_name || "Advertising Plan", 60);
-  var bizName  = H.trunc(meta.bizName || "", 50);
+  var planName = H.trunc(meta.planName || plan.plan_name || "Advertising Plan", 55);
+  var bizName  = H.trunc(meta.bizName || "", 45);
   var date     = meta.date || new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" });
-
   var hasImage = !!(meta.coverImageBase64);
 
   if (hasImage) {
-    // Left half: text; right half: illustration
-    var imgX = 6.8, imgW = 5.8, imgH = 7.5;
-
-    // Ivory left panel
+    // ── With cover illustration ──
+    // Left: deep aubergine panel
+    var panelW = 7.0;
     slide.addShape("rect", {
-      x: 0, y: 0, w: imgX + 0.2, h: T.H,
-      fill: { color: T.color.bg },
-      line: { color: T.color.bg },
-    });
-
-    // Illustration — fills right 43% of slide
-    slide.addImage({
-      data: "data:" + (meta.coverMime || "image/png") + ";base64," + meta.coverImageBase64,
-      x: imgX, y: 0, w: imgW, h: imgH,
-      sizing: { type: "cover", w: imgW, h: imgH },
-    });
-
-    // Thin accent rule left of image
-    slide.addShape("rect", {
-      x: imgX - 0.03, y: 0, w: 0.04, h: T.H,
+      x: 0, y: 0, w: panelW, h: T.H,
       fill: { color: T.color.accent },
       line: { color: T.color.accent },
     });
 
-    // Text positioned on left panel
-    var tx = T.margin.x, tw = imgX - T.margin.x * 2 - 0.1;
-
-    // AdCraft wordmark small
-    slide.addText("AdCraft", {
-      x: tx, y: 0.45, w: tw, h: 0.22,
-      fontSize: 11, color: T.color.accent,
-      fontFace: T.font.heading, bold: true, charSpacing: 2,
+    // Right: illustration
+    var imgX = panelW;
+    slide.addImage({
+      data: "data:" + (meta.coverMime || "image/png") + ";base64," + meta.coverImageBase64,
+      x: imgX, y: 0, w: T.W - imgX, h: T.H,
+      sizing: { type: "cover", w: T.W - imgX, h: T.H },
     });
 
-    // Plan name
+    // Text on left panel
+    var tx = 0.65, tw = panelW - 1.1;
+
+    // AdCraft mark
+    slide.addText("ADCRAFT", {
+      x: tx, y: 0.52, w: tw, h: 0.18,
+      fontSize: 8, color: T.color.accentLight,
+      fontFace: T.font.body, bold: false, charSpacing: 3.5,
+    });
+
+    // Plan name — large serif
     slide.addText(planName, {
-      x: tx, y: 1.15, w: tw, h: 1.6,
-      fontSize: T.size.coverTitle, color: T.color.fg,
+      x: tx, y: 1.0, w: tw, h: 2.8,
+      fontSize: T.size.coverTitle, color: T.color.white,
       fontFace: T.font.heading, bold: true,
       wrap: true,
     });
 
-    // Subtitle
-    slide.addText("Advertising Plan", {
-      x: tx, y: 2.85, w: tw, h: 0.35,
-      fontSize: T.size.coverSubtitle, color: T.color.accent,
-      fontFace: T.font.body,
+    // Rule
+    slide.addShape("line", {
+      x: tx, y: 3.9, w: 1.2, h: 0,
+      line: { color: T.color.accentLight, pt: 1.5 },
     });
 
-    H.addRule(slide, tx, 3.3, tw - 0.3);
+    // Subtitle tag
+    slide.addText("Advertising Strategy", {
+      x: tx, y: 4.1, w: tw, h: 0.28,
+      fontSize: T.size.coverSubtitle, color: T.color.accentLight,
+      fontFace: T.font.body, italic: false,
+    });
 
     if (bizName) {
       slide.addText(bizName, {
-        x: tx, y: 3.5, w: tw, h: 0.3,
-        fontSize: 13, color: T.color.fg,
+        x: tx, y: 4.52, w: tw, h: 0.28,
+        fontSize: 12, color: T.color.white,
         fontFace: T.font.body, bold: true,
       });
     }
 
     slide.addText(date, {
-      x: tx, y: bizName ? 3.85 : 3.5, w: tw, h: 0.25,
-      fontSize: T.size.coverMeta, color: T.color.muted,
+      x: tx, y: bizName ? 4.84 : 4.52, w: tw, h: 0.22,
+      fontSize: T.size.coverMeta, color: T.color.accentLight,
       fontFace: T.font.body,
     });
 
-    // Footer
+    // Footer on left panel
     slide.addText("Prepared with AdCraft", {
-      x: tx, y: 7.15, w: tw, h: 0.25,
-      fontSize: T.size.footer, color: T.color.muted,
+      x: tx, y: 7.18, w: tw, h: 0.22,
+      fontSize: T.size.footer, color: T.color.accentLight,
       fontFace: T.font.body,
     });
 
   } else {
-    // Minimal cover — full ivory, centered text, accent bar on left
+    // ── Minimal cover — no illustration ──
+    // Top accent bar (generous)
     slide.addShape("rect", {
-      x: 0, y: 0, w: 0.25, h: T.H,
+      x: 0, y: 0, w: T.W, h: 2.2,
       fill: { color: T.color.accent },
       line: { color: T.color.accent },
     });
 
-    var cx = 1.0, cw = T.W - 1.6;
+    // Subtle grid pattern on top bar
+    for (var gi = 0; gi < 8; gi++) {
+      slide.addShape("line", {
+        x: 1.6 * gi, y: 0, w: 0, h: 2.2,
+        line: { color: "5A2050", pt: 0.5 },
+      });
+    }
 
-    slide.addText("AdCraft", {
-      x: cx, y: 0.7, w: cw, h: 0.28,
-      fontSize: 11, color: T.color.accent,
-      fontFace: T.font.heading, bold: true, charSpacing: 2,
+    // AdCraft mark in top bar
+    slide.addText("ADCRAFT", {
+      x: T.margin.x, y: 0.35, w: 3, h: 0.2,
+      fontSize: 8, color: T.color.accentLight,
+      fontFace: T.font.body, charSpacing: 4,
     });
 
+    // Plan name below top bar — very large
+    var cx = T.margin.x, cw = T.W - T.margin.x * 2;
     slide.addText(planName, {
-      x: cx, y: 1.4, w: cw, h: 2.0,
+      x: cx, y: 2.5, w: cw, h: 2.2,
       fontSize: T.size.coverTitle, color: T.color.fg,
       fontFace: T.font.heading, bold: true,
       wrap: true,
     });
 
-    slide.addText("Advertising Plan", {
-      x: cx, y: 3.5, w: cw, h: 0.4,
+    // Rule
+    slide.addShape("line", {
+      x: cx, y: 4.82, w: 1.0, h: 0,
+      line: { color: T.color.accent, pt: 2 },
+    });
+
+    slide.addText("Advertising Strategy", {
+      x: cx, y: 5.05, w: cw, h: 0.3,
       fontSize: T.size.coverSubtitle, color: T.color.accent,
       fontFace: T.font.body,
     });
 
-    H.addRule(slide, cx, 4.05, cw * 0.4);
-
     if (bizName) {
       slide.addText(bizName, {
-        x: cx, y: 4.25, w: cw, h: 0.3,
-        fontSize: 13, color: T.color.fg,
+        x: cx, y: 5.45, w: cw, h: 0.28,
+        fontSize: 12, color: T.color.fg,
         fontFace: T.font.body, bold: true,
       });
     }
 
     slide.addText(date, {
-      x: cx, y: bizName ? 4.62 : 4.25, w: cw, h: 0.25,
+      x: cx, y: bizName ? 5.78 : 5.45, w: cw, h: 0.22,
       fontSize: T.size.coverMeta, color: T.color.muted,
       fontFace: T.font.body,
     });
 
     slide.addText("Prepared with AdCraft", {
-      x: cx, y: 7.15, w: T.W - 1.2, h: 0.25,
-      fontSize: T.size.footer, color: T.color.muted,
-      fontFace: T.font.body,
+      x: 0, y: T.margin.footerY,
+      w: T.W - T.margin.x, h: T.margin.footerH,
+      fontSize: T.size.footer, color: T.color.mutedLight,
+      fontFace: T.font.body, align: "right",
     });
   }
 }
@@ -150,31 +159,60 @@ function slideAtAGlance(pptx, plan, meta) {
   var y = H.addSlideHeader(slide, "Plan at a Glance", "Executive Summary");
   H.addFooter(slide);
 
-  var items = [];
+  var cx = T.margin.x, cw = T.W - T.margin.x * 2;
   var budget = H.totalBudget(plan);
-  if (plan.the_opportunity)          items.push({ label: "Opportunity",         value: H.trunc(plan.the_opportunity, 130) });
-  if (plan.recommended_approach)     items.push({ label: "Strategic Approach",  value: H.trunc(plan.recommended_approach, 130) });
-  if (budget)                        items.push({ label: "Monthly Budget",       value: H.fmtDollars(budget) + "/mo" });
-  if (meta.geography)                items.push({ label: "Geography",            value: H.trunc(meta.geography, 60) });
-  if (meta.goal)                     items.push({ label: "Primary Goal",         value: H.trunc(meta.goal, 80) });
-  if (plan.who_to_target && plan.who_to_target[0])
-    items.push({ label: "Primary Audience", value: H.trunc(plan.who_to_target[0].audience_group, 60) });
 
-  // Two columns
-  var col = 0, colX = [T.margin.x, T.W / 2 + 0.1], rowH = 0.95, perCol = Math.ceil(items.length / 2);
-  items.forEach(function(item, i) {
-    var col = i < perCol ? 0 : 1;
-    var row = i < perCol ? i : i - perCol;
-    var ix = colX[col], iy = y + row * rowH;
-    var iw = T.W / 2 - T.margin.x - 0.2;
-    H.addCard(slide, ix - T.card.pad, iy - T.card.pad, iw + T.card.pad * 2, rowH - 0.1);
-    H.addKVItem(slide, item.label, item.value, ix, iy, iw, rowH - 0.12);
-  });
+  // Hero row: key stats
+  var stats = [];
+  if (budget)                   stats.push({ label: "Monthly Budget",   value: H.fmtDollars(budget) });
+  if (plan.who_to_target && plan.who_to_target.length)
+    stats.push({ label: "Audiences",       value: String(plan.who_to_target.length) });
+  if (plan.recommended_channels && plan.recommended_channels.length)
+    stats.push({ label: "Channels",        value: String(plan.recommended_channels.length) });
+  if (meta && meta.goal)        stats.push({ label: "Primary Goal",     value: H.trunc(meta.goal, 22) });
+
+  if (stats.length) {
+    var sw = (cw - 0.2 * (stats.length - 1)) / stats.length;
+    stats.forEach(function(s, i) {
+      H.addStatTile(slide, s.label, s.value, cx + i * (sw + 0.2), y, sw, 0.98);
+    });
+    y += 1.12;
+  }
+
+  // Two body text sections
+  var bodyW = (cw - 0.3) / 2;
+
+  if (plan.the_opportunity) {
+    slide.addText("THE OPPORTUNITY", {
+      x: cx, y: y, w: bodyW, h: 0.15,
+      fontSize: T.size.sectionLabel, color: T.color.accent,
+      fontFace: T.font.body, charSpacing: 2,
+    });
+    slide.addText(H.trunc(plan.the_opportunity, 260), {
+      x: cx, y: y + 0.17, w: bodyW, h: 1.5,
+      fontSize: T.size.body, color: T.color.fg,
+      fontFace: T.font.body, wrap: true,
+    });
+  }
+
+  if (plan.recommended_approach) {
+    var r2x = cx + bodyW + 0.3;
+    slide.addText("STRATEGIC APPROACH", {
+      x: r2x, y: y, w: bodyW, h: 0.15,
+      fontSize: T.size.sectionLabel, color: T.color.accent,
+      fontFace: T.font.body, charSpacing: 2,
+    });
+    slide.addText(H.trunc(plan.recommended_approach, 260), {
+      x: r2x, y: y + 0.17, w: bodyW, h: 1.5,
+      fontSize: T.size.body, color: T.color.fg,
+      fontFace: T.font.body, wrap: true,
+    });
+  }
 }
 
 // ── 3. BUSINESS OBJECTIVE ─────────────────────────────────────────────────────
 function slideObjective(pptx, plan) {
-  if (!plan.what_advertising_needs_to_do && !plan.your_advertising_strategy) return;
+  if (!plan.the_opportunity && !plan.what_advertising_needs_to_do) return;
   var slide = pptx.addSlide();
   slide.background = { color: T.color.bg };
   var y = H.addSlideHeader(slide, "Business Objective", "Strategy");
@@ -182,43 +220,75 @@ function slideObjective(pptx, plan) {
 
   var cx = T.margin.x, cw = T.W - T.margin.x * 2;
 
-  if (plan.the_opportunity) {
-    slide.addText("The Opportunity", {
-      x: cx, y: y, w: cw, h: 0.2,
-      fontSize: T.size.h3, color: T.color.accent,
-      fontFace: T.font.heading, bold: true,
+  // Left/right split: Opportunity | What Advertising Needs to Do
+  var hasLeft  = !!(plan.the_opportunity);
+  var hasRight = !!(plan.what_advertising_needs_to_do);
+
+  if (hasLeft && hasRight) {
+    var colW = (cw - 0.4) / 2;
+    var rightX = cx + colW + 0.4;
+
+    // Left — opportunity
+    slide.addText("THE OPPORTUNITY", {
+      x: cx, y: y, w: colW, h: 0.15,
+      fontSize: T.size.sectionLabel, color: T.color.accent,
+      fontFace: T.font.body, charSpacing: 2,
     });
-    slide.addText(plan.the_opportunity, {
-      x: cx, y: y + 0.22, w: cw, h: 0.65,
-      fontSize: T.size.body, color: T.color.fg,
+    // Large italic pull quote style
+    slide.addText(H.trunc(plan.the_opportunity, 300), {
+      x: cx, y: y + 0.18, w: colW, h: 2.8,
+      fontSize: T.size.h2, color: T.color.fg,
+      fontFace: T.font.heading, bold: false,
+      wrap: true, italic: true,
+    });
+
+    // Vertical rule
+    slide.addShape("line", {
+      x: cx + colW + 0.2, y: y, w: 0, h: 3.5,
+      line: { color: T.color.border, pt: 0.75 },
+    });
+
+    // Right — what advertising needs to do
+    slide.addText("WHAT ADVERTISING NEEDS TO DO", {
+      x: rightX, y: y, w: colW, h: 0.15,
+      fontSize: T.size.sectionLabel, color: T.color.accent,
+      fontFace: T.font.body, charSpacing: 2,
+    });
+    slide.addText(H.trunc(plan.what_advertising_needs_to_do, 300), {
+      x: rightX, y: y + 0.18, w: colW, h: 2.8,
+      fontSize: T.size.body + 1, color: T.color.fg,
       fontFace: T.font.body, wrap: true,
     });
-    y += 0.95;
+
+    y += 3.05;
+  } else {
+    // Single section — full width, large
+    var single = plan.the_opportunity || plan.what_advertising_needs_to_do;
+    var singleLabel = plan.the_opportunity ? "THE OPPORTUNITY" : "WHAT ADVERTISING NEEDS TO DO";
+    slide.addText(singleLabel, {
+      x: cx, y: y, w: cw, h: 0.15,
+      fontSize: T.size.sectionLabel, color: T.color.accent,
+      fontFace: T.font.body, charSpacing: 2,
+    });
+    slide.addText(H.trunc(single, 360), {
+      x: cx, y: y + 0.18, w: cw, h: 1.9,
+      fontSize: T.size.h2, color: T.color.fg,
+      fontFace: T.font.heading, bold: false, wrap: true, italic: true,
+    });
+    y += 2.2;
   }
 
-  if (plan.what_advertising_needs_to_do) {
-    slide.addText("What Advertising Needs to Do", {
-      x: cx, y: y, w: cw, h: 0.2,
-      fontSize: T.size.h3, color: T.color.accent,
-      fontFace: T.font.heading, bold: true,
-    });
-    slide.addText(plan.what_advertising_needs_to_do, {
-      x: cx, y: y + 0.22, w: cw, h: 0.85,
-      fontSize: T.size.body, color: T.color.fg,
-      fontFace: T.font.body, wrap: true,
-    });
-    y += 1.15;
-  }
-
+  // Strategic POV below — muted, smaller
   if (plan.your_advertising_strategy) {
-    slide.addText("Strategic Point of View", {
-      x: cx, y: y, w: cw, h: 0.2,
-      fontSize: T.size.h3, color: T.color.accent,
-      fontFace: T.font.heading, bold: true,
+    H.addRule(slide, cx, y, cw * 0.25);
+    slide.addText("STRATEGIC POINT OF VIEW", {
+      x: cx, y: y + 0.12, w: cw, h: 0.15,
+      fontSize: T.size.sectionLabel, color: T.color.muted,
+      fontFace: T.font.body, charSpacing: 2,
     });
-    slide.addText(plan.your_advertising_strategy, {
-      x: cx, y: y + 0.22, w: cw, h: 1.0,
-      fontSize: T.size.body, color: T.color.fg,
+    slide.addText(H.trunc(plan.your_advertising_strategy, 280), {
+      x: cx, y: y + 0.28, w: cw, h: 0.9,
+      fontSize: T.size.body, color: T.color.muted,
       fontFace: T.font.body, wrap: true,
     });
   }
@@ -234,37 +304,61 @@ function slideAudience(pptx, plan, meta) {
 
   var cx = T.margin.x, cw = T.W - T.margin.x * 2;
 
-  if (meta.geography) {
+  if (meta && meta.geography) {
     slide.addText("Geography: " + meta.geography, {
-      x: cx, y: y, w: cw, h: 0.22,
+      x: cx, y: y, w: cw, h: 0.18,
       fontSize: T.size.small, color: T.color.muted,
-      fontFace: T.font.body, italic: true,
+      fontFace: T.font.body,
     });
-    y += 0.28;
+    y += 0.24;
   }
 
   var audiences = plan.who_to_target.slice(0, 4);
-  var cols = audiences.length <= 2 ? 1 : 2;
-  var cardW = cols === 1 ? cw : (cw - 0.2) / 2;
-  var cardH = 1.3;
-  var gap = 0.2;
+  var availH = T.margin.footerY - 0.1 - y;
+  var cols = audiences.length <= 2 ? audiences.length : 2;
+  var rows = Math.ceil(audiences.length / cols);
+  var colGap = 0.25, rowGap = 0.18;
+  var cardW = (cw - colGap * (cols - 1)) / cols;
+  var cardH = (availH - rowGap * (rows - 1)) / rows;
 
   audiences.forEach(function(aud, i) {
-    var col = cols === 1 ? 0 : i % 2;
-    var row = cols === 1 ? i : Math.floor(i / 2);
-    var ax = cx + col * (cardW + gap);
-    var ay = y + row * (cardH + gap);
+    var col = i % cols;
+    var row = Math.floor(i / cols);
+    var ax = cx + col * (cardW + colGap);
+    var ay = y + row * (cardH + rowGap);
 
     H.addCard(slide, ax, ay, cardW, cardH);
-    slide.addText(H.trunc(aud.audience_group, 50), {
+
+    // Audience number badge
+    slide.addShape("rect", {
       x: ax + T.card.pad, y: ay + T.card.pad,
-      w: cardW - T.card.pad * 2, h: 0.28,
+      w: 0.26, h: 0.26,
+      fill: { color: T.color.accent },
+      line: { color: T.color.accent },
+      rectRadius: 0.03,
+    });
+    slide.addText(String(i + 1), {
+      x: ax + T.card.pad, y: ay + T.card.pad,
+      w: 0.26, h: 0.26,
+      fontSize: 10, color: T.color.white,
+      fontFace: T.font.body, bold: true,
+      align: "center", valign: "middle",
+    });
+
+    // Audience name
+    slide.addText(H.trunc(aud.audience_group || "", 45), {
+      x: ax + T.card.pad + 0.34, y: ay + T.card.pad + 0.02,
+      w: cardW - T.card.pad * 2 - 0.36, h: 0.24,
       fontSize: T.size.h3, color: T.color.accent,
       fontFace: T.font.heading, bold: true,
     });
-    slide.addText(H.trunc(aud.description, 200), {
-      x: ax + T.card.pad, y: ay + T.card.pad + 0.3,
-      w: cardW - T.card.pad * 2, h: cardH - T.card.pad * 2 - 0.32,
+
+    // Description
+    var descY = ay + T.card.pad + 0.34;
+    var descH = cardH - T.card.pad * 2 - 0.36;
+    slide.addText(H.trunc(aud.description || "", 240), {
+      x: ax + T.card.pad, y: descY,
+      w: cardW - T.card.pad * 2, h: descH,
       fontSize: T.size.body, color: T.color.fg,
       fontFace: T.font.body, wrap: true,
     });
@@ -281,39 +375,47 @@ function slideStrategy(pptx, plan) {
 
   var cx = T.margin.x, cw = T.W - T.margin.x * 2;
 
-  slide.addText(plan.recommended_approach, {
-    x: cx, y: y, w: cw, h: 0.9,
-    fontSize: T.size.h2, color: T.color.fg,
-    fontFace: T.font.heading, bold: false, wrap: true,
-    italic: true,
+  // Large italic pull-quote approach statement
+  slide.addText(H.trunc(plan.recommended_approach, 280), {
+    x: cx, y: y, w: cw * 0.72, h: 1.6,
+    fontSize: T.size.h2 + 2, color: T.color.fg,
+    fontFace: T.font.heading, bold: false,
+    wrap: true, italic: true,
   });
-  y += 1.0;
 
-  if (plan.campaign_timing) {
-    H.addRule(slide, cx, y, cw * 0.3);
-    slide.addText("Campaign Approach", {
-      x: cx, y: y + 0.1, w: cw, h: 0.22,
-      fontSize: T.size.h3, color: T.color.accent,
-      fontFace: T.font.heading, bold: true,
-    });
-    slide.addText(H.trunc(plan.campaign_timing, 400), {
-      x: cx, y: y + 0.36, w: cw, h: 1.2,
-      fontSize: T.size.body, color: T.color.fg,
-      fontFace: T.font.body, wrap: true,
-    });
-    y += 1.65;
-  }
+  // Decorative quote mark
+  slide.addText("“", {
+    x: T.W - T.margin.x - 1.8, y: y - 0.15,
+    w: 1.8, h: 1.2,
+    fontSize: 110, color: T.color.accentLight,
+    fontFace: T.font.heading, bold: false,
+    align: "right",
+  });
 
-  if (plan.creative) {
-    slide.addText("Creative Direction", {
-      x: cx, y: y, w: cw, h: 0.22,
-      fontSize: T.size.h3, color: T.color.accent,
-      fontFace: T.font.heading, bold: true,
-    });
-    slide.addText(H.trunc(plan.creative, 350), {
-      x: cx, y: y + 0.24, w: cw, h: 1.0,
-      fontSize: T.size.body, color: T.color.fg,
-      fontFace: T.font.body, wrap: true,
+  y += 1.7;
+  H.addRule(slide, cx, y, cw * 0.2);
+  y += 0.15;
+
+  // Campaign approach + creative direction side by side
+  var cols = [];
+  if (plan.campaign_timing) cols.push({ label: "CAMPAIGN APPROACH", text: plan.campaign_timing });
+  if (plan.creative)         cols.push({ label: "CREATIVE DIRECTION", text: plan.creative });
+
+  if (cols.length) {
+    var colW = cols.length === 1 ? cw : (cw - 0.3) / 2;
+    var availH = T.margin.footerY - y - 0.12;
+    cols.forEach(function(col, i) {
+      var colX = cx + i * (colW + 0.3);
+      slide.addText(col.label, {
+        x: colX, y: y, w: colW, h: 0.15,
+        fontSize: T.size.sectionLabel, color: T.color.accent,
+        fontFace: T.font.body, charSpacing: 2,
+      });
+      slide.addText(H.trunc(col.text, 320), {
+        x: colX, y: y + 0.18, w: colW, h: availH - 0.18,
+        fontSize: T.size.body, color: T.color.fg,
+        fontFace: T.font.body, wrap: true,
+      });
     });
   }
 }
@@ -323,8 +425,7 @@ function slideChannels(pptx, plan) {
   if (!plan.recommended_channels || !plan.recommended_channels.length) return;
 
   var channels = plan.recommended_channels;
-  // Split into groups of 3 for multi-slide support
-  var pageSize = 3;
+  var pageSize = 4;
   var pages = Math.ceil(channels.length / pageSize);
 
   for (var p = 0; p < pages; p++) {
@@ -336,57 +437,66 @@ function slideChannels(pptx, plan) {
     H.addFooter(slide);
 
     var cx = T.margin.x, cw = T.W - T.margin.x * 2;
-    var cardH = (T.H - y - 0.4) / group.length - 0.12;
-    cardH = Math.min(cardH, 1.6);
+    var availH = T.margin.footerY - 0.1 - y;
+    var cardH = (availH - 0.12 * (group.length - 1)) / group.length;
+    cardH = Math.min(cardH, 1.45);
 
     group.forEach(function(ch, i) {
-      var cy = y + i * (cardH + 0.14);
+      var cy = y + i * (cardH + 0.12);
       H.addCard(slide, cx, cy, cw, cardH);
 
-      // Channel name
-      slide.addText(H.trunc(ch.channel, 30), {
-        x: cx + T.card.pad, y: cy + T.card.pad,
-        w: 2.8, h: 0.26,
-        fontSize: T.size.h3, color: T.color.accent,
-        fontFace: T.font.heading, bold: true,
+      // Left: channel name block (accent bg strip)
+      var nameW = 2.2;
+      slide.addShape("rect", {
+        x: cx, y: cy, w: nameW, h: cardH,
+        fill: { color: T.color.accentLight },
+        line: { color: T.color.border, pt: 0.75 },
+        rectRadius: T.card.r,
       });
 
-      // Role pill
+      slide.addText(H.trunc(ch.channel || "", 22), {
+        x: cx + T.card.pad, y: cy,
+        w: nameW - T.card.pad * 2, h: cardH * 0.68,
+        fontSize: T.size.h3 - 1, color: T.color.accent,
+        fontFace: T.font.heading, bold: true,
+        valign: "bottom", wrap: true,
+      });
+
+      // Role
       if (ch.role) {
-        slide.addShape("rect", {
-          x: cx + 3.2, y: cy + T.card.pad + 0.02,
-          w: 2.2, h: 0.22,
-          fill: { color: T.color.bg },
-          line: { color: T.color.border, pt: 0.5 },
-          rectRadius: 0.04,
-        });
         slide.addText(H.trunc(ch.role, 30), {
-          x: cx + 3.2, y: cy + T.card.pad + 0.02,
-          w: 2.2, h: 0.22,
+          x: cx + T.card.pad, y: cy + cardH * 0.68,
+          w: nameW - T.card.pad * 2, h: cardH * 0.28,
           fontSize: T.size.small, color: T.color.muted,
-          fontFace: T.font.body, align: "center", valign: "middle",
+          fontFace: T.font.body, valign: "top",
         });
       }
 
-      // Budget from plan.budget array
+      // Right: rationale
+      var bodyX = cx + nameW + 0.18;
+      var bodyW2 = cw - nameW - 0.18 - T.card.pad;
+
+      // Budget
       var budgetEntry = (plan.budget || []).find(function(b) {
         return (b.channel || "").toLowerCase() === (ch.channel || "").toLowerCase();
       });
-      if (budgetEntry) {
+      var hasAmt = !!(budgetEntry);
+      var amtW = hasAmt ? 1.4 : 0;
+
+      if (hasAmt) {
         slide.addText(H.fmtDollars(budgetEntry.monthly_investment) + "/mo", {
-          x: T.W - T.margin.x - 1.8, y: cy + T.card.pad,
-          w: 1.6, h: 0.26,
-          fontSize: 12, color: T.color.fg,
-          fontFace: T.font.body, bold: true, align: "right",
+          x: cx + cw - amtW - T.card.pad, y: cy + T.card.pad,
+          w: amtW, h: 0.25,
+          fontSize: 11, color: T.color.accent,
+          fontFace: T.font.heading, bold: true, align: "right",
         });
       }
 
-      // Why / rationale
-      var body = H.trunc(ch.why || ch.what_to_run || "", 180);
+      var body = H.trunc(ch.why || ch.what_to_run || "", 220);
       if (body) {
         slide.addText(body, {
-          x: cx + T.card.pad, y: cy + T.card.pad + 0.3,
-          w: cw - T.card.pad * 2, h: cardH - T.card.pad * 2 - 0.34,
+          x: bodyX, y: cy + T.card.pad,
+          w: bodyW2 - amtW - 0.1, h: cardH - T.card.pad * 2,
           fontSize: T.size.body, color: T.color.fg,
           fontFace: T.font.body, wrap: true,
         });
@@ -406,69 +516,84 @@ function slideBudget(pptx, plan) {
   var total = H.totalBudget(plan);
   var cx = T.margin.x, cw = T.W - T.margin.x * 2;
 
-  // Total callout
-  slide.addText("Total Monthly Budget", {
-    x: cx, y: y, w: 3.5, h: 0.18,
-    fontSize: T.size.small, color: T.color.muted,
-    fontFace: T.font.body, charSpacing: 1,
+  // Total budget hero — right-aligned large stat
+  slide.addText("TOTAL / MONTH", {
+    x: T.W - T.margin.x - 3.2, y: y, w: 3.2, h: 0.15,
+    fontSize: T.size.sectionLabel, color: T.color.muted,
+    fontFace: T.font.body, charSpacing: 2, align: "right",
   });
-  slide.addText(H.fmtDollars(total) + "/mo", {
-    x: cx, y: y + 0.2, w: 3.5, h: 0.5,
+  slide.addText(H.fmtDollars(total), {
+    x: T.W - T.margin.x - 3.2, y: y + 0.15, w: 3.2, h: 0.58,
     fontSize: T.size.kpi, color: T.color.accent,
-    fontFace: T.font.heading, bold: true,
+    fontFace: T.font.heading, bold: true, align: "right",
   });
 
-  y += 0.9;
+  y += 0.88;
 
-  // Bar chart — horizontal bars proportional to budget
-  var barMaxW = cw - 2.4;
-  var barH = 0.32;
-  var barGap = 0.14;
+  // Horizontal bar chart
+  var barMaxW = cw - 3.8;
+  var labelW = 2.4;
+  var amtW = 1.3;
+  var barAreaX = cx + labelW + 0.1;
+  var barH = 0.3;
+  var barGap = 0.12;
+
   var maxInv = Math.max.apply(null, plan.budget.map(function(b) {
     return parseFloat(String(b.monthly_investment || 0).replace(/[^0-9.]/g, "")) || 0;
   }));
 
   plan.budget.forEach(function(b, i) {
     var inv = parseFloat(String(b.monthly_investment || 0).replace(/[^0-9.]/g, "")) || 0;
-    var barW = maxInv > 0 ? (inv / maxInv) * barMaxW : 0;
+    var barW = maxInv > 0 ? Math.max((inv / maxInv) * barMaxW, 0.06) : 0.06;
     var by = y + i * (barH + barGap);
 
     // Channel label
-    slide.addText(H.trunc(b.channel, 18), {
-      x: cx, y: by, w: 2.0, h: barH,
+    slide.addText(H.trunc(b.channel || "", 20), {
+      x: cx, y: by, w: labelW, h: barH,
       fontSize: 10, color: T.color.fg,
       fontFace: T.font.body, valign: "middle",
     });
 
-    // Bar background
+    // Bar background track
     slide.addShape("rect", {
-      x: cx + 2.1, y: by + 0.04, w: barMaxW, h: barH - 0.08,
-      fill: { color: T.color.accentLight },
-      line: { color: T.color.border, pt: 0.25 },
+      x: barAreaX, y: by + 0.04, w: barMaxW, h: barH - 0.08,
+      fill: { color: T.color.borderLight },
+      line: { color: T.color.borderLight },
+      rectRadius: 0.02,
     });
 
     // Bar fill
-    if (barW > 0.05) {
-      slide.addShape("rect", {
-        x: cx + 2.1, y: by + 0.04, w: barW, h: barH - 0.08,
-        fill: { color: T.color.accent },
-        line: { color: T.color.accent },
-      });
-    }
+    slide.addShape("rect", {
+      x: barAreaX, y: by + 0.04, w: barW, h: barH - 0.08,
+      fill: { color: T.color.accent },
+      line: { color: T.color.accent },
+      rectRadius: 0.02,
+    });
 
-    // Amount + pct label
-    var pct = H.fmtPct(b.percentage);
-    slide.addText(H.fmtDollars(inv) + "  " + pct, {
-      x: cx + 2.1 + barMaxW + 0.1, y: by, w: 1.8, h: barH,
-      fontSize: 10, color: T.color.fg,
+    // Amount and pct — right of bar
+    var pct = b.percentage ? " · " + H.fmtPct(b.percentage) : "";
+    slide.addText(H.fmtDollars(inv) + pct, {
+      x: barAreaX + barMaxW + 0.12, y: by, w: amtW, h: barH,
+      fontSize: 9, color: T.color.muted,
       fontFace: T.font.body, valign: "middle",
     });
   });
 }
 
-// ── 8. CAMPAIGN / TACTICAL ────────────────────────────────────────────────────
+// ── 8. CAMPAIGN / MESSAGING ───────────────────────────────────────────────────
 function slideCampaign(pptx, plan) {
-  if (!plan.messaging || !plan.messaging.length) return;
+  // Handle both array and object forms of messaging
+  var msgs = null;
+  if (Array.isArray(plan.messaging)) {
+    msgs = plan.messaging.slice(0, 4);
+  } else if (plan.messaging && typeof plan.messaging === "object") {
+    // Object with territory/tone/key_messages
+    msgs = null; // handled separately below
+  }
+
+  if (msgs !== null && msgs.length === 0) return;
+  if (!plan.messaging) return;
+
   var slide = pptx.addSlide();
   slide.background = { color: T.color.bg };
   var y = H.addSlideHeader(slide, "Campaign Approach", "Messaging & Creative");
@@ -476,30 +601,64 @@ function slideCampaign(pptx, plan) {
 
   var cx = T.margin.x, cw = T.W - T.margin.x * 2;
 
-  var msgs = plan.messaging.slice(0, 4);
-  var cols = msgs.length <= 2 ? 1 : 2;
-  var cardW = cols === 1 ? cw : (cw - 0.2) / 2;
-  var cardH = cols === 1 ? 1.1 : 1.3;
+  if (msgs && msgs.length) {
+    // Array of messaging territories
+    var cols = msgs.length <= 2 ? msgs.length : 2;
+    var rows = Math.ceil(msgs.length / cols);
+    var colGap = 0.25, rowGap = 0.18;
+    var availH = T.margin.footerY - 0.1 - y;
+    var cardW = (cw - colGap * (cols - 1)) / cols;
+    var cardH = (availH - rowGap * (rows - 1)) / rows;
 
-  msgs.forEach(function(msg, i) {
-    var col = cols === 1 ? 0 : i % 2;
-    var row = cols === 1 ? i : Math.floor(i / 2);
-    var mx = cx + col * (cardW + 0.2);
-    var my = y + row * (cardH + 0.15);
-    H.addCard(slide, mx, my, cardW, cardH);
-    slide.addText(H.trunc(msg.territory, 50), {
-      x: mx + T.card.pad, y: my + T.card.pad,
-      w: cardW - T.card.pad * 2, h: 0.25,
-      fontSize: T.size.h3, color: T.color.accent,
-      fontFace: T.font.heading, bold: true,
+    msgs.forEach(function(msg, i) {
+      var col = i % cols;
+      var row = Math.floor(i / cols);
+      var mx = cx + col * (cardW + colGap);
+      var my = y + row * (cardH + rowGap);
+      H.addCard(slide, mx, my, cardW, cardH);
+
+      // Territory
+      slide.addText(H.trunc(msg.territory || "", 50), {
+        x: mx + T.card.pad, y: my + T.card.pad,
+        w: cardW - T.card.pad * 2, h: 0.24,
+        fontSize: T.size.h3, color: T.color.accent,
+        fontFace: T.font.heading, bold: true,
+      });
+
+      // Rationale
+      slide.addText(H.trunc(msg.rationale || "", 200), {
+        x: mx + T.card.pad, y: my + T.card.pad + 0.28,
+        w: cardW - T.card.pad * 2, h: cardH - T.card.pad * 2 - 0.3,
+        fontSize: T.size.body, color: T.color.fg,
+        fontFace: T.font.body, wrap: true,
+      });
     });
-    slide.addText(H.trunc(msg.rationale, 180), {
-      x: mx + T.card.pad, y: my + T.card.pad + 0.28,
-      w: cardW - T.card.pad * 2, h: cardH - T.card.pad * 2 - 0.3,
-      fontSize: T.size.body, color: T.color.fg,
-      fontFace: T.font.body, wrap: true,
+
+  } else {
+    // Object form: territory, tone, key_messages
+    var m = plan.messaging;
+    var sections = [];
+    if (m.territory)     sections.push({ label: "MESSAGE TERRITORY",  text: m.territory });
+    if (m.tone)          sections.push({ label: "TONE OF VOICE",      text: m.tone });
+    if (m.key_messages)  {
+      var kmText = Array.isArray(m.key_messages) ? m.key_messages.join(" · ") : m.key_messages;
+      sections.push({ label: "KEY MESSAGES", text: kmText });
+    }
+
+    sections.forEach(function(sec, i) {
+      var sy = y + i * ((T.margin.footerY - 0.1 - y) / Math.max(sections.length, 1) + 0.02);
+      slide.addText(sec.label, {
+        x: cx, y: sy, w: cw, h: 0.15,
+        fontSize: T.size.sectionLabel, color: T.color.accent,
+        fontFace: T.font.body, charSpacing: 2,
+      });
+      slide.addText(H.trunc(sec.text, 260), {
+        x: cx, y: sy + 0.17, w: cw, h: 0.72,
+        fontSize: T.size.body, color: T.color.fg,
+        fontFace: T.font.body, wrap: true,
+      });
     });
-  });
+  }
 }
 
 // ── 9. MEASUREMENT ────────────────────────────────────────────────────────────
@@ -515,29 +674,43 @@ function slideMeasurement(pptx, plan) {
   var y = H.addSlideHeader(slide, "How to Measure Success", "Measurement");
   H.addFooter(slide);
 
-  var cx = T.margin.x, cw = (T.W - T.margin.x * 2 - 0.3) / 2;
+  var cx = T.margin.x, colGap = 0.35;
+  var colW = (T.W - T.margin.x * 2 - colGap) / 2;
+  var availH = T.margin.footerY - 0.1 - y;
 
-  function addKpiList(title, items, x) {
-    slide.addText(title, {
-      x: x, y: y, w: cw, h: 0.25,
-      fontSize: T.size.h3, color: T.color.accent,
-      fontFace: T.font.heading, bold: true,
+  function addKpiColumn(title, items, x) {
+    slide.addText(title.toUpperCase(), {
+      x: x, y: y, w: colW, h: 0.15,
+      fontSize: T.size.sectionLabel, color: T.color.accent,
+      fontFace: T.font.body, charSpacing: 2,
     });
-    H.addRule(slide, x, y + 0.28, cw * 0.4);
+
+    var itemH = (availH - 0.28) / Math.min(items.length, 6);
+    itemH = Math.min(itemH, 0.88);
+
     items.slice(0, 6).forEach(function(item, i) {
-      var iy = y + 0.44 + i * 0.52;
-      H.addCard(slide, x, iy, cw, 0.46);
-      slide.addText(H.trunc(item, 100), {
-        x: x + T.card.pad, y: iy + T.card.pad,
-        w: cw - T.card.pad * 2, h: 0.46 - T.card.pad * 2,
+      var iy = y + 0.22 + i * (itemH + 0.08);
+      H.addCard(slide, x, iy, colW, itemH);
+
+      // Number dot
+      slide.addShape("rect", {
+        x: x + T.card.pad, y: iy + (itemH - 0.2) / 2,
+        w: 0.18, h: 0.18,
+        fill: { color: T.color.accent },
+        line: { color: T.color.accent },
+        rectRadius: 0.09,
+      });
+      slide.addText(H.trunc(item, 130), {
+        x: x + T.card.pad + 0.26, y: iy + T.card.pad,
+        w: colW - T.card.pad * 2 - 0.28, h: itemH - T.card.pad * 2,
         fontSize: T.size.body, color: T.color.fg,
         fontFace: T.font.body, wrap: true,
       });
     });
   }
 
-  if (business.length) addKpiList("Business Outcomes", business, cx);
-  if (media.length)    addKpiList("Media Signals", media, cx + cw + 0.3);
+  if (business.length) addKpiColumn("Business Outcomes", business, cx);
+  if (media.length)    addKpiColumn("Media Signals", media, cx + colW + colGap);
 }
 
 // ── 10. ROADMAP ───────────────────────────────────────────────────────────────
@@ -550,79 +723,84 @@ function slideRoadmap(pptx, plan) {
   H.addFooter(slide);
 
   var phases = [
-    { label: "Launch", days: "Days 1–30",  text: lp.days_1_30  || "" },
-    { label: "Learn",  days: "Days 31–60", text: lp.days_31_60 || "" },
-    { label: "Optimize", days: "Days 61–90", text: lp.days_61_90 || "" },
+    { label: "Launch",   days: "Days 1–30",   text: lp.days_1_30  || "", num: "01" },
+    { label: "Learn",    days: "Days 31–60",  text: lp.days_31_60 || "", num: "02" },
+    { label: "Optimize", days: "Days 61–90",  text: lp.days_61_90 || "", num: "03" },
   ].filter(function(p) { return p.text; });
 
-  var cw = (T.W - T.margin.x * 2 - 0.3 * (phases.length - 1)) / phases.length;
-  var cx = T.margin.x;
-  var cardH = T.H - y - 0.5;
+  if (!phases.length) return;
+
+  var cx = T.margin.x, cw = T.W - T.margin.x * 2;
+  var colGap = 0.25;
+  var phaseW = (cw - colGap * (phases.length - 1)) / phases.length;
+  var availH = T.margin.footerY - 0.1 - y;
+  var headerH = 0.65, contentH = availH - headerH - 0.1;
 
   phases.forEach(function(phase, i) {
-    var px = cx + i * (cw + 0.3);
+    var px = cx + i * (phaseW + colGap);
 
-    // Phase header bar
-    slide.addShape("rect", {
-      x: px, y: y, w: cw, h: 0.4,
-      fill: { color: T.color.accent },
-      line: { color: T.color.accent },
-      rectRadius: 0.04,
+    // Phase header card — accent fill
+    H.addAccentCard(slide, px, y, phaseW, headerH);
+
+    // Number
+    slide.addText(phase.num, {
+      x: px + T.card.pad, y: y + T.card.pad,
+      w: 0.4, h: headerH - T.card.pad * 2,
+      fontSize: 22, color: T.color.accentLight,
+      fontFace: T.font.heading, bold: false,
+      valign: "middle",
     });
-    slide.addText(phase.label, {
-      x: px, y: y, w: cw, h: 0.22,
-      fontSize: 10, color: T.color.white,
-      fontFace: T.font.heading, bold: true,
-      align: "center", valign: "middle",
+
+    // Phase name
+    slide.addText(phase.label.toUpperCase(), {
+      x: px + T.card.pad + 0.42, y: y + T.card.pad,
+      w: phaseW - T.card.pad * 2 - 0.44, h: 0.26,
+      fontSize: 11, color: T.color.white,
+      fontFace: T.font.body, bold: true,
+      valign: "bottom",
     });
+
+    // Days label
     slide.addText(phase.days, {
-      x: px, y: y + 0.22, w: cw, h: 0.18,
+      x: px + T.card.pad + 0.42, y: y + T.card.pad + 0.28,
+      w: phaseW - T.card.pad * 2 - 0.44, h: 0.22,
       fontSize: T.size.small, color: T.color.accentLight,
-      fontFace: T.font.body, align: "center",
+      fontFace: T.font.body,
     });
 
-    // Phase content card
-    H.addCard(slide, px, y + 0.44, cw, cardH - 0.46);
-    slide.addText(H.trunc(phase.text, 280), {
-      x: px + T.card.pad, y: y + 0.44 + T.card.pad,
-      w: cw - T.card.pad * 2, h: cardH - 0.46 - T.card.pad * 2,
+    // Content card
+    H.addCard(slide, px, y + headerH + 0.08, phaseW, contentH);
+    slide.addText(H.trunc(phase.text, 320), {
+      x: px + T.card.pad, y: y + headerH + 0.08 + T.card.pad,
+      w: phaseW - T.card.pad * 2, h: contentH - T.card.pad * 2,
       fontSize: T.size.body, color: T.color.fg,
       fontFace: T.font.body, wrap: true,
     });
-
-    // Arrow connector (not on last)
-    if (i < phases.length - 1) {
-      slide.addShape("line", {
-        x: px + cw + 0.04, y: y + 0.2,
-        w: 0.22, h: 0,
-        line: { color: T.color.accent, pt: 1.5 },
-      });
-    }
   });
 
-  // Smart next moves
+  // Smart next moves — below phases if room
   if (plan.smart_next_moves && plan.smart_next_moves.length) {
-    var ny = y + cardH + 0.05;
-    if (ny < T.H - 0.5) {
-      slide.addText("Smart Next Moves", {
-        x: T.margin.x, y: ny, w: T.W - T.margin.x * 2, h: 0.22,
-        fontSize: T.size.h3, color: T.color.accent,
-        fontFace: T.font.heading, bold: true,
+    var ny = y + availH + 0.06;
+    if (ny < T.H - 0.35) {
+      var moves = plan.smart_next_moves.slice(0, 3);
+      slide.addText("NEXT MOVES  ", {
+        x: cx, y: ny, w: 1.4, h: 0.22,
+        fontSize: T.size.sectionLabel, color: T.color.muted,
+        fontFace: T.font.body, charSpacing: 1.5,
       });
-      var moves = plan.smart_next_moves.slice(0, 3).join("   •   ");
-      slide.addText(moves, {
-        x: T.margin.x, y: ny + 0.24,
-        w: T.W - T.margin.x * 2, h: 0.25,
-        fontSize: T.size.small, color: T.color.muted,
-        fontFace: T.font.body,
+      moves.forEach(function(m, mi) {
+        slide.addText("→ " + H.trunc(m, 60), {
+          x: cx + 1.5 + mi * 3.6, y: ny, w: 3.5, h: 0.22,
+          fontSize: T.size.small, color: T.color.muted,
+          fontFace: T.font.body,
+        });
       });
     }
   }
 }
 
-// ── 11. OPTIMIZATION SUMMARY (only if opt data present) ───────────────────────
+// ── 11. OPTIMIZATION ──────────────────────────────────────────────────────────
 function slideOptimization(pptx, plan) {
-  // Works with either a full optimized plan (has budget_reallocation + channel_actions)
   var realloc  = plan.budget_reallocation;
   var actions  = plan.channel_actions;
   if (!realloc || !realloc.length) return;
@@ -634,64 +812,71 @@ function slideOptimization(pptx, plan) {
 
   var cx = T.margin.x, cw = T.W - T.margin.x * 2;
 
-  // Summary headline
+  // Key insight
   if (plan.performance_snapshot && plan.performance_snapshot.key_insight) {
-    slide.addText(H.trunc(plan.performance_snapshot.key_insight, 150), {
-      x: cx, y: y, w: cw, h: 0.38,
+    slide.addText(H.trunc(plan.performance_snapshot.key_insight, 180), {
+      x: cx, y: y, w: cw, h: 0.34,
       fontSize: T.size.body, color: T.color.muted,
       fontFace: T.font.body, wrap: true, italic: true,
     });
-    y += 0.45;
+    y += 0.40;
+  }
+
+  // Column layout
+  var colW = [2.5, 1.25, 1.3, 1.2, 0.92, 0];
+  colW[5] = cw - colW.slice(0, 5).reduce(function(a, b) { return a + b; }, 0) - 0.3;
+  var colX = [cx];
+  for (var ci = 1; ci < colW.length; ci++) {
+    colX.push(colX[ci - 1] + colW[ci - 1] + 0.06);
   }
 
   // Column headers
-  var colW = [2.5, 1.3, 1.3, 1.3, 0.95, T.W - T.margin.x * 2 - 7.35];
-  var colX = [cx];
-  for (var ci = 1; ci < colW.length; ci++) colX.push(colX[ci-1] + colW[ci-1] + 0.05);
-
   var headers = ["Channel", "Current", "Recommended", "Change", "Action", "Rationale"];
   headers.forEach(function(h, i) {
     slide.addText(h.toUpperCase(), {
-      x: colX[i], y: y, w: colW[i], h: 0.22,
-      fontSize: T.size.small, color: T.color.muted,
-      fontFace: T.font.body, charSpacing: 0.8,
+      x: colX[i], y: y, w: colW[i], h: 0.18,
+      fontSize: T.size.sectionLabel - 1, color: T.color.muted,
+      fontFace: T.font.body, charSpacing: 1,
     });
   });
-  H.addRule(slide, cx, y + 0.24, cw);
-  y += 0.32;
+  H.addRule(slide, cx, y + 0.2, cw, T.color.border);
+  y += 0.28;
 
-  var rowH = 0.46;
-  realloc.slice(0, 7).forEach(function(row, i) {
+  var rowH = 0.44;
+  realloc.slice(0, 8).forEach(function(row, i) {
     var ry = y + i * rowH;
+
+    // Alternating row tint
     if (i % 2 === 0) {
       slide.addShape("rect", {
-        x: cx - 0.05, y: ry - 0.04, w: cw + 0.1, h: rowH,
+        x: cx - 0.04, y: ry - 0.03, w: cw + 0.08, h: rowH,
         fill: { color: T.color.accentLight },
         line: { color: T.color.accentLight },
       });
     }
 
-    var changeDollars = row.change_dollars || (row.recommended_budget - row.current_budget);
+    var changeDollars = row.change_dollars != null
+      ? row.change_dollars
+      : ((row.recommended_budget || 0) - (row.current_budget || 0));
     var changeColor = changeDollars > 0 ? T.color.scale.increase
                     : changeDollars < 0 ? T.color.scale.decrease
                     : T.color.scale.neutral;
-    var changeStr = changeDollars > 0 ? "+" + H.fmtDollars(changeDollars) : H.fmtDollars(changeDollars);
+    var changeStr = changeDollars > 0
+      ? "+" + H.fmtDollars(changeDollars)
+      : H.fmtDollars(changeDollars);
 
-    // Find matching action
     var actionObj = actions && actions.find(function(a) {
       return (a.channel || "").toLowerCase() === (row.channel || "").toLowerCase();
     });
     var action = actionObj ? actionObj.action : (row.direction || "");
 
-    slide.addText(H.trunc(row.channel, 24),   { x: colX[0], y: ry, w: colW[0], h: rowH, fontSize: 10, color: T.color.fg,  fontFace: T.font.body, valign: "middle" });
-    slide.addText(H.fmtDollars(row.current_budget),     { x: colX[1], y: ry, w: colW[1], h: rowH, fontSize: 10, color: T.color.muted, fontFace: T.font.body, valign: "middle" });
-    slide.addText(H.fmtDollars(row.recommended_budget), { x: colX[2], y: ry, w: colW[2], h: rowH, fontSize: 10, color: T.color.fg,    fontFace: T.font.body, valign: "middle", bold: true });
-    slide.addText(changeStr, { x: colX[3], y: ry, w: colW[3], h: rowH, fontSize: 10, color: changeColor, fontFace: T.font.body, valign: "middle", bold: true });
-
+    slide.addText(H.trunc(row.channel, 24),                 { x: colX[0], y: ry, w: colW[0], h: rowH, fontSize: 9,  color: T.color.fg,    fontFace: T.font.body, valign: "middle" });
+    slide.addText(H.fmtDollars(row.current_budget),         { x: colX[1], y: ry, w: colW[1], h: rowH, fontSize: 9,  color: T.color.muted, fontFace: T.font.body, valign: "middle" });
+    slide.addText(H.fmtDollars(row.recommended_budget),     { x: colX[2], y: ry, w: colW[2], h: rowH, fontSize: 9,  color: T.color.fg,    fontFace: T.font.body, valign: "middle", bold: true });
+    slide.addText(changeStr,                                 { x: colX[3], y: ry, w: colW[3], h: rowH, fontSize: 9,  color: changeColor,   fontFace: T.font.body, valign: "middle", bold: true });
     if (action) H.addActionBadge(slide, action, colX[4], ry + 0.12);
-
     if (row.rationale) {
-      slide.addText(H.trunc(row.rationale, 100), { x: colX[5], y: ry, w: colW[5], h: rowH, fontSize: T.size.small, color: T.color.muted, fontFace: T.font.body, valign: "middle", wrap: true });
+      slide.addText(H.trunc(row.rationale, 110), { x: colX[5], y: ry, w: colW[5], h: rowH, fontSize: T.size.small, color: T.color.muted, fontFace: T.font.body, valign: "middle", wrap: true });
     }
   });
 }

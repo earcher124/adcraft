@@ -39,7 +39,7 @@ exports.handler = async function (event) {
       productType: r.fields["Product"] || "",
       targetCustomer: r.fields["Target Customer"] || "",
       geo: r.fields["Geography"] || "",
-      monthlyRevenue: r.fields["Monthly Revenue"] || "",
+      monthlyRevenue: r.fields["Monthly Revenue"] != null ? r.fields["Monthly Revenue"] : "",
       currentAdvertising: r.fields["Current Advertising"] || "",
     };
 
