@@ -227,20 +227,7 @@
   <script>
     var recordId = new URLSearchParams(window.location.search).get('id');
 
-    // Fire background generation immediately — prompt is stored in Airtable, only recordId needed
-    (function() {
-      if (!recordId) return;
-      console.log('[AdCraft] triggering plan generation for recordId:', recordId);
-      fetch('/.netlify/functions/trigger-plan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recordId: recordId })
-      }).then(function(r) {
-        console.log('[AdCraft] trigger-plan responded:', r.status);
-      }).catch(function(e) {
-        console.error('[AdCraft] trigger-plan fetch error:', e.message);
-      });
-    })();
+    // Background generation is triggered from new-plan.html before redirect — nothing to do here.
 
     var pollInterval = null;
     var pollCount = 0;

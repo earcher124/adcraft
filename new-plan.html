@@ -532,6 +532,17 @@
         var data = await res.json();
 
         if (data.recordId) {
+          // Trigger background generation before redirecting — trigger-plan has CORS,
+          // and we await it so the fetch completes before navigation kills it.
+          try {
+            await fetch('/.netlify/functions/trigger-plan', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ recordId: data.recordId, prompt: prompt })
+            });
+          } catch(e) {
+            console.error('[AdCraft] trigger-plan error:', e.message);
+          }
           window.location.href = '/plan-viewer.html?id=' + data.recordId;
         } else {
           throw new Error('No record ID returned');
