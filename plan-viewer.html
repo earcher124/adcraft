@@ -226,6 +226,32 @@
   <script src="_shared.js"></script>
   <script>
     var recordId = new URLSearchParams(window.location.search).get('id');
+
+    // Fire background generation immediately — no auth needed, just recordId + stored prompt
+    (function() {
+      if (!recordId) return;
+      try {
+        var pendingPrompt = sessionStorage.getItem('adcraft_pending_' + recordId);
+        console.log('[AdCraft] recordId:', recordId, 'pendingPrompt found:', !!pendingPrompt);
+        if (pendingPrompt) {
+          sessionStorage.removeItem('adcraft_pending_' + recordId);
+          fetch('/.netlify/functions/trigger-plan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recordId: recordId, prompt: pendingPrompt })
+          }).then(function(r) {
+            console.log('[AdCraft] trigger-plan responded:', r.status);
+          }).catch(function(e) {
+            console.error('[AdCraft] trigger-plan fetch error:', e.message);
+          });
+        } else {
+          console.warn('[AdCraft] No pending prompt found in sessionStorage');
+        }
+      } catch(e) {
+        console.error('[AdCraft] sessionStorage error:', e);
+      }
+    })();
+
     var pollInterval = null;
     var pollCount = 0;
     var currentPlan = null;
@@ -554,29 +580,6 @@
       }
 
       startStepAnimation();
-
-      // Fire background generation if we have a pending prompt stored from new-plan.html
-      try {
-        var pendingPrompt = sessionStorage.getItem('adcraft_pending_' + recordId);
-        console.log('[AdCraft] pendingPrompt found:', !!pendingPrompt, 'recordId:', recordId);
-        if (pendingPrompt) {
-          sessionStorage.removeItem('adcraft_pending_' + recordId);
-          fetch('/.netlify/functions/trigger-plan', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ recordId: recordId, prompt: pendingPrompt })
-          }).then(function(r) {
-            console.log('[AdCraft] trigger-plan status:', r.status);
-          }).catch(function(e) {
-            console.error('[AdCraft] trigger-plan error:', e.message);
-          });
-        } else {
-          console.warn('[AdCraft] No pending prompt in sessionStorage — plan may already be generating or was triggered elsewhere');
-        }
-      } catch(e) {
-        console.error('[AdCraft] sessionStorage error:', e);
-      }
-
       // Poll immediately, then every 4 seconds
       pollPlan();
       pollInterval = setInterval(pollPlan, 4000);
