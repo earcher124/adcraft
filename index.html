@@ -422,6 +422,36 @@
         '<div class="state-msg">' + esc(msg) + '</div></div>';
     }
 
+    function renderMarkdown(md, f) {
+      // Convert markdown to styled HTML for optimized plans
+      var name = f['Plan Name'] || 'Optimized Plan';
+      var biz  = f['Business Name'] || '';
+      var goal = f['Primary Goal'] || '';
+      // Convert markdown to basic HTML
+      var body = md
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/^#{3}\s+(.+)$/gm, '<h3 style="font-family:var(--font-display);font-size:16px;color:var(--accent);margin:28px 0 8px;font-weight:700;">$1</h3>')
+        .replace(/^#{2}\s+(.+)$/gm, '<h2 style="font-family:var(--font-display);font-size:20px;color:var(--fg);margin:36px 0 10px;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:8px;">$1</h2>')
+        .replace(/^#{1}\s+(.+)$/gm, '<h2 style="font-family:var(--font-display);font-size:24px;color:var(--fg);margin:36px 0 12px;font-weight:700;">$1</h2>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/^[-•]\s+(.+)$/gm, '<li style="margin-bottom:6px;font-size:14px;color:var(--fg-soft);">$1</li>')
+        .replace(/(<li[^>]*>.*<\/li>\n?)+/g, '<ul style="padding-left:20px;margin:10px 0;">$&</ul>')
+        .replace(/\n\n+/g, '</p><p style="font-size:14px;color:var(--fg-soft);line-height:1.7;margin:0 0 12px;">')
+        .replace(/\n/g, '<br>');
+      return '<div class="page">' +
+        '<div class="hero">' +
+          '<div class="hero-eyebrow">Optimized Plan</div>' +
+          '<h1 class="hero-name">' + esc(name) + '</h1>' +
+          (biz ? '<p class="hero-strategy">' + esc(biz) + (goal ? ' · ' + esc(goal) : '') + '</p>' : '') +
+        '</div>' +
+        '<div class="section">' +
+          '<p style="font-size:14px;color:var(--fg-soft);line-height:1.7;margin:0 0 12px;">' + body + '</p>' +
+        '</div>' +
+        (isPro ? '<div class="pro-actions"><button class="btn-pro" onclick="downloadPlan()">⬇ Download Plan</button></div>' : '') +
+        '</div>';
+    }
+
     function render(p) {
       var html = '<div class="page">';
 
@@ -969,8 +999,6 @@
         if (!raw) throw new Error('Plan JSON field is empty for this record.');
         // Strip markdown code fences if present
         var cleaned = raw.trim().replace(/^```[a-z]*\n?/i, '').replace(/```\s*$/,'').trim();
-        var plan = JSON.parse(cleaned);
-        window._currentPlan = plan;
         // Store Airtable fields for xlsx (field names match Airtable column names)
         var f = data.fields;
         window._airtableFields = {
@@ -981,7 +1009,17 @@
           budget_tier: f['Budget Tier'] || f['Tier'] || f['budget_tier'] || '',
           status: f['Status'] || f['status'] || 'Ready'
         };
-        document.getElementById('root').innerHTML = render(plan);
+        // Try JSON first; fall back to markdown renderer for optimized plans
+        var plan;
+        try {
+          plan = JSON.parse(cleaned);
+          window._currentPlan = plan;
+          document.getElementById('root').innerHTML = render(plan);
+        } catch(e) {
+          // Raw markdown from optimization — render it directly
+          window._currentPlan = { plan_name: f['Plan Name'] || 'Optimized Plan', _markdown: cleaned };
+          document.getElementById('root').innerHTML = renderMarkdown(cleaned, f);
+        }
       })
       .catch(function(err) {
         showError('Could not load plan: ' + err.message);
