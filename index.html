@@ -33,7 +33,7 @@
       padding-block: 32px;
     }
     .page { max-width: 860px; margin: 0 auto; }
-
+ 
     /* Loading / Error states */
     .state {
       display: flex;
@@ -62,7 +62,7 @@
       animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-
+ 
     /* Hero */
     .hero {
       padding: 48px 0 36px;
@@ -95,7 +95,7 @@
       padding-left: 18px;
       margin: 0;
     }
-
+ 
     /* Section */
     .section { margin-bottom: 44px; }
     .section-label {
@@ -117,7 +117,7 @@
       background: var(--border);
       margin: 44px 0;
     }
-
+ 
     /* Cards (channels) */
     .cards {
       display: grid;
@@ -148,7 +148,7 @@
       color: var(--fg-muted);
       margin-top: 6px;
     }
-
+ 
     /* Budget table */
     .budget-table {
       width: 100%;
@@ -184,7 +184,7 @@
       background: var(--accent);
       border-radius: 2px;
     }
-
+ 
     /* Audience */
     .audience-item { margin-bottom: 16px; }
     .audience-name {
@@ -194,7 +194,7 @@
       margin-bottom: 3px;
     }
     .audience-desc { font-size: 13px; color: var(--fg-soft); }
-
+ 
     /* Messaging */
     .msg-item {
       padding: 16px;
@@ -210,7 +210,7 @@
       margin-bottom: 4px;
     }
     .msg-rationale { font-size: 13px; color: var(--fg-soft); }
-
+ 
     /* KPI grid */
     .kpi-grid {
       display: grid;
@@ -233,7 +233,7 @@
       color: var(--fg-soft);
     }
     .kpi-list li { margin-bottom: 6px; }
-
+ 
     /* Avoid */
     .avoid-item {
       display: flex;
@@ -250,7 +250,7 @@
     }
     .avoid-tactic { font-weight: 600; font-size: 13px; color: var(--fg); }
     .avoid-reason { font-size: 13px; color: var(--fg-soft); margin-top: 2px; }
-
+ 
     /* Moves */
     .moves-list {
       margin: 0;
@@ -259,7 +259,7 @@
       color: var(--fg-soft);
     }
     .moves-list li { margin-bottom: 8px; }
-
+ 
     /* Phase grid */
     .phase-grid {
       display: grid;
@@ -290,7 +290,7 @@
       line-height: 1.3;
     }
     .phase-body { font-size: 13px; color: var(--fg-soft); line-height: 1.6; }
-
+ 
     /* Checklist (launch plan) */
     .checklist {
       list-style: none;
@@ -314,7 +314,7 @@
       flex-shrink: 0;
       margin-top: 1px;
     }
-
+ 
     /* Assumptions */
     .assumptions-list {
       margin: 0;
@@ -323,7 +323,34 @@
       color: var(--fg-muted);
     }
     .assumptions-list li { margin-bottom: 6px; }
-
+ 
+    /* Pro actions */
+    .pro-actions {
+      display: flex;
+      gap: 12px;
+      margin: 40px 0 0;
+      flex-wrap: wrap;
+    }
+    .btn-pro {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn-pro:hover { background: var(--accent-mid); }
+    .btn-optimize { background: var(--surface); color: var(--accent); border: 2px solid var(--accent); }
+    .btn-optimize:hover { background: var(--accent-light); }
+ 
     /* Footer */
     .footer {
       margin-top: 60px;
@@ -353,10 +380,10 @@
       <div class="state-msg">Loading your plan…</div>
     </div>
   </div>
-
+ 
   <script>
     // Token is server-side — calls go through Netlify function
-
+ 
     function esc(s) {
       if (!s) return '';
       return String(s)
@@ -365,7 +392,7 @@
         .replace(/>/g,'&gt;')
         .replace(/"/g,'&quot;');
     }
-
+ 
     // Convert long text into paragraphs split on sentence boundaries (every 2-3 sentences)
     function para(s) {
       if (!s) return '';
@@ -379,7 +406,7 @@
       }
       return chunks.map(function(c) { return '<p class="section-body">' + c + '</p>'; }).join('');
     }
-
+ 
     // Convert launch plan text into checklist items split by period or newline
     function checklist(s) {
       if (!s) return '';
@@ -388,16 +415,16 @@
         return '<li><span class="check-icon">✓</span><span>' + item.trim().replace(/\.$/,'') + '</span></li>';
       }).join('') + '</ul>';
     }
-
+ 
     function showError(msg) {
       document.getElementById('root').innerHTML =
         '<div class="state"><div class="state-logo">AdCraft</div>' +
         '<div class="state-msg">' + esc(msg) + '</div></div>';
     }
-
+ 
     function render(p) {
       var html = '<div class="page">';
-
+ 
       // Hero
       html += '<div class="hero">';
       html += '<div class="hero-eyebrow">AdCraft Advertising Plan</div>';
@@ -406,7 +433,7 @@
         html += '<p class="hero-strategy">' + esc(p.your_advertising_strategy) + '</p>';
       }
       html += '</div>';
-
+ 
       if (p.the_opportunity) {
         html += '<div class="section"><div class="section-label">The Opportunity</div>';
         html += para(p.the_opportunity) + '</div>';
@@ -419,9 +446,9 @@
         html += '<div class="section"><div class="section-label">Recommended Approach</div>';
         html += para(p.recommended_approach) + '</div>';
       }
-
+ 
       html += '<div class="divider"></div>';
-
+ 
       // Channels
       if (p.recommended_channels && p.recommended_channels.length) {
         html += '<div class="section"><div class="section-label">Where to Advertise</div>';
@@ -437,7 +464,7 @@
         });
         html += '</div></div>';
       }
-
+ 
       // Budget
       if (p.budget && p.budget.length) {
         html += '<div class="section"><div class="section-label">Budget</div>';
@@ -456,9 +483,9 @@
         });
         html += '</tbody></table></div>';
       }
-
+ 
       html += '<div class="divider"></div>';
-
+ 
       // Audiences
       if (p.who_to_target && p.who_to_target.length) {
         html += '<div class="section"><div class="section-label">Who to Target</div>';
@@ -470,7 +497,7 @@
         });
         html += '</div>';
       }
-
+ 
       // Messaging
       if (p.messaging && p.messaging.length) {
         html += '<div class="section"><div class="section-label">What Your Ads Should Say</div>';
@@ -482,7 +509,7 @@
         });
         html += '</div>';
       }
-
+ 
       if (p.creative) {
         html += '<div class="section"><div class="section-label">What the Ads Should Look Like</div>';
         html += '<p class="section-body">' + esc(p.creative) + '</p></div>';
@@ -491,9 +518,9 @@
         html += '<div class="section"><div class="section-label">Campaign Timing</div>';
         html += '<p class="section-body">' + esc(p.campaign_timing) + '</p></div>';
       }
-
+ 
       html += '<div class="divider"></div>';
-
+ 
       // KPIs
       if (p.how_to_measure_success) {
         html += '<div class="section"><div class="section-label">How to Measure Success</div>';
@@ -510,7 +537,7 @@
         }
         html += '</div></div>';
       }
-
+ 
       // What not to do
       if (p.what_i_would_not_do && p.what_i_would_not_do.length) {
         html += '<div class="section"><div class="section-label">What I Would Not Do</div>';
@@ -523,7 +550,7 @@
         });
         html += '</div>';
       }
-
+ 
       // Smart moves
       if (p.smart_next_moves && p.smart_next_moves.length) {
         html += '<div class="section"><div class="section-label">Smart Next Moves</div>';
@@ -531,7 +558,7 @@
         p.smart_next_moves.forEach(function(m) { html += '<li>' + esc(m) + '</li>'; });
         html += '</ol></div>';
       }
-
+ 
       // 90-day plan
       if (p.launch_plan) {
         html += '<div class="section"><div class="section-label">90-Day Launch Plan</div>';
@@ -552,7 +579,7 @@
         });
         html += '</div></div>';
       }
-
+ 
       // Assumptions
       if (p.assumptions && p.assumptions.length) {
         html += '<div class="section"><div class="section-label">Assumptions</div>';
@@ -560,20 +587,65 @@
         p.assumptions.forEach(function(a) { html += '<li>' + esc(a) + '</li>'; });
         html += '</ul></div>';
       }
-
+ 
+      // Pro actions
+      if (isPro) {
+        html += '<div class="pro-actions">';
+        html += '<button class="btn-pro" onclick="downloadPlan()">⬇ Download Plan</button>';
+        html += '<a class="btn-pro btn-optimize" href="https://adcraft.softr.app/performance-optimization?recordId=' + currentRecordId + '">✦ Optimize This Plan</a>';
+        html += '</div>';
+      }
+ 
       // Footer
       html += '<div class="footer">';
       html += '<span class="footer-brand">AdCraft</span>';
       html += '<span>Generated by AdCraft · Powered by Claude</span>';
       html += '</div>';
-
+ 
       html += '</div>';
       return html;
     }
-
-    // Main: get recordId from URL, fetch from Airtable
-    var recordId = new URLSearchParams(window.location.search).get('recordId');
-
+ 
+    // Main: get recordId and tier from URL
+    var params = new URLSearchParams(window.location.search);
+    var recordId = params.get('recordId');
+    var currentRecordId = recordId;
+    var isPro = (params.get('tier') || '').toLowerCase() === 'pro';
+ 
+    function downloadPlan() {
+      if (!window._currentPlan) return;
+      var p = window._currentPlan;
+      var rows = [['AdCraft Plan: ' + (p.plan_name || '')], []];
+      rows.push(['Strategy', p.your_advertising_strategy || '']);
+      rows.push(['The Opportunity', p.the_opportunity || '']);
+      rows.push(['What Advertising Needs to Do', p.what_advertising_needs_to_do || '']);
+      rows.push([]);
+      rows.push(['CHANNELS']);
+      rows.push(['Channel', 'Role', 'What to Run', 'CTA']);
+      (p.recommended_channels || []).forEach(function(c) {
+        rows.push([c.channel, c.role, c.what_to_run, c.cta]);
+      });
+      rows.push([]);
+      rows.push(['BUDGET']);
+      rows.push(['Channel', 'Monthly Investment', 'Percentage', 'Purpose']);
+      (p.budget || []).forEach(function(b) {
+        rows.push([b.channel, b.monthly_investment, b.percentage, b.purpose]);
+      });
+      var csv = rows.map(function(r) {
+        return r.map(function(cell) {
+          var s = String(cell || '').replace(/"/g, '""');
+          return s.indexOf(',') >= 0 || s.indexOf('\n') >= 0 ? '"' + s + '"' : s;
+        }).join(',');
+      }).join('\n');
+      var blob = new Blob([csv], { type: 'text/csv' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = (p.plan_name || 'AdCraft-Plan').replace(/\s+/g, '-') + '.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+ 
     if (!recordId) {
       showError('No plan selected. Please return to AdCraft and select a plan.');
     } else {
@@ -588,6 +660,7 @@
         // Strip markdown code fences if present
         var cleaned = raw.trim().replace(/^```[a-z]*\n?/i, '').replace(/```\s*$/,'').trim();
         var plan = JSON.parse(cleaned);
+        window._currentPlan = plan;
         document.getElementById('root').innerHTML = render(plan);
       })
       .catch(function(err) {
@@ -597,3 +670,4 @@
   </script>
 </body>
 </html>
+ 
