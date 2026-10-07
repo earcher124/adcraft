@@ -269,8 +269,16 @@
       // Try to parse as JSON (structured plan), fall back to markdown
       var plan;
       try {
-        plan = JSON.parse(planText);
+        // Strip markdown code fences if present (e.g. ```json ... ```)
+        var cleanText = planText.trim();
+        if (cleanText.startsWith('```')) {
+          cleanText = cleanText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '');
+        }
+        console.log('Plan text first 100 chars:', cleanText.substring(0, 100));
+        console.log('Plan text type:', typeof cleanText);
+        plan = JSON.parse(cleanText);
       } catch (e) {
+        console.warn('JSON parse failed:', e.message);
         plan = null;
       }
 
@@ -278,8 +286,9 @@
       if (plan) {
         body.innerHTML = renderPlanJSON(plan);
       } else {
-        marked.setOptions({ breaks: true });
-        body.innerHTML = marked.parse(planText);
+        // JSON parse failed — show raw text in a readable way
+        console.warn('JSON parse failed, rendering as text');
+        body.innerHTML = '<pre style="white-space:pre-wrap;font-size:13px;line-height:1.6;">' + esc(planText) + '</pre>';
       }
       document.getElementById('plan-card').classList.add('visible');
     }
