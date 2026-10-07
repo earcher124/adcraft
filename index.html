@@ -566,7 +566,7 @@
         return r.json();
       })
       .then(function(data) {
-        var raw = data.fields['Plan JSON'];
+        var raw = data.fields['Plan Output'];
         if (!raw) throw new Error('Plan JSON field is empty for this record.');
         var plan = JSON.parse(raw);
         document.getElementById('root').innerHTML = render(plan);
