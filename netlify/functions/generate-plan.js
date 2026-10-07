@@ -1,6 +1,7 @@
 const AT_BASE = "appCtUgAKIoaa6ECh";
 const AT_PLANS_TBL = "tblOAtGXbtWewEAm0";
 const AT_PROFILES_TBL = "tblvXoTaqOdiZ4Kzc";
+const AT_USERS_TBL = "tbl7fisATFgQXPOhP";
 
 exports.handler = async function (event) {
   console.log("generate-plan invoked", event.httpMethod);
@@ -20,7 +21,7 @@ exports.handler = async function (event) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: "Invalid JSON" }) };
   }
 
-  const { prompt, email, bizName } = body;
+  const { prompt, email, bizName, userName } = body;
   if (!prompt) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: "Missing prompt" }) };
   }
@@ -61,15 +62,16 @@ exports.handler = async function (event) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to create plan record" }) };
   }
 
-  // 2. Upsert business profile (fire-and-forget, but log errors)
+  // 2. Upsert user record + business profile (fire-and-forget)
   if (email) {
-    upsertProfile(email, bizName, body.formData).then(() => {
-      console.log("Profile upsert success for", email);
-    }).catch(err =>
+    upsertUser(email, userName).catch(err =>
+      console.error("User upsert error:", err.message)
+    );
+    upsertProfile(email, bizName, body.formData).catch(err =>
       console.error("Profile upsert error:", err.message, err.detail || "")
     );
   } else {
-    console.warn("No email provided, skipping profile upsert");
+    console.warn("No email provided, skipping user/profile upsert");
   }
 
   // 4. Return the record ID immediately — frontend polls for completion
@@ -79,6 +81,24 @@ exports.handler = async function (event) {
     body: JSON.stringify({ recordId, status: "generating" }),
   };
 };
+
+async function upsertUser(email, name) {
+  const token = process.env.AIRTABLE_TOKEN;
+  const searchUrl = `https://api.airtable.com/v0/${AT_BASE}/${AT_USERS_TBL}?filterByFormula=${encodeURIComponent(`{Email}="${email}"`)}`;
+  const searchRes = await fetch(searchUrl, { headers: { Authorization: `Bearer ${token}` } });
+  const searchData = await searchRes.json();
+
+  // Only create if user doesn't exist yet — never overwrite existing records
+  if (!searchData.records || searchData.records.length === 0) {
+    const res = await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_USERS_TBL}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ fields: { "Email": email, "Name": name || "", "Tier": "Free" } }),
+    });
+    if (!res.ok) { const d = await res.json(); throw new Error("User create failed: " + JSON.stringify(d)); }
+    console.log("User created for", email);
+  }
+}
 
 async function upsertProfile(email, bizName, formData = {}) {
   const token = process.env.AIRTABLE_TOKEN;
@@ -96,7 +116,7 @@ async function upsertProfile(email, bizName, formData = {}) {
     "Product": formData.productType || "",
     "Target Customer": formData.targetCustomer || "",
     "Geography": formData.geo || "",
-    "Monthly Revenue": formData.monthlyRevenue || "",
+    "Monthly Revenue": formData.monthlyRevenue ? parseFloat(String(formData.monthlyRevenue).replace(/[^0-9.]/g, "")) || null : null,
     "Current Advertising": formData.currentAdvertising || "",
   };
 

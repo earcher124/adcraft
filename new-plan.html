@@ -502,6 +502,7 @@
       try {
         var clerk = await window.__clerkLoaded;
         var email = clerk.user?.primaryEmailAddress?.emailAddress || '';
+        var userName = ((clerk.user?.firstName || '') + ' ' + (clerk.user?.lastName || '')).trim() || '';
 
         var prompt = buildPrompt(d);
 
@@ -512,6 +513,7 @@
           body: JSON.stringify({
             prompt: prompt,
             email: email,
+            userName: userName,
             bizName: d.bizName,
             goal: d.goal,
             budget: d.budget,
