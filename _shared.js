@@ -51,6 +51,7 @@ function renderNav(activePage) {
     { label: "Dashboard", href: "/dashboard.html" },
     { label: "My Plans", href: "/my-plans.html" },
     { label: "New Plan", href: "/new-plan.html" },
+    { label: "Account", href: "/account.html" },
   ];
 
   var links = navItems.map(function(item) {

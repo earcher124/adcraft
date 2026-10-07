@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdCraft — My Plans</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #FAF6ED; font-family: 'Inter', system-ui, sans-serif; color: #1a1a1a; }
+
+    .hero { max-width: 100%; padding: 48px 48px 36px; background: #FAF6ED; }
+    .hero-inner { max-width: 860px; margin: 0 auto; display: flex; align-items: flex-end; gap: 24px; }
+    .hero-left { flex: 1; }
+    .hero-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #4A1040; margin-bottom: 10px; }
+    .hero-title { font-family: 'Playfair Display', Georgia, serif; font-size: 42px; font-weight: 800; color: #1a1a1a; margin: 0; letter-spacing: -0.03em; line-height: 1; }
+    .hero-title em { font-style: italic; font-weight: 400; color: #4A1040; }
+    .hero-right { flex: 1; padding-bottom: 6px; border-left: 1px solid #e8ddd0; padding-left: 24px; }
+    .hero-desc { font-size: 15px; color: #6b6270; margin: 0; line-height: 1.6; }
+    .hero-line { max-width: 860px; margin: 24px auto 0; height: 2px; background: linear-gradient(to right, #4A1040, transparent); }
+
+    .content { max-width: 860px; margin: 40px auto; padding: 0 48px; }
+
+    .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #4A1040; margin-bottom: 16px; }
+
+    .plans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) {
+      .plans-grid { grid-template-columns: 1fr; }
+      .hero { padding: 32px 20px 24px; }
+      .hero-inner { flex-direction: column; gap: 16px; }
+      .hero-right { border-left: none; border-top: 1px solid #e8ddd0; padding-left: 0; padding-top: 16px; }
+      .content { padding: 0 20px; }
+    }
+
+    .plan-card {
+      background: #fff;
+      border: 1px solid #e8ddd0;
+      border-top: 3px solid #4A1040;
+      border-radius: 12px;
+      padding: 20px 24px;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: box-shadow 0.2s, transform 0.2s;
+      cursor: pointer;
+    }
+    .plan-card:hover { box-shadow: 0 4px 16px rgba(74,16,64,0.1); transform: translateY(-2px); }
+    .plan-name { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+    .plan-meta { font-size: 12px; color: #6b6270; margin-bottom: 12px; }
+    .plan-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .plan-tag { font-size: 11px; font-weight: 600; background: #F0E8EE; color: #4A1040; border-radius: 20px; padding: 3px 10px; }
+
+    .empty-state {
+      text-align: center;
+      padding: 64px 24px;
+      color: #6b6270;
+    }
+    .empty-state-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-state h3 { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; color: #1a1a1a; margin: 0 0 8px; }
+    .empty-state p { font-size: 14px; margin: 0 0 24px; }
+    .btn-primary {
+      display: inline-block;
+      background: #4A1040;
+      color: #FAF6ED;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #6a2060; }
+
+    .loading { text-align: center; padding: 64px; color: #6b6270; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div id="nav-mount"></div>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <p class="hero-eyebrow">Your work</p>
+        <h1 class="hero-title">My <em>Plans</em></h1>
+      </div>
+      <div class="hero-right">
+        <p class="hero-desc">All your saved advertising plans in one place. Pick up where you left off or start something new.</p>
+      </div>
+    </div>
+    <div class="hero-line"></div>
+  </div>
+
+  <div class="content">
+    <p class="section-label">Saved Plans</p>
+    <div id="plans-container" class="loading">Loading your plans…</div>
+  </div>
+
+  <script src="_shared.js"></script>
+  <script>
+    window.__clerkLoaded.then(async function(clerk) {
+      if (!clerk.user) { window.location.href = "/login.html"; return; }
+      renderNav("My Plans");
+
+      var email = clerk.user.primaryEmailAddress?.emailAddress;
+      // Load plans from Airtable Plans table linked to this user
+      // For now show placeholder — full Airtable wiring comes next
+      loadPlans(email);
+    });
+
+    async function loadPlans(email) {
+      var container = document.getElementById("plans-container");
+      // Plans are stored in Airtable with a field linking to user email
+      // We'll fetch from the Plans table filtered by user
+      // AT token needed — for now show empty state
+      container.innerHTML = '';
+      container.className = '';
+
+      // Try to get plans from sessionStorage or show empty state
+      var plans = [];
+
+      if (plans.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <h3>No plans yet</h3>
+            <p>Create your first AI-powered advertising plan in seconds.</p>
+            <a class="btn-primary" href="/new-plan.html">Create a Plan</a>
+          </div>`;
+        return;
+      }
+
+      var grid = document.createElement("div");
+      grid.className = "plans-grid";
+      plans.forEach(function(plan) {
+        var card = document.createElement("a");
+        card.className = "plan-card";
+        card.href = "/plan-viewer.html?id=" + plan.id;
+        var date = new Date(plan.fields.Created).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        card.innerHTML = `
+          <div class="plan-name">${plan.fields.Name || "Untitled Plan"}</div>
+          <div class="plan-meta">Created ${date}</div>
+          <div class="plan-tags">
+            ${plan.fields.Industry ? '<span class="plan-tag">' + plan.fields.Industry + '</span>' : ''}
+            ${plan.fields.Budget ? '<span class="plan-tag">' + plan.fields.Budget + '</span>' : ''}
+          </div>`;
+        grid.appendChild(card);
+      });
+      container.appendChild(grid);
+    }
+  </script>
+</body>
+</html>

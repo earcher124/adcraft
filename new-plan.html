@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdCraft — New Plan</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #FAF6ED; font-family: 'Inter', system-ui, sans-serif; color: #1a1a1a; }
+
+    .hero { max-width: 100%; padding: 48px 48px 36px; background: #FAF6ED; }
+    .hero-inner { max-width: 860px; margin: 0 auto; display: flex; align-items: flex-end; gap: 24px; }
+    .hero-left { flex: 1; }
+    .hero-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #4A1040; margin-bottom: 10px; }
+    .hero-title { font-family: 'Playfair Display', Georgia, serif; font-size: 42px; font-weight: 800; color: #1a1a1a; margin: 0; letter-spacing: -0.03em; line-height: 1; }
+    .hero-title em { font-style: italic; font-weight: 400; color: #4A1040; }
+    .hero-right { flex: 1; padding-bottom: 6px; border-left: 1px solid #e8ddd0; padding-left: 24px; }
+    .hero-desc { font-size: 15px; color: #6b6270; margin: 0; line-height: 1.6; }
+    .hero-line { max-width: 860px; margin: 24px auto 0; height: 2px; background: linear-gradient(to right, #4A1040, transparent); }
+
+    .content { max-width: 860px; margin: 40px auto; padding: 0 48px; }
+    .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #4A1040; margin-bottom: 16px; }
+
+    /* Progress bar */
+    .progress-wrap { margin-bottom: 32px; }
+    .progress-steps { display: flex; gap: 8px; margin-bottom: 8px; }
+    .progress-step {
+      flex: 1;
+      height: 4px;
+      background: #e8ddd0;
+      border-radius: 2px;
+      transition: background 0.3s;
+    }
+    .progress-step.active { background: #4A1040; }
+    .progress-label { font-size: 12px; color: #6b6270; }
+
+    /* Form */
+    .form-card {
+      background: #fff;
+      border: 1px solid #e8ddd0;
+      border-radius: 16px;
+      padding: 40px;
+    }
+    .step { display: none; }
+    .step.active { display: block; }
+
+    .step-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #4A1040; margin-bottom: 8px; }
+    .step-question { font-family: 'Playfair Display', Georgia, serif; font-size: 26px; color: #1a1a1a; margin: 0 0 24px; line-height: 1.3; }
+
+    .form-group { margin-bottom: 20px; }
+    label { display: block; font-size: 12px; font-weight: 600; color: #6b6270; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+    input[type="text"], textarea, select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #e8ddd0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Inter', system-ui, sans-serif;
+      color: #1a1a1a;
+      background: #FAF6ED;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    input[type="text"]:focus, textarea:focus, select:focus { border-color: #4A1040; }
+    textarea { resize: vertical; min-height: 100px; }
+
+    .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      padding: 8px 16px;
+      border: 1px solid #e8ddd0;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      background: #FAF6ED;
+      color: #1a1a1a;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .chip:hover { border-color: #4A1040; color: #4A1040; }
+    .chip.selected { background: #4A1040; color: #FAF6ED; border-color: #4A1040; }
+
+    .form-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; }
+    .btn {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      font-family: 'Inter', system-ui, sans-serif;
+      transition: background 0.2s;
+    }
+    .btn-primary { background: #4A1040; color: #FAF6ED; }
+    .btn-primary:hover { background: #6a2060; }
+    .btn-primary:disabled { background: #c0aab8; cursor: not-allowed; }
+    .btn-ghost { background: transparent; color: #6b6270; }
+    .btn-ghost:hover { color: #1a1a1a; }
+
+    /* Generating state */
+    .generating {
+      text-align: center;
+      padding: 60px 24px;
+      display: none;
+    }
+    .generating.active { display: block; }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 3px solid #e8ddd0;
+      border-top-color: #4A1040;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 24px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .generating h3 { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; color: #1a1a1a; margin: 0 0 8px; }
+    .generating p { font-size: 14px; color: #6b6270; margin: 0; }
+
+    @media (max-width: 640px) {
+      .hero { padding: 32px 20px 24px; }
+      .hero-inner { flex-direction: column; gap: 16px; }
+      .hero-right { border-left: none; border-top: 1px solid #e8ddd0; padding-left: 0; padding-top: 16px; }
+      .content { padding: 0 20px; }
+      .form-card { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-mount"></div>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <p class="hero-eyebrow">Build something</p>
+        <h1 class="hero-title">New <em>Plan</em></h1>
+      </div>
+      <div class="hero-right">
+        <p class="hero-desc">Answer a few questions and we'll generate a complete AI-powered advertising strategy for your business.</p>
+      </div>
+    </div>
+    <div class="hero-line"></div>
+  </div>
+
+  <div class="content">
+    <div class="progress-wrap">
+      <div class="progress-steps">
+        <div class="progress-step active" id="ps1"></div>
+        <div class="progress-step" id="ps2"></div>
+        <div class="progress-step" id="ps3"></div>
+        <div class="progress-step" id="ps4"></div>
+      </div>
+      <div class="progress-label" id="progress-label">Step 1 of 4</div>
+    </div>
+
+    <div class="form-card" id="form-card">
+      <!-- Step 1: Business basics -->
+      <div class="step active" id="step1">
+        <p class="step-eyebrow">Step 1 — Your Business</p>
+        <h2 class="step-question">Tell us about your business.</h2>
+        <div class="form-group">
+          <label>Business Name</label>
+          <input type="text" id="biz-name" placeholder="e.g. Sunrise Bakery">
+        </div>
+        <div class="form-group">
+          <label>Industry</label>
+          <div class="chip-group" id="industry-chips">
+            <div class="chip" data-val="Retail">Retail</div>
+            <div class="chip" data-val="Restaurant / Food">Restaurant / Food</div>
+            <div class="chip" data-val="Health & Wellness">Health & Wellness</div>
+            <div class="chip" data-val="Professional Services">Professional Services</div>
+            <div class="chip" data-val="Real Estate">Real Estate</div>
+            <div class="chip" data-val="E-commerce">E-commerce</div>
+            <div class="chip" data-val="Travel & Tourism">Travel & Tourism</div>
+            <div class="chip" data-val="Other">Other</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>What do you sell or offer?</label>
+          <textarea id="biz-desc" placeholder="Briefly describe your products or services…"></textarea>
+        </div>
+        <div class="form-nav">
+          <span></span>
+          <button class="btn btn-primary" onclick="goStep(2)">Next →</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Audience & Goals -->
+      <div class="step" id="step2">
+        <p class="step-eyebrow">Step 2 — Audience & Goals</p>
+        <h2 class="step-question">Who are you trying to reach?</h2>
+        <div class="form-group">
+          <label>Target Audience</label>
+          <input type="text" id="audience" placeholder="e.g. Women 25–45 in Toronto interested in wellness">
+        </div>
+        <div class="form-group">
+          <label>Primary Goal</label>
+          <div class="chip-group" id="goal-chips">
+            <div class="chip" data-val="Drive store / website traffic">Drive traffic</div>
+            <div class="chip" data-val="Generate leads">Generate leads</div>
+            <div class="chip" data-val="Increase brand awareness">Brand awareness</div>
+            <div class="chip" data-val="Boost sales / conversions">Boost sales</div>
+            <div class="chip" data-val="Grow social following">Grow social following</div>
+            <div class="chip" data-val="Promote an event">Promote an event</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Geographic Focus</label>
+          <input type="text" id="geo" placeholder="e.g. Toronto, Ontario or National">
+        </div>
+        <div class="form-nav">
+          <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+          <button class="btn btn-primary" onclick="goStep(3)">Next →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Budget & Timeline -->
+      <div class="step" id="step3">
+        <p class="step-eyebrow">Step 3 — Budget & Timeline</p>
+        <h2 class="step-question">What's your budget and timeframe?</h2>
+        <div class="form-group">
+          <label>Monthly Ad Budget</label>
+          <div class="chip-group" id="budget-chips">
+            <div class="chip" data-val="Under $1,000/month">Under $1K</div>
+            <div class="chip" data-val="$1,000–$5,000/month">$1K–$5K</div>
+            <div class="chip" data-val="$5,000–$15,000/month">$5K–$15K</div>
+            <div class="chip" data-val="$15,000–$50,000/month">$15K–$50K</div>
+            <div class="chip" data-val="Over $50,000/month">Over $50K</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Campaign Duration</label>
+          <div class="chip-group" id="duration-chips">
+            <div class="chip" data-val="1 month">1 month</div>
+            <div class="chip" data-val="3 months">3 months</div>
+            <div class="chip" data-val="6 months">6 months</div>
+            <div class="chip" data-val="Ongoing / always-on">Ongoing</div>
+          </div>
+        </div>
+        <div class="form-nav">
+          <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
+          <button class="btn btn-primary" onclick="goStep(4)">Next →</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Channels & Notes -->
+      <div class="step" id="step4">
+        <p class="step-eyebrow">Step 4 — Channels</p>
+        <h2 class="step-question">Any channels or notes to include?</h2>
+        <div class="form-group">
+          <label>Preferred Channels (optional)</label>
+          <div class="chip-group" id="channel-chips">
+            <div class="chip" data-val="Meta (Facebook/Instagram)">Meta</div>
+            <div class="chip" data-val="Google Search">Google Search</div>
+            <div class="chip" data-val="Google Display">Google Display</div>
+            <div class="chip" data-val="YouTube">YouTube</div>
+            <div class="chip" data-val="TikTok">TikTok</div>
+            <div class="chip" data-val="LinkedIn">LinkedIn</div>
+            <div class="chip" data-val="Pinterest">Pinterest</div>
+            <div class="chip" data-val="Programmatic Display">Programmatic</div>
+            <div class="chip" data-val="Email">Email</div>
+            <div class="chip" data-val="Radio / Streaming Audio">Audio</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Anything else we should know?</label>
+          <textarea id="notes" placeholder="Seasonal promotions, competitors, past learnings…"></textarea>
+        </div>
+        <div class="form-nav">
+          <button class="btn btn-ghost" onclick="goStep(3)">← Back</button>
+          <button class="btn btn-primary" id="generate-btn" onclick="generatePlan()">Generate My Plan ✨</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generating state -->
+    <div class="generating" id="generating">
+      <div class="spinner"></div>
+      <h3>Building your plan…</h3>
+      <p>Our AI is crafting a custom advertising strategy for your business.</p>
+    </div>
+  </div>
+
+  <script src="_shared.js"></script>
+  <script>
+    var formData = {};
+    var currentStep = 1;
+
+    // Chip selection
+    document.querySelectorAll('.chip-group').forEach(function(group) {
+      var multi = group.id === 'channel-chips';
+      group.querySelectorAll('.chip').forEach(function(chip) {
+        chip.addEventListener('click', function() {
+          if (multi) {
+            chip.classList.toggle('selected');
+          } else {
+            group.querySelectorAll('.chip').forEach(function(c) { c.classList.remove('selected'); });
+            chip.classList.add('selected');
+          }
+        });
+      });
+    });
+
+    function getChipVal(groupId) {
+      var selected = document.querySelectorAll('#' + groupId + ' .chip.selected');
+      return Array.from(selected).map(function(c) { return c.dataset.val; }).join(', ');
+    }
+
+    function goStep(n) {
+      // Collect current step data
+      if (currentStep === 1) {
+        formData.bizName = document.getElementById('biz-name').value;
+        formData.industry = getChipVal('industry-chips');
+        formData.bizDesc = document.getElementById('biz-desc').value;
+      } else if (currentStep === 2) {
+        formData.audience = document.getElementById('audience').value;
+        formData.goal = getChipVal('goal-chips');
+        formData.geo = document.getElementById('geo').value;
+      } else if (currentStep === 3) {
+        formData.budget = getChipVal('budget-chips');
+        formData.duration = getChipVal('duration-chips');
+      }
+
+      document.getElementById('step' + currentStep).classList.remove('active');
+      document.getElementById('step' + n).classList.add('active');
+      currentStep = n;
+
+      // Update progress
+      for (var i = 1; i <= 4; i++) {
+        var el = document.getElementById('ps' + i);
+        if (el) el.classList.toggle('active', i <= n);
+      }
+      document.getElementById('progress-label').textContent = 'Step ' + n + ' of 4';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function generatePlan() {
+      formData.channels = getChipVal('channel-chips');
+      formData.notes = document.getElementById('notes').value;
+
+      document.getElementById('form-card').style.display = 'none';
+      document.getElementById('generating').classList.add('active');
+      document.querySelector('.progress-wrap').style.display = 'none';
+
+      try {
+        var clerk = await window.__clerkLoaded;
+        var email = clerk.user?.primaryEmailAddress?.emailAddress || '';
+
+        var prompt = buildPrompt(formData);
+        var res = await fetch('/.netlify/functions/generate-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: prompt, email: email, bizName: formData.bizName })
+        });
+
+        if (!res.ok) throw new Error('Generation failed');
+        var data = await res.json();
+
+        // Save plan ID and redirect to viewer
+        if (data.recordId) {
+          window.location.href = '/plan-viewer.html?id=' + data.recordId;
+        } else {
+          throw new Error('No record ID returned');
+        }
+      } catch (err) {
+        document.getElementById('generating').innerHTML =
+          '<div style="color:#c0392b;font-size:14px;">Something went wrong. <a href="/new-plan.html" style="color:#4A1040;">Try again</a></div>';
+      }
+    }
+
+    function buildPrompt(d) {
+      return [
+        'Create a detailed advertising plan for the following business:',
+        '',
+        'Business Name: ' + (d.bizName || 'Not specified'),
+        'Industry: ' + (d.industry || 'Not specified'),
+        'Description: ' + (d.bizDesc || 'Not specified'),
+        'Target Audience: ' + (d.audience || 'Not specified'),
+        'Primary Goal: ' + (d.goal || 'Not specified'),
+        'Geography: ' + (d.geo || 'Not specified'),
+        'Monthly Budget: ' + (d.budget || 'Not specified'),
+        'Campaign Duration: ' + (d.duration || 'Not specified'),
+        'Preferred Channels: ' + (d.channels || 'No preference — recommend best mix'),
+        'Additional Notes: ' + (d.notes || 'None'),
+        '',
+        'Please provide a comprehensive advertising plan including: executive summary, recommended channel mix with budget allocation, monthly flight plan, key messages and creative direction, KPIs to track, and implementation timeline. Format with clear sections and include a budget breakdown table.'
+      ].join('\n');
+    }
+
+    window.__clerkLoaded.then(async function(clerk) {
+      if (!clerk.user) { window.location.href = "/login.html"; return; }
+      renderNav("New Plan");
+    });
+  </script>
+</body>
+</html>

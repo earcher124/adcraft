@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdCraft — Account</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #FAF6ED; font-family: 'Inter', system-ui, sans-serif; color: #1a1a1a; }
+
+    .hero { max-width: 100%; padding: 48px 48px 36px; background: #FAF6ED; }
+    .hero-inner { max-width: 860px; margin: 0 auto; display: flex; align-items: flex-end; gap: 24px; }
+    .hero-left { flex: 1; }
+    .hero-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #4A1040; margin-bottom: 10px; }
+    .hero-title { font-family: 'Playfair Display', Georgia, serif; font-size: 42px; font-weight: 800; color: #1a1a1a; margin: 0; letter-spacing: -0.03em; line-height: 1; }
+    .hero-title em { font-style: italic; font-weight: 400; color: #4A1040; }
+    .hero-right { flex: 1; padding-bottom: 6px; border-left: 1px solid #e8ddd0; padding-left: 24px; }
+    .hero-desc { font-size: 15px; color: #6b6270; margin: 0; line-height: 1.6; }
+    .hero-line { max-width: 860px; margin: 24px auto 0; height: 2px; background: linear-gradient(to right, #4A1040, transparent); }
+
+    .content { max-width: 860px; margin: 40px auto; padding: 0 48px; }
+    .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #4A1040; margin-bottom: 16px; }
+
+    .info-card {
+      background: #fff;
+      border: 1px solid #e8ddd0;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0ebe4;
+    }
+    .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .info-row:first-child { padding-top: 0; }
+    .info-label { font-size: 12px; font-weight: 600; color: #6b6270; text-transform: uppercase; letter-spacing: 0.08em; }
+    .info-value { font-size: 14px; color: #1a1a1a; font-weight: 500; }
+
+    .tier-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+    .tier-free { background: #f0ebe4; color: #6b6270; }
+    .tier-pro { background: #4A1040; color: #FAF6ED; }
+
+    .btn {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary { background: #4A1040; color: #FAF6ED; }
+    .btn-primary:hover { background: #6a2060; }
+    .btn-outline { background: transparent; color: #4A1040; border: 1px solid #4A1040; }
+    .btn-outline:hover { background: #f0e8ee; }
+
+    @media (max-width: 640px) {
+      .hero { padding: 32px 20px 24px; }
+      .hero-inner { flex-direction: column; gap: 16px; }
+      .hero-right { border-left: none; border-top: 1px solid #e8ddd0; padding-left: 0; padding-top: 16px; }
+      .content { padding: 0 20px; }
+      .info-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-mount"></div>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <p class="hero-eyebrow">Settings</p>
+        <h1 class="hero-title">Your <em>Account</em></h1>
+      </div>
+      <div class="hero-right">
+        <p class="hero-desc">Manage your profile, subscription, and billing details.</p>
+      </div>
+    </div>
+    <div class="hero-line"></div>
+  </div>
+
+  <div class="content">
+    <p class="section-label">Profile</p>
+    <div class="info-card">
+      <div class="info-row">
+        <span class="info-label">Name</span>
+        <span class="info-value" id="acct-name">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Email</span>
+        <span class="info-value" id="acct-email">—</span>
+      </div>
+    </div>
+
+    <p class="section-label">Subscription</p>
+    <div class="info-card">
+      <div class="info-row">
+        <span class="info-label">Current Plan</span>
+        <span class="info-value" id="acct-tier"><span class="tier-badge tier-free">Free</span></span>
+      </div>
+      <div class="info-row" id="manage-row" style="display:none;">
+        <span class="info-label">Billing</span>
+        <a class="btn btn-outline" href="https://billing.stripe.com/p/login/00wbJ38W25jCdb019XeME00" target="_blank">Manage Subscription →</a>
+      </div>
+      <div class="info-row" id="upgrade-row">
+        <span class="info-label">Want more?</span>
+        <a class="btn btn-primary" href="/upgrade.html">Upgrade to Pro</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="_shared.js"></script>
+  <script>
+    window.__clerkLoaded.then(async function(clerk) {
+      if (!clerk.user) { window.location.href = "/login.html"; return; }
+      renderNav("");
+
+      var user = clerk.user;
+      document.getElementById("acct-name").textContent = (user.firstName || "") + " " + (user.lastName || "");
+      document.getElementById("acct-email").textContent = user.primaryEmailAddress?.emailAddress || "";
+
+      // Check Airtable tier — requires AT key via meta tag
+      // For now show free tier; tier check wired in when AT token is available
+      var tier = "free"; // Will be replaced with Airtable lookup
+
+      var tierEl = document.getElementById("acct-tier");
+      if (tier === "pro") {
+        tierEl.innerHTML = '<span class="tier-badge tier-pro">✦ Pro</span>';
+        document.getElementById("manage-row").style.display = "flex";
+        document.getElementById("upgrade-row").style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>

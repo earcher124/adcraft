@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdCraft — Upgrade to Pro</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #FAF6ED; font-family: 'Inter', system-ui, sans-serif; color: #1a1a1a; }
+
+    .hero { max-width: 100%; padding: 48px 48px 36px; background: #FAF6ED; }
+    .hero-inner { max-width: 860px; margin: 0 auto; display: flex; align-items: flex-end; gap: 24px; }
+    .hero-left { flex: 1; }
+    .hero-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #4A1040; margin-bottom: 10px; }
+    .hero-title { font-family: 'Playfair Display', Georgia, serif; font-size: 42px; font-weight: 800; color: #1a1a1a; margin: 0; letter-spacing: -0.03em; line-height: 1; }
+    .hero-title em { font-style: italic; font-weight: 400; color: #4A1040; }
+    .hero-right { flex: 1; padding-bottom: 6px; border-left: 1px solid #e8ddd0; padding-left: 24px; }
+    .hero-desc { font-size: 15px; color: #6b6270; margin: 0; line-height: 1.6; }
+    .hero-line { max-width: 860px; margin: 24px auto 0; height: 2px; background: linear-gradient(to right, #4A1040, transparent); }
+
+    .content { max-width: 860px; margin: 40px auto; padding: 0 48px; }
+
+    .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #4A1040; margin-bottom: 16px; }
+
+    .pricing-block {
+      background: #4A1040;
+      border-radius: 16px;
+      padding: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+      margin-bottom: 32px;
+    }
+    .pricing-left {}
+    .pricing-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: rgba(250,246,237,0.6); margin-bottom: 8px; }
+    .pricing-amount { font-family: 'Playfair Display', Georgia, serif; font-size: 56px; font-weight: 700; color: #FAF6ED; line-height: 1; margin-bottom: 4px; }
+    .pricing-amount span { font-size: 22px; font-weight: 400; vertical-align: top; margin-top: 10px; display: inline-block; }
+    .pricing-period { font-size: 13px; color: rgba(250,246,237,0.6); }
+    .pricing-cta {
+      display: inline-block;
+      background: #FAF6ED;
+      color: #4A1040;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 16px 32px;
+      border-radius: 10px;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .pricing-cta:hover { background: #f0e8ee; }
+
+    .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 40px; }
+    .feature-card {
+      background: #fff;
+      border: 1px solid #e8ddd0;
+      border-top: 3px solid #4A1040;
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .feature-icon { font-size: 28px; margin-bottom: 12px; }
+    .feature-title { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+    .feature-desc { font-size: 13px; color: #6b6270; line-height: 1.6; }
+    .feature-list { list-style: none; padding: 0; margin: 12px 0 0; }
+    .feature-list li { font-size: 13px; color: #6b6270; padding: 4px 0; display: flex; gap: 8px; }
+    .feature-list li::before { content: "✓"; color: #4A1040; font-weight: 700; flex-shrink: 0; }
+
+    .bottom-cta { text-align: center; padding: 40px 24px; }
+    .bottom-cta a {
+      display: inline-block;
+      background: #4A1040;
+      color: #FAF6ED;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 16px 40px;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .bottom-cta a:hover { background: #6a2060; }
+    .bottom-cta p { font-size: 13px; color: #6b6270; margin-top: 12px; }
+
+    @media (max-width: 640px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .pricing-block { flex-direction: column; text-align: center; padding: 32px 24px; }
+      .hero { padding: 32px 20px 24px; }
+      .hero-inner { flex-direction: column; gap: 16px; }
+      .hero-right { border-left: none; border-top: 1px solid #e8ddd0; padding-left: 0; padding-top: 16px; }
+      .content { padding: 0 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-mount"></div>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <p class="hero-eyebrow">Go further</p>
+        <h1 class="hero-title">Upgrade to <em>Pro</em></h1>
+      </div>
+      <div class="hero-right">
+        <p class="hero-desc">Unlock performance optimization and deeper analysis tools to maximize your advertising ROI.</p>
+      </div>
+    </div>
+    <div class="hero-line"></div>
+  </div>
+
+  <div class="content">
+    <div class="pricing-block">
+      <div class="pricing-left">
+        <p class="pricing-label">AdCraft Pro</p>
+        <div class="pricing-amount"><span>$</span>49</div>
+        <p class="pricing-period">per month · cancel anytime</p>
+      </div>
+      <a class="pricing-cta" href="https://buy.stripe.com/00wbJ38W25jCdb019XeME00" target="_blank">Upgrade Now →</a>
+    </div>
+
+    <p class="section-label">What you get</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">Performance Optimization</div>
+        <div class="feature-desc">Upload your ad performance data and get AI-driven recommendations to improve results.</div>
+        <ul class="feature-list">
+          <li>Upload CSV or Excel performance data</li>
+          <li>AI analysis of what's working</li>
+          <li>Actionable budget reallocation tips</li>
+          <li>Channel-by-channel insights</li>
+        </ul>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📥</div>
+        <div class="feature-title">Excel Export</div>
+        <div class="feature-desc">Download your complete advertising plans as a fully formatted Excel file, ready to share with your team.</div>
+        <ul class="feature-list">
+          <li>Formatted Excel workbook</li>
+          <li>Channel breakdowns by week</li>
+          <li>Budget allocation tables</li>
+          <li>Ready to present or email</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="bottom-cta">
+      <a href="https://buy.stripe.com/00wbJ38W25jCdb019XeME00" target="_blank">Get AdCraft Pro — $49/month</a>
+      <p>Cancel anytime. No contracts. Instant access after payment.</p>
+    </div>
+  </div>
+
+  <script src="_shared.js"></script>
+  <script>
+    window.__clerkLoaded.then(async function(clerk) {
+      if (!clerk.user) { window.location.href = "/login.html"; return; }
+      renderNav("");
+    });
+  </script>
+</body>
+</html>
