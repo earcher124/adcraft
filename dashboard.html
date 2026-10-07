@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdCraft — Dashboard</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #FAF6ED; font-family: 'Inter', system-ui, sans-serif; color: #1a1a1a; }
+
+    .hero {
+      max-width: 100%;
+      padding: 48px 48px 36px;
+      background: #FAF6ED;
+    }
+    .hero-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-end;
+      gap: 24px;
+    }
+    .hero-left { flex: 1; }
+    .hero-eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #4A1040;
+      margin-bottom: 10px;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 42px;
+      font-weight: 800;
+      color: #1a1a1a;
+      margin: 0;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .hero-title em { font-style: italic; font-weight: 400; color: #4A1040; }
+    .hero-right {
+      flex: 1;
+      padding-bottom: 6px;
+      border-left: 1px solid #e8ddd0;
+      padding-left: 24px;
+    }
+    .hero-desc { font-size: 15px; color: #6b6270; margin: 0; line-height: 1.6; }
+    .hero-line {
+      max-width: 860px;
+      margin: 24px auto 0;
+      height: 2px;
+      background: linear-gradient(to right, #4A1040, transparent);
+    }
+
+    .content { max-width: 860px; margin: 40px auto; padding: 0 48px; }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    @media (max-width: 640px) {
+      .quick-actions { grid-template-columns: 1fr; }
+      .hero { padding: 32px 20px 24px; }
+      .hero-inner { flex-direction: column; gap: 16px; }
+      .hero-right { border-left: none; border-top: 1px solid #e8ddd0; padding-left: 0; padding-top: 16px; }
+      .content { padding: 0 20px; }
+    }
+
+    .action-card {
+      background: #fff;
+      border: 1px solid #e8ddd0;
+      border-top: 3px solid #4A1040;
+      border-radius: 12px;
+      padding: 24px;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .action-card:hover { box-shadow: 0 4px 16px rgba(74,16,64,0.1); transform: translateY(-2px); }
+    .action-icon { font-size: 28px; margin-bottom: 12px; }
+    .action-title { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; }
+    .action-desc { font-size: 13px; color: #6b6270; line-height: 1.5; }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #4A1040;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-mount"></div>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <p class="hero-eyebrow">Welcome back</p>
+        <h1 class="hero-title">Your<br><em id="first-name">Dashboard</em></h1>
+      </div>
+      <div class="hero-right">
+        <p class="hero-desc">Your AI-powered advertising command center. Build plans, analyze performance, and grow your business.</p>
+      </div>
+    </div>
+    <div class="hero-line"></div>
+  </div>
+
+  <div class="content">
+    <p class="section-label">Quick Actions</p>
+    <div class="quick-actions">
+      <a class="action-card" href="/new-plan.html">
+        <div class="action-icon">✨</div>
+        <div class="action-title">Create a New Plan</div>
+        <p class="action-desc">Answer a few questions and get an AI-generated advertising strategy in seconds.</p>
+      </a>
+      <a class="action-card" href="/my-plans.html">
+        <div class="action-icon">📋</div>
+        <div class="action-title">View My Plans</div>
+        <p class="action-desc">See all your saved advertising plans and pick up where you left off.</p>
+      </a>
+      <a class="action-card" href="/upgrade.html" id="pro-card">
+        <div class="action-icon">📊</div>
+        <div class="action-title">Optimize a Plan</div>
+        <p class="action-desc">Upload your ad performance data and get AI-driven recommendations.</p>
+      </a>
+    </div>
+  </div>
+
+  <script src="_shared.js"></script>
+  <script>
+    window.__clerkLoaded.then(async function(clerk) {
+      if (!clerk.user) {
+        window.location.href = "/login.html";
+        return;
+      }
+      renderNav("Dashboard");
+      var firstName = clerk.user.firstName || clerk.user.primaryEmailAddress?.emailAddress?.split("@")[0] || "";
+      if (firstName) {
+        document.getElementById("first-name").textContent = firstName;
+      }
+      // Update pro card link based on tier (if Airtable user is pro)
+      // For now links to upgrade; once tier check is wired it'll go to optimize
+    });
+  </script>
+</body>
+</html>
