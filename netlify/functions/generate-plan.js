@@ -61,11 +61,15 @@ exports.handler = async function (event) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to create plan record" }) };
   }
 
-  // 2. Upsert business profile (fire-and-forget)
+  // 2. Upsert business profile (fire-and-forget, but log errors)
   if (email) {
-    upsertProfile(email, bizName, body.formData).catch(err =>
-      console.error("Profile upsert error:", err)
+    upsertProfile(email, bizName, body.formData).then(() => {
+      console.log("Profile upsert success for", email);
+    }).catch(err =>
+      console.error("Profile upsert error:", err.message, err.detail || "")
     );
+  } else {
+    console.warn("No email provided, skipping profile upsert");
   }
 
   // 4. Return the record ID immediately — frontend polls for completion
@@ -98,16 +102,20 @@ async function upsertProfile(email, bizName, formData = {}) {
 
   if (searchData.records && searchData.records.length > 0) {
     const rid = searchData.records[0].id;
-    await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_PROFILES_TBL}/${rid}`, {
+    const res = await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_PROFILES_TBL}/${rid}`, {
       method: "PATCH",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ fields }),
     });
+    if (!res.ok) { const d = await res.json(); throw Object.assign(new Error("PATCH failed"), { detail: JSON.stringify(d) }); }
+    console.log("Profile updated, id:", rid);
   } else {
-    await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_PROFILES_TBL}`, {
+    const res = await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_PROFILES_TBL}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ fields }),
     });
+    if (!res.ok) { const d = await res.json(); throw Object.assign(new Error("POST failed"), { detail: JSON.stringify(d) }); }
+    console.log("Profile created for", email);
   }
 }

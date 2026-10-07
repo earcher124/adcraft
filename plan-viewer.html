@@ -184,7 +184,9 @@
       <div class="hero-right" id="hero-right" style="display:none;">
         <p class="hero-meta" id="hero-meta"></p>
         <div class="hero-actions">
-          <button class="btn btn-outline" onclick="printPlan()">Download PDF</button>
+          <button class="btn btn-outline" id="btn-excel" onclick="downloadExcel()">↓ Excel</button>
+          <button class="btn btn-outline" id="btn-pdf" onclick="downloadPDF()">↓ PDF</button>
+          <button class="btn btn-outline" id="btn-optimize" onclick="optimizePlan()">✦ Optimize Plan</button>
           <a href="/new-plan.html" class="btn btn-primary">New Plan →</a>
         </div>
       </div>
@@ -497,6 +499,37 @@
         console.warn('Poll error:', err);
         // Don't stop polling on a transient network error
       }
+    }
+
+    function downloadExcel() {
+      var btn = document.getElementById('btn-excel');
+      btn.textContent = 'Building…';
+      btn.disabled = true;
+      fetch('/.netlify/functions/generate-xlsx?id=' + encodeURIComponent(recordId))
+        .then(function(res) {
+          if (!res.ok) throw new Error('Failed');
+          return res.blob();
+        })
+        .then(function(blob) {
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = 'adcraft-plan.xlsx';
+          a.click();
+          URL.revokeObjectURL(url);
+        })
+        .catch(function() { alert('Excel export failed. Please try again.'); })
+        .finally(function() { btn.textContent = '↓ Excel'; btn.disabled = false; });
+    }
+
+    function downloadPDF() {
+      // Placeholder — will be a beautifully formatted PDF/PPT export
+      alert('Beautiful PDF export coming soon!');
+    }
+
+    function optimizePlan() {
+      // Placeholder — will allow refining the plan with follow-up questions
+      alert('Plan optimization coming soon!');
     }
 
     function printPlan() {
