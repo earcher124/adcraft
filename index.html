@@ -20,34 +20,7 @@
       --font-display: 'Playfair Display', Georgia, serif;
       --font-body: 'Inter', system-ui, sans-serif;
     }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --bg: #1a1218;
-        --surface: #251820;
-        --border: #3a2830;
-        --fg: #f0e8ee;
-        --fg-soft: #c8b8c4;
-        --fg-muted: #8a7a86;
-        --accent: #c070a8;
-        --accent-mid: #a05088;
-        --accent-light: #2a1828;
-        --gold: #d49848;
-        color-scheme: dark;
-      }
-    }
-    :root[data-theme="dark"] {
-      --bg: #1a1218;
-      --surface: #251820;
-      --border: #3a2830;
-      --fg: #f0e8ee;
-      --fg-soft: #c8b8c4;
-      --fg-muted: #8a7a86;
-      --accent: #c070a8;
-      --accent-mid: #a05088;
-      --accent-light: #2a1828;
-      --gold: #d49848;
-      color-scheme: dark;
-    }
+    /* Always light mode — matches Softr site */
     * { box-sizing: border-box; }
     body {
       background: var(--bg);
