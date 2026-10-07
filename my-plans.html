@@ -109,43 +109,63 @@
 
     async function loadPlans(email) {
       var container = document.getElementById("plans-container");
-      // Plans are stored in Airtable with a field linking to user email
-      // We'll fetch from the Plans table filtered by user
-      // AT token needed — for now show empty state
-      container.innerHTML = '';
-      container.className = '';
 
-      // Try to get plans from sessionStorage or show empty state
-      var plans = [];
+      try {
+        var res = await fetch('/.netlify/functions/get-plans?email=' + encodeURIComponent(email));
+        var data = await res.json();
+        var plans = data.plans || [];
 
-      if (plans.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-state-icon">📋</div>
-            <h3>No plans yet</h3>
-            <p>Create your first AI-powered advertising plan in seconds.</p>
-            <a class="btn-primary" href="/new-plan.html">Create a Plan</a>
-          </div>`;
-        return;
+        container.innerHTML = '';
+        container.className = '';
+
+        if (plans.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <h3>No plans yet</h3>
+              <p>Create your first AI-powered advertising plan in seconds.</p>
+              <a class="btn-primary" href="/new-plan.html">Create a Plan →</a>
+            </div>`;
+          return;
+        }
+
+        var grid = document.createElement("div");
+        grid.className = "plans-grid";
+        plans.forEach(function(plan) {
+          var card = document.createElement("a");
+          card.className = "plan-card";
+          card.href = "/plan-viewer.html?id=" + plan.id;
+
+          var date = plan.created
+            ? new Date(plan.created).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+            : "";
+
+          var statusBadge = plan.status === "Ready" || plan.status === "Complete"
+            ? '<span class="plan-tag" style="background:#e8f5e9;color:#2e7d32;">Ready</span>'
+            : plan.status === "Generating"
+            ? '<span class="plan-tag" style="background:#fff8e1;color:#f57f17;">Generating…</span>'
+            : plan.status === "Error"
+            ? '<span class="plan-tag" style="background:#fce4ec;color:#c62828;">Error</span>'
+            : '';
+
+          card.innerHTML =
+            '<div class="plan-name">' + (plan.planName || 'Untitled Plan') + '</div>' +
+            '<div class="plan-meta">' + (plan.bizName ? plan.bizName + ' · ' : '') + (date || '') + '</div>' +
+            '<div class="plan-tags">' +
+              statusBadge +
+              (plan.budget ? '<span class="plan-tag">' + plan.budget + '</span>' : '') +
+            '</div>';
+
+          grid.appendChild(card);
+        });
+
+        container.appendChild(grid);
+
+      } catch (err) {
+        container.innerHTML = '<div class="empty-state"><p>Failed to load plans. Please refresh.</p></div>';
+        container.className = '';
+        console.error("loadPlans error:", err);
       }
-
-      var grid = document.createElement("div");
-      grid.className = "plans-grid";
-      plans.forEach(function(plan) {
-        var card = document.createElement("a");
-        card.className = "plan-card";
-        card.href = "/plan-viewer.html?id=" + plan.id;
-        var date = new Date(plan.fields.Created).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-        card.innerHTML = `
-          <div class="plan-name">${plan.fields.Name || "Untitled Plan"}</div>
-          <div class="plan-meta">Created ${date}</div>
-          <div class="plan-tags">
-            ${plan.fields.Industry ? '<span class="plan-tag">' + plan.fields.Industry + '</span>' : ''}
-            ${plan.fields.Budget ? '<span class="plan-tag">' + plan.fields.Budget + '</span>' : ''}
-          </div>`;
-        grid.appendChild(card);
-      });
-      container.appendChild(grid);
     }
   </script>
 </body>
