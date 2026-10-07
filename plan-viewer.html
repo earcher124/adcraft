@@ -724,10 +724,10 @@
         if (coverType === "illustration") {
           btn.textContent = "Creating cover art…";
           try {
-            // Fire the background function — it returns 202 immediately and
-            // generates the image async, saving it to Airtable when done.
-            // If art is already cached it returns 200 {status:"ready"}.
-            var bgRes = await fetch("/.netlify/functions/generate-cover-art-background", {
+            // Fire via trigger proxy — background functions can't be called directly
+            // from the browser; this proxy calls the background function server-to-server.
+            // Returns 200 {status:"ready"} if already cached, 202 {status:"generating"} otherwise.
+            var bgRes = await fetch("/.netlify/functions/trigger-cover-art", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ recordId: recordId, email: email }),
