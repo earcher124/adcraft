@@ -187,7 +187,6 @@
           <button class="btn btn-outline" id="btn-excel" onclick="downloadExcel()">↓ Excel</button>
           <button class="btn btn-outline" id="btn-pdf" onclick="downloadPDF()">↓ PDF</button>
           <button class="btn btn-outline" id="btn-optimize" onclick="optimizePlan()">✦ Optimize Plan</button>
-          <a href="/new-plan.html" class="btn btn-primary">New Plan →</a>
         </div>
       </div>
     </div>
@@ -229,6 +228,7 @@
     var recordId = new URLSearchParams(window.location.search).get('id');
     var pollInterval = null;
     var pollCount = 0;
+    var currentPlan = null;
     var stepIndex = 0;
     var stepTimers = [];
 
@@ -309,6 +309,7 @@
 
       var body = document.getElementById('plan-body');
       if (plan) {
+        currentPlan = plan;
         body.innerHTML = renderPlanJSON(plan);
         restoreCheckboxes();
         // Save checkbox state whenever one changes
@@ -502,10 +503,15 @@
     }
 
     function downloadExcel() {
+      if (!currentPlan) { alert('Plan not loaded yet.'); return; }
       var btn = document.getElementById('btn-excel');
       btn.textContent = 'Building…';
       btn.disabled = true;
-      fetch('/.netlify/functions/generate-xlsx?id=' + encodeURIComponent(recordId))
+      fetch('/.netlify/functions/generate-xlsx', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(currentPlan)
+      })
         .then(function(res) {
           if (!res.ok) throw new Error('Failed');
           return res.blob();
@@ -514,7 +520,7 @@
           var url = URL.createObjectURL(blob);
           var a = document.createElement('a');
           a.href = url;
-          a.download = 'adcraft-plan.xlsx';
+          a.download = (currentPlan.plan_name || 'AdCraft-Plan').replace(/[^a-zA-Z0-9 _\-]/g, '').replace(/\s+/g, '-') + '.xlsx';
           a.click();
           URL.revokeObjectURL(url);
         })
