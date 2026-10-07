@@ -562,8 +562,23 @@
         return;
       }
 
+      // Check status immediately — if already complete, show plan without animation
+      try {
+        var initRes = await fetch('/.netlify/functions/poll-plan?id=' + encodeURIComponent(recordId));
+        var initData = await initRes.json();
+        console.log('[AdCraft] initial status:', initData.status, '| has plan:', !!initData.plan);
+        if (initData.status === 'Complete' && initData.plan) {
+          currentIntake = initData.intake || null;
+          showPlan(initData.plan, initData.bizName);
+          return; // done — no need to poll
+        }
+        if (initData.status === 'Error') { showError(); return; }
+      } catch(e) {
+        console.warn('[AdCraft] initial poll error:', e.message);
+      }
+
+      // Plan is still generating — show animation and poll
       startStepAnimation();
-      // Poll immediately, then every 4 seconds
       pollPlan();
       pollInterval = setInterval(pollPlan, 4000);
     });
