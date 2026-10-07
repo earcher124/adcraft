@@ -40,18 +40,11 @@ exports.handler = async function (event) {
             "Plan Name": bizName || "Untitled Plan",
             "Email": email || "",
             "Business Name": body.bizName || "",
+            "Primary Goal": body.goal || "",
+            "Geography": body.geo || "",
+            "Monthly Ad Budget": body.budget || "",
             "Status": "Generating",
-            "Intake Responses": JSON.stringify({
-              bizType: body.formData?.bizType || "",
-              productType: body.formData?.productType || "",
-              targetCustomer: body.formData?.targetCustomer || "",
-              goal: body.goal || "",
-              geo: body.geo || "",
-              budget: body.budget || "",
-              monthlyRevenue: body.formData?.monthlyRevenue || "",
-              currentAdvertising: body.formData?.currentAdvertising || "",
-              ...body.formData,
-            }),
+            "Intake Responses": JSON.stringify(body.formData || {}),
           },
         }),
       }
@@ -60,38 +53,9 @@ exports.handler = async function (event) {
     const atData = await atRes.json();
     if (!atRes.ok) {
       console.error("Airtable create error:", JSON.stringify(atData));
-      // If "Intake Responses" field doesn't exist, retry with just core fields
-      if (atData.error?.type === "UNKNOWN_FIELD_NAME") {
-        const retryRes = await fetch(
-          `https://api.airtable.com/v0/${AT_BASE}/${AT_PLANS_TBL}`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${process.env.AIRTABLE_TOKEN}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              fields: {
-                "Plan Name": bizName || "Untitled Plan",
-                "Email": email || "",
-                "Business Name": body.bizName || "",
-                "Status": "Generating",
-              },
-            }),
-          }
-        );
-        const retryData = await retryRes.json();
-        if (!retryRes.ok) {
-          console.error("Airtable retry error:", JSON.stringify(retryData));
-          return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to create plan record" }) };
-        }
-        recordId = retryData.id;
-      } else {
-        return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to create plan record" }) };
-      }
-    } else {
-      recordId = atData.id;
+      return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to create plan record" }) };
     }
+    recordId = atData.id;
   } catch (err) {
     console.error("Airtable error:", err);
     return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to create plan record" }) };
