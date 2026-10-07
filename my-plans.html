@@ -21,8 +21,30 @@
 
     .content { max-width: 860px; margin: 40px auto; padding: 0 48px; }
 
-    .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #4A1040; margin-bottom: 16px; }
+    .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #4A1040; white-space: nowrap; }
 
+    .search-wrap { flex: 1; position: relative; max-width: 320px; }
+    .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #9a8fa0; pointer-events: none; }
+    #search-input {
+      width: 100%; padding: 8px 12px 8px 34px;
+      border: 1px solid #e0d6dc; border-radius: 8px;
+      font-size: 13px; font-family: inherit; background: #fff; color: #1a1a1a;
+      outline: none; transition: border-color 0.15s;
+    }
+    #search-input:focus { border-color: #4A1040; }
+    #search-input::placeholder { color: #b0a4b8; }
+
+    .btn-show-archived {
+      font-size: 12px; font-weight: 600; color: #6b6270;
+      background: none; border: 1px solid #e0d6dc; border-radius: 8px;
+      padding: 7px 13px; cursor: pointer; white-space: nowrap;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-show-archived:hover { border-color: #4A1040; color: #4A1040; }
+    .btn-show-archived.active { border-color: #4A1040; color: #4A1040; background: #F0E8EE; }
+
+    /* Cards */
     .plans-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
 
     .plan-card {
@@ -30,21 +52,41 @@
       border: 1px solid #e8ddd0;
       border-radius: 12px;
       padding: 20px;
-      text-decoration: none;
-      color: inherit;
       display: flex;
       flex-direction: column;
       gap: 12px;
-      transition: box-shadow 0.15s, transform 0.15s;
+      transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
+      position: relative;
+      cursor: pointer;
+      user-select: none;
     }
     .plan-card:hover { box-shadow: 0 4px 16px rgba(74,16,64,0.10); transform: translateY(-2px); }
+    .plan-card.selected { border-color: #4A1040; box-shadow: 0 0 0 2px rgba(74,16,64,0.18); transform: none; }
+    .plan-card.archived { opacity: 0.6; }
 
-    .plan-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    /* Checkbox */
+    .card-checkbox {
+      position: absolute; top: 14px; right: 14px;
+      width: 18px; height: 18px;
+      border: 2px solid #c8bcd0; border-radius: 4px;
+      background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.15s, border-color 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+    .plan-card:hover .card-checkbox,
+    .plan-card.selected .card-checkbox { opacity: 1; }
+    .plan-card.selected .card-checkbox { border-color: #4A1040; background: #4A1040; }
+    .card-checkbox svg { display: none; }
+    .plan-card.selected .card-checkbox svg { display: block; }
+
+    .plan-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; }
     .plan-name { font-size: 15px; font-weight: 700; color: #1a1a1a; line-height: 1.3; flex: 1; }
     .plan-tag { font-size: 11px; font-weight: 600; background: #F0E8EE; color: #4A1040; border-radius: 20px; padding: 3px 10px; white-space: nowrap; flex-shrink: 0; }
     .tag-ready { background: #e8f5e9; color: #2e7d32; }
     .tag-generating { background: #fff8e1; color: #f57f17; }
     .tag-error { background: #fce4ec; color: #c62828; }
+    .tag-archived { background: #f0f0f0; color: #888; }
 
     .plan-meta { font-size: 12px; color: #6b6270; line-height: 1.5; }
 
@@ -60,36 +102,55 @@
     }
     .btn-view:hover { background: #4A1040; color: #FAF6ED; }
 
+    /* Floating action bar */
+    .bulk-bar {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: #1a1a1a; color: #fff;
+      border-radius: 12px; padding: 12px 20px;
+      display: flex; align-items: center; gap: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+      transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s;
+      opacity: 0; pointer-events: none; z-index: 100;
+      white-space: nowrap;
+    }
+    .bulk-bar.visible { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: all; }
+    .bulk-count { font-size: 13px; font-weight: 600; color: #ccc; }
+    .bulk-divider { width: 1px; height: 20px; background: #444; }
+    .bulk-btn {
+      font-size: 13px; font-weight: 600; color: #fff;
+      background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+      transition: background 0.15s;
+    }
+    .bulk-btn:hover { background: rgba(255,255,255,0.12); }
+    .bulk-btn.danger:hover { background: rgba(220,53,69,0.3); color: #ff8a8a; }
+    .bulk-btn-cancel { color: #888; }
+
+    /* No results */
+    .no-results { text-align: center; padding: 40px; color: #6b6270; font-size: 14px; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 64px 24px; color: #6b6270; }
+    .empty-state-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-state h3 { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; color: #1a1a1a; margin: 0 0 8px; }
+    .empty-state p { font-size: 14px; margin: 0 0 24px; }
+    .btn-primary {
+      display: inline-block; background: #4A1040; color: #FAF6ED;
+      font-size: 14px; font-weight: 600; padding: 12px 24px; border-radius: 8px;
+      text-decoration: none; transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #6a2060; }
+
+    .loading { text-align: center; padding: 64px; color: #6b6270; font-size: 14px; }
+
     @media (max-width: 640px) {
       .hero { padding: 32px 20px 24px; }
       .hero-inner { flex-direction: column; gap: 16px; }
       .hero-right { border-left: none; border-top: 1px solid #e8ddd0; padding-left: 0; padding-top: 16px; }
       .content { padding: 0 20px; }
       .plans-grid { grid-template-columns: 1fr; }
+      .toolbar { flex-wrap: wrap; }
+      .search-wrap { max-width: 100%; }
     }
-
-    .empty-state {
-      text-align: center;
-      padding: 64px 24px;
-      color: #6b6270;
-    }
-    .empty-state-icon { font-size: 48px; margin-bottom: 16px; }
-    .empty-state h3 { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; color: #1a1a1a; margin: 0 0 8px; }
-    .empty-state p { font-size: 14px; margin: 0 0 24px; }
-    .btn-primary {
-      display: inline-block;
-      background: #4A1040;
-      color: #FAF6ED;
-      font-size: 14px;
-      font-weight: 600;
-      padding: 12px 24px;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: background 0.2s;
-    }
-    .btn-primary:hover { background: #6a2060; }
-
-    .loading { text-align: center; padding: 64px; color: #6b6270; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -109,86 +170,213 @@
   </div>
 
   <div class="content">
-    <p class="section-label">Saved Plans</p>
+    <div class="toolbar">
+      <p class="section-label">Saved Plans</p>
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="search-input" type="text" placeholder="Search plans…" oninput="filterPlans()">
+      </div>
+      <button class="btn-show-archived" id="btn-archived" onclick="toggleArchived()">Show Archived</button>
+    </div>
     <div id="plans-container" class="loading">Loading your plans…</div>
+  </div>
+
+  <!-- Bulk action bar -->
+  <div class="bulk-bar" id="bulk-bar">
+    <span class="bulk-count" id="bulk-count">0 selected</span>
+    <div class="bulk-divider"></div>
+    <button class="bulk-btn" onclick="bulkArchive()">Archive</button>
+    <button class="bulk-btn danger" onclick="bulkDelete()">Delete</button>
+    <div class="bulk-divider"></div>
+    <button class="bulk-btn bulk-btn-cancel" onclick="clearSelection()">Cancel</button>
   </div>
 
   <script src="_shared.js"></script>
   <script>
+    var allPlans = [];
+    var selectedIds = new Set();
+    var showArchived = false;
+
     window.__clerkLoaded.then(async function(clerk) {
       if (!clerk.user) { window.location.href = "/login.html"; return; }
       renderNav("My Plans");
-
       var email = clerk.user.primaryEmailAddress?.emailAddress;
-      // Load plans from Airtable Plans table linked to this user
-      // For now show placeholder — full Airtable wiring comes next
       loadPlans(email);
     });
 
     async function loadPlans(email) {
       var container = document.getElementById("plans-container");
-
       try {
         var res = await fetch('/.netlify/functions/get-plans?email=' + encodeURIComponent(email));
         var data = await res.json();
-        var plans = data.plans || [];
-
-        container.innerHTML = '';
+        allPlans = data.plans || [];
         container.className = '';
-
-        if (plans.length === 0) {
-          container.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-state-icon">📋</div>
-              <h3>No plans yet</h3>
-              <p>Create your first AI-powered advertising plan in seconds.</p>
-              <a class="btn-primary" href="/new-plan.html">Create a Plan →</a>
-            </div>`;
-          return;
-        }
-
-        var grid = document.createElement("div");
-        grid.className = "plans-grid";
-        plans.forEach(function(plan) {
-          var card = document.createElement("div");
-          card.className = "plan-card";
-
-          var date = plan.created
-            ? new Date(plan.created).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-            : "";
-
-          var statusClass = (plan.status === "Ready" || plan.status === "Complete") ? "tag-ready"
-            : plan.status === "Generating" ? "tag-generating"
-            : plan.status === "Error" ? "tag-error" : "";
-          var statusLabel = (plan.status === "Ready" || plan.status === "Complete") ? "Ready"
-            : plan.status === "Generating" ? "Generating…"
-            : plan.status === "Error" ? "Error" : plan.status || "";
-
-          var showBiz = plan.bizName && plan.bizName !== plan.planName;
-          card.innerHTML =
-            '<div class="plan-card-top">' +
-              '<div class="plan-name">' + (plan.planName || 'Untitled Plan') + '</div>' +
-              (statusLabel ? '<span class="plan-tag ' + statusClass + '">' + statusLabel + '</span>' : '') +
-            '</div>' +
-            '<div class="plan-meta">' +
-              (showBiz ? plan.bizName + (date ? ' · ' : '') : '') +
-              (date || '') +
-            '</div>' +
-            '<div class="plan-card-footer">' +
-              '<span class="plan-budget">' + (plan.budget || '') + '</span>' +
-              '<a class="btn-view" href="/plan-viewer.html?id=' + plan.id + '">View Plan →</a>' +
-            '</div>';
-
-          grid.appendChild(card);
-        });
-
-        container.appendChild(grid);
-
+        renderPlans();
       } catch (err) {
         container.innerHTML = '<div class="empty-state"><p>Failed to load plans. Please refresh.</p></div>';
         container.className = '';
         console.error("loadPlans error:", err);
       }
+    }
+
+    function renderPlans() {
+      var container = document.getElementById("plans-container");
+      var query = document.getElementById("search-input").value.trim().toLowerCase();
+
+      var visible = allPlans.filter(function(plan) {
+        var archived = plan.status === "Archived";
+        if (archived && !showArchived) return false;
+        if (query) {
+          var haystack = ((plan.planName || '') + ' ' + (plan.bizName || '')).toLowerCase();
+          return haystack.includes(query);
+        }
+        return true;
+      });
+
+      if (allPlans.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <h3>No plans yet</h3>
+            <p>Create your first AI-powered advertising plan in seconds.</p>
+            <a class="btn-primary" href="/new-plan.html">Create a Plan →</a>
+          </div>`;
+        return;
+      }
+
+      if (visible.length === 0) {
+        container.innerHTML = '<div class="no-results">No plans match your search.</div>';
+        return;
+      }
+
+      var grid = document.createElement("div");
+      grid.className = "plans-grid";
+
+      visible.forEach(function(plan) {
+        var isArchived = plan.status === "Archived";
+        var date = plan.created
+          ? new Date(plan.created).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+          : "";
+        var statusClass = isArchived ? "tag-archived"
+          : (plan.status === "Ready" || plan.status === "Complete") ? "tag-ready"
+          : plan.status === "Generating" ? "tag-generating"
+          : plan.status === "Error" ? "tag-error" : "";
+        var statusLabel = isArchived ? "Archived"
+          : (plan.status === "Ready" || plan.status === "Complete") ? "Ready"
+          : plan.status === "Generating" ? "Generating…"
+          : plan.status === "Error" ? "Error" : plan.status || "";
+
+        var showBiz = plan.bizName && plan.bizName !== plan.planName;
+
+        var card = document.createElement("div");
+        card.className = "plan-card" + (isArchived ? " archived" : "") + (selectedIds.has(plan.id) ? " selected" : "");
+        card.dataset.id = plan.id;
+        card.innerHTML =
+          '<div class="card-checkbox">' +
+            '<svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,6 5,9.5 10.5,2.5"/></svg>' +
+          '</div>' +
+          '<div class="plan-card-top">' +
+            '<div class="plan-name">' + escHtml(plan.planName || 'Untitled Plan') + '</div>' +
+            (statusLabel ? '<span class="plan-tag ' + statusClass + '">' + statusLabel + '</span>' : '') +
+          '</div>' +
+          '<div class="plan-meta">' +
+            (showBiz ? escHtml(plan.bizName) + (date ? ' · ' : '') : '') +
+            (date || '') +
+          '</div>' +
+          '<div class="plan-card-footer">' +
+            '<span class="plan-budget">' + escHtml(plan.budget || '') + '</span>' +
+            '<a class="btn-view" href="/plan-viewer.html?id=' + plan.id + '">View Plan →</a>' +
+          '</div>';
+
+        // Click card body = toggle selection; View Plan button = navigate
+        card.addEventListener("click", function(e) {
+          if (e.target.closest(".btn-view")) return; // let link through
+          toggleSelect(plan.id, card);
+        });
+
+        grid.appendChild(card);
+      });
+
+      container.innerHTML = '';
+      container.appendChild(grid);
+    }
+
+    function filterPlans() { renderPlans(); }
+
+    function toggleArchived() {
+      showArchived = !showArchived;
+      var btn = document.getElementById("btn-archived");
+      btn.classList.toggle("active", showArchived);
+      btn.textContent = showArchived ? "Hide Archived" : "Show Archived";
+      renderPlans();
+    }
+
+    function toggleSelect(id, card) {
+      if (selectedIds.has(id)) {
+        selectedIds.delete(id);
+        card.classList.remove("selected");
+      } else {
+        selectedIds.add(id);
+        card.classList.add("selected");
+      }
+      updateBulkBar();
+    }
+
+    function clearSelection() {
+      selectedIds.clear();
+      document.querySelectorAll(".plan-card.selected").forEach(function(c) { c.classList.remove("selected"); });
+      updateBulkBar();
+    }
+
+    function updateBulkBar() {
+      var bar = document.getElementById("bulk-bar");
+      var count = selectedIds.size;
+      document.getElementById("bulk-count").textContent = count + " selected";
+      bar.classList.toggle("visible", count > 0);
+    }
+
+    async function bulkArchive() {
+      var ids = Array.from(selectedIds);
+      if (!ids.length) return;
+      try {
+        var res = await fetch('/.netlify/functions/archive-plan', {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids })
+        });
+        if (!res.ok) throw new Error("Failed");
+        ids.forEach(function(id) {
+          var plan = allPlans.find(function(p) { return p.id === id; });
+          if (plan) plan.status = "Archived";
+        });
+        clearSelection();
+        renderPlans();
+      } catch(e) {
+        alert("Archive failed. Please try again.");
+      }
+    }
+
+    async function bulkDelete() {
+      var ids = Array.from(selectedIds);
+      if (!ids.length) return;
+      if (!confirm("Delete " + ids.length + " plan" + (ids.length > 1 ? "s" : "") + "? This cannot be undone.")) return;
+      try {
+        var res = await fetch('/.netlify/functions/delete-plan', {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids })
+        });
+        if (!res.ok) throw new Error("Failed");
+        allPlans = allPlans.filter(function(p) { return !selectedIds.has(p.id); });
+        clearSelection();
+        renderPlans();
+      } catch(e) {
+        alert("Delete failed. Please try again.");
+      }
+    }
+
+    function escHtml(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
   </script>
 </body>
