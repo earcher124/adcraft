@@ -31,8 +31,8 @@ exports.handler = async function (event) {
   try {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const message = await client.messages.create({
-      model: "claude-opus-4-5",
-      max_tokens: 4096,
+      model: "claude-sonnet-4-5",
+      max_tokens: 3000,
       messages: [
         {
           role: "user",
