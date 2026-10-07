@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdCraft — AI-Powered Advertising Plans</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,800;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #FAF6ED;
+      font-family: 'Inter', system-ui, sans-serif;
+      color: #1a1a1a;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+      height: 64px;
+      background: #FAF6ED;
+      border-bottom: 1px solid rgba(74,16,64,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: #4A1040;
+      text-decoration: none;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-logo .sparkle { color: #E8603C; font-size: 18px; }
+    .nav-links { display: flex; align-items: center; gap: 8px; }
+    .nav-link {
+      font-size: 14px;
+      font-weight: 500;
+      color: #4A1040;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: background 0.15s;
+    }
+    .nav-link:hover { background: rgba(74,16,64,0.06); }
+    .nav-link-cta {
+      background: #4A1040;
+      color: #FAF6ED !important;
+      font-weight: 600;
+    }
+    .nav-link-cta:hover { background: #6a2060 !important; }
+
+    /* ── HERO ── */
+    .hero {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 80px 48px 60px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 64px;
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #E8603C;
+      margin-bottom: 20px;
+    }
+    .hero-eyebrow::before {
+      content: "";
+      display: inline-block;
+      width: 20px;
+      height: 2px;
+      background: #E8603C;
+    }
+    .hero-heading {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 52px;
+      font-weight: 800;
+      color: #1a1a1a;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+    }
+    .hero-heading em {
+      font-style: italic;
+      font-weight: 700;
+      color: #4A1040;
+    }
+    .hero-sub {
+      font-size: 17px;
+      color: #6b6270;
+      line-height: 1.65;
+      margin-bottom: 36px;
+      max-width: 420px;
+    }
+    .hero-ctas {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #4A1040;
+      color: #FAF6ED;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 14px 28px;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-primary:hover { background: #6a2060; transform: translateY(-1px); }
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      background: transparent;
+      color: #4A1040;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 14px 28px;
+      border-radius: 10px;
+      border: 1.5px solid #4A1040;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn-outline:hover { background: rgba(74,16,64,0.06); }
+    .hero-note {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #9b8fa0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hero-note::before { content: "✓"; color: #4A1040; font-weight: 700; }
+
+    /* Hero right — laptop illustration */
+    .hero-visual {
+      position: relative;
+    }
+    .laptop-wrap {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 24px 80px rgba(74,16,64,0.12), 0 4px 16px rgba(74,16,64,0.06);
+      overflow: hidden;
+      aspect-ratio: 4/3;
+      position: relative;
+    }
+    /* Simulated laptop screen with AdCraft UI preview */
+    .laptop-screen {
+      width: 100%;
+      height: 100%;
+      background: #FAF6ED;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .screen-nav {
+      background: #4A1040;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 6px;
+    }
+    .screen-nav span {
+      font-family: 'Playfair Display', serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: #FAF6ED;
+      letter-spacing: -0.01em;
+    }
+    .screen-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .screen-body { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+    .screen-hero-txt {
+      font-family: 'Playfair Display', serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a1a1a;
+      letter-spacing: -0.02em;
+    }
+    .screen-hero-txt em { font-style: italic; color: #4A1040; }
+    .screen-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+    .screen-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 10px;
+      border: 1px solid #e8ddd0;
+    }
+    .screen-card-icon { font-size: 16px; margin-bottom: 4px; }
+    .screen-card-title { font-size: 7px; font-weight: 700; color: #1a1a1a; margin-bottom: 2px; }
+    .screen-card-sub { font-size: 6px; color: #9b8fa0; }
+    .screen-plan-row {
+      background: #fff;
+      border-radius: 8px;
+      padding: 8px 10px;
+      border: 1px solid #e8ddd0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .screen-plan-title { font-size: 7px; font-weight: 600; color: #1a1a1a; }
+    .screen-plan-meta { font-size: 6px; color: #9b8fa0; }
+    .screen-badge {
+      font-size: 6px;
+      font-weight: 700;
+      background: #4A1040;
+      color: #FAF6ED;
+      padding: 2px 6px;
+      border-radius: 20px;
+    }
+    .screen-chart { background: #fff; border-radius: 8px; padding: 10px; border: 1px solid #e8ddd0; }
+    .screen-chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 36px; margin-top: 4px; }
+    .bar { background: #4A1040; border-radius: 2px 2px 0 0; flex: 1; opacity: 0.85; }
+    .bar:nth-child(2) { opacity: 0.6; }
+    .bar:nth-child(3) { opacity: 0.45; background: #E8603C; }
+    .bar:nth-child(4) { opacity: 0.7; }
+    .bar:nth-child(5) { opacity: 0.9; }
+
+    /* decorative blob behind laptop */
+    .hero-blob {
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(232,96,60,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-blob-2 {
+      position: absolute;
+      bottom: -30px;
+      left: -30px;
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle, rgba(74,16,64,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── LOGOS / SOCIAL PROOF ── */
+    .proof-bar {
+      border-top: 1px solid #e8ddd0;
+      border-bottom: 1px solid #e8ddd0;
+      background: #FAF6ED;
+      padding: 20px 48px;
+      text-align: center;
+    }
+    .proof-inner { max-width: 700px; margin: 0 auto; }
+    .proof-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #9b8fa0;
+      margin-bottom: 16px;
+    }
+    .proof-stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #4A1040;
+      letter-spacing: -0.02em;
+    }
+    .stat-label { font-size: 12px; color: #6b6270; margin-top: 2px; }
+
+    /* ── HOW IT WORKS ── */
+    .section { padding: 80px 48px; max-width: 1100px; margin: 0 auto; }
+    .section-eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #E8603C;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .section-heading {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 38px;
+      font-weight: 800;
+      color: #1a1a1a;
+      text-align: center;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+    .section-heading em { font-style: italic; color: #4A1040; }
+    .section-sub {
+      font-size: 16px;
+      color: #6b6270;
+      text-align: center;
+      max-width: 500px;
+      margin: 0 auto 56px;
+      line-height: 1.6;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+    .step-card {
+      text-align: center;
+      padding: 40px 28px;
+      background: #fff;
+      border-radius: 20px;
+      border: 1px solid #e8ddd0;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .step-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(74,16,64,0.1); }
+    .step-num {
+      position: absolute;
+      top: 20px;
+      left: 24px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #E8603C;
+      letter-spacing: 0.1em;
+    }
+    .step-illustration {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 20px;
+    }
+    .step-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 19px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+    .step-desc { font-size: 14px; color: #6b6270; line-height: 1.65; }
+
+    /* ── FEATURES / WHAT'S INSIDE ── */
+    .features-section {
+      padding: 80px 48px;
+      background: #4A1040;
+    }
+    .features-inner { max-width: 1100px; margin: 0 auto; }
+    .features-section .section-eyebrow { color: rgba(250,246,237,0.5); }
+    .features-section .section-heading { color: #FAF6ED; }
+    .features-section .section-heading em { color: #E8603C; }
+    .features-section .section-sub { color: rgba(250,246,237,0.6); }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .feature-card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 32px 28px;
+      transition: background 0.2s;
+    }
+    .feature-card:hover { background: rgba(255,255,255,0.12); }
+    .feature-icon-wrap {
+      width: 56px;
+      height: 56px;
+      background: rgba(232,96,60,0.15);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 20px;
+    }
+    .feature-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: #FAF6ED;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+    .feature-desc { font-size: 13px; color: rgba(250,246,237,0.65); line-height: 1.65; }
+    .feature-list { list-style: none; padding: 0; margin-top: 14px; }
+    .feature-list li {
+      font-size: 13px;
+      color: rgba(250,246,237,0.6);
+      padding: 4px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .feature-list li::before { content: "→"; color: #E8603C; flex-shrink: 0; font-weight: 700; }
+
+    /* ── CTA BANNER ── */
+    .cta-section { padding: 48px 48px 80px; max-width: 1100px; margin: 0 auto; }
+    .cta-banner {
+      background: #4A1040;
+      border-radius: 24px;
+      padding: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+    }
+    .cta-left {}
+    .cta-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: rgba(250,246,237,0.5); margin-bottom: 12px; }
+    .cta-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      font-weight: 800;
+      color: #FAF6ED;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      max-width: 380px;
+    }
+    .cta-heading em { font-style: italic; color: #E8603C; }
+    .cta-sub { font-size: 15px; color: rgba(250,246,237,0.65); margin-top: 12px; line-height: 1.6; }
+    .cta-right { flex-shrink: 0; }
+    .btn-cta {
+      display: inline-block;
+      background: #FAF6ED;
+      color: #4A1040;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 18px 36px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn-cta:hover { background: #f0e8ee; transform: translateY(-1px); }
+    .btn-cta-note {
+      font-size: 12px;
+      color: rgba(250,246,237,0.5);
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* ── FAQ ── */
+    .faq-section { padding: 80px 48px; max-width: 800px; margin: 0 auto; }
+    .faq-list { display: flex; flex-direction: column; gap: 2px; margin-top: 48px; }
+    .faq-item { border-bottom: 1px solid #e8ddd0; }
+    .faq-q {
+      width: 100%;
+      background: none;
+      border: none;
+      text-align: left;
+      padding: 20px 0;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a1a;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .faq-q:hover { color: #4A1040; }
+    .faq-chevron {
+      color: #4A1040;
+      font-size: 18px;
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+    .faq-item.open .faq-chevron { transform: rotate(45deg); }
+    .faq-a {
+      font-size: 15px;
+      color: #6b6270;
+      line-height: 1.7;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding-bottom 0.3s;
+    }
+    .faq-item.open .faq-a { max-height: 200px; padding-bottom: 20px; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid #e8ddd0;
+      padding: 32px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .footer-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #4A1040;
+      letter-spacing: -0.02em;
+    }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-link { font-size: 13px; color: #6b6270; text-decoration: none; }
+    .footer-link:hover { color: #4A1040; }
+    .footer-copy { font-size: 12px; color: #9b8fa0; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-link:not(.nav-link-cta) { display: none; }
+      .hero { grid-template-columns: 1fr; padding: 48px 20px 32px; gap: 40px; }
+      .hero-heading { font-size: 38px; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .cta-banner { flex-direction: column; text-align: center; padding: 40px 28px; }
+      .cta-heading { max-width: 100%; }
+      .section { padding: 56px 20px; }
+      .cta-section { padding: 24px 20px 56px; }
+      .faq-section { padding: 56px 20px; }
+      .features-section { padding: 56px 20px; }
+      .proof-bar { padding: 20px; }
+      .proof-stats { gap: 28px; }
+      footer { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="/home.html">
+      <span class="sparkle">✦</span> AdCraft
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="/login.html">Sign in</a>
+      <a class="nav-link nav-link-cta" href="/login.html">Get started free →</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-left">
+      <p class="hero-eyebrow">AI-Powered Advertising</p>
+      <h1 class="hero-heading">Your first advertising plan in <em>minutes.</em></h1>
+      <p class="hero-sub">Stop guessing where to put your ad budget. AdCraft creates a complete, channel-by-channel advertising strategy tailored to your business — in minutes, not months.</p>
+      <div class="hero-ctas">
+        <a class="btn-primary" href="/login.html">Get my free plan →</a>
+        <a class="btn-outline" href="/login.html">Sign in</a>
+      </div>
+      <p class="hero-note">Free to start — no credit card required</p>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-blob"></div>
+      <div class="hero-blob-2"></div>
+      <div class="laptop-wrap">
+        <div class="laptop-screen">
+          <div class="screen-nav">
+            <div class="screen-dot" style="background:#FAF6ED;opacity:0.4"></div>
+            <div class="screen-dot" style="background:#FAF6ED;opacity:0.4"></div>
+            <div class="screen-dot" style="background:#FAF6ED;opacity:0.4"></div>
+            <span style="margin-left:8px;">AdCraft</span>
+          </div>
+          <div class="screen-body">
+            <div class="screen-hero-txt">Your <em>Dashboard</em></div>
+            <div class="screen-grid">
+              <div class="screen-card">
+                <div class="screen-card-icon">📋</div>
+                <div class="screen-card-title">New Plan</div>
+                <div class="screen-card-sub">AI-powered →</div>
+              </div>
+              <div class="screen-card">
+                <div class="screen-card-icon">📊</div>
+                <div class="screen-card-title">My Plans</div>
+                <div class="screen-card-sub">3 active</div>
+              </div>
+              <div class="screen-card">
+                <div class="screen-card-icon">⚡</div>
+                <div class="screen-card-title">Optimize</div>
+                <div class="screen-card-sub">Pro feature</div>
+              </div>
+            </div>
+            <div class="screen-plan-row">
+              <div>
+                <div class="screen-plan-title">Spring Launch — Retail Co.</div>
+                <div class="screen-plan-meta">$5,000/mo · 4 channels</div>
+              </div>
+              <span class="screen-badge">View</span>
+            </div>
+            <div class="screen-plan-row">
+              <div>
+                <div class="screen-plan-title">Q4 Push — Tech Startup</div>
+                <div class="screen-plan-meta">$12,000/mo · 6 channels</div>
+              </div>
+              <span class="screen-badge">View</span>
+            </div>
+            <div class="screen-chart">
+              <div class="screen-plan-title" style="margin-bottom:2px;">Budget Allocation</div>
+              <div class="screen-chart-bars">
+                <div class="bar" style="height:70%"></div>
+                <div class="bar" style="height:45%"></div>
+                <div class="bar" style="height:30%"></div>
+                <div class="bar" style="height:55%"></div>
+                <div class="bar" style="height:85%"></div>
+                <div class="bar" style="height:40%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOCIAL PROOF BAR -->
+  <div class="proof-bar">
+    <div class="proof-inner">
+      <p class="proof-label">Trusted by growing brands</p>
+      <div class="proof-stats">
+        <div class="stat-item">
+          <div class="stat-num">500+</div>
+          <div class="stat-label">Plans created</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">12</div>
+          <div class="stat-label">Ad channels covered</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">< 5 min</div>
+          <div class="stat-label">To a complete plan</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">Free</div>
+          <div class="stat-label">To get started</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="section">
+    <p class="section-eyebrow">How it works</p>
+    <h2 class="section-heading">Three steps to your <em>full plan</em></h2>
+    <p class="section-sub">No advertising expertise needed. Answer a few questions and get a complete strategy.</p>
+    <div class="steps-grid">
+      <div class="step-card">
+        <span class="step-num">01</span>
+        <div class="step-illustration">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="15" y="10" width="70" height="80" rx="8" fill="#F5EBF3"/>
+            <rect x="25" y="25" width="50" height="6" rx="3" fill="#4A1040" opacity="0.3"/>
+            <rect x="25" y="37" width="40" height="6" rx="3" fill="#4A1040" opacity="0.3"/>
+            <rect x="25" y="49" width="46" height="6" rx="3" fill="#4A1040" opacity="0.3"/>
+            <circle cx="23" cy="63" r="4" fill="#E8603C" opacity="0.8"/>
+            <rect x="32" y="60" width="36" height="6" rx="3" fill="#4A1040" opacity="0.2"/>
+            <circle cx="23" cy="75" r="4" fill="#E8603C" opacity="0.4"/>
+            <rect x="32" y="72" width="28" height="6" rx="3" fill="#4A1040" opacity="0.2"/>
+          </svg>
+        </div>
+        <h3 class="step-title">Tell us about your business</h3>
+        <p class="step-desc">Answer a quick questionnaire about your industry, goals, budget, and target audience. Takes about 3 minutes.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-num">02</span>
+        <div class="step-illustration">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="35" fill="#F5EBF3"/>
+            <circle cx="50" cy="50" r="20" fill="#4A1040" opacity="0.15"/>
+            <circle cx="50" cy="50" r="8" fill="#4A1040" opacity="0.6"/>
+            <line x1="50" y1="15" x2="50" y2="30" stroke="#E8603C" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="70" x2="50" y2="85" stroke="#E8603C" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="15" y1="50" x2="30" y2="50" stroke="#4A1040" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/>
+            <line x1="70" y1="50" x2="85" y2="50" stroke="#4A1040" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/>
+            <circle cx="50" cy="50" r="4" fill="#E8603C"/>
+          </svg>
+        </div>
+        <h3 class="step-title">AI builds your strategy</h3>
+        <p class="step-desc">Our AI analyzes your inputs and generates a full channel-by-channel advertising plan optimized for your goals.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-num">03</span>
+        <div class="step-illustration">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="55" width="16" height="30" rx="4" fill="#E8603C" opacity="0.7"/>
+            <rect x="30" y="40" width="16" height="45" rx="4" fill="#4A1040" opacity="0.5"/>
+            <rect x="50" y="30" width="16" height="55" rx="4" fill="#E8603C" opacity="0.5"/>
+            <rect x="70" y="20" width="16" height="65" rx="4" fill="#4A1040" opacity="0.8"/>
+            <line x1="8" y1="18" x2="8" y2="88" stroke="#4A1040" stroke-width="2" opacity="0.2"/>
+            <line x1="8" y1="88" x2="92" y2="88" stroke="#4A1040" stroke-width="2" opacity="0.2"/>
+          </svg>
+        </div>
+        <h3 class="step-title">Get a complete plan</h3>
+        <p class="step-desc">Receive your detailed advertising plan with channel recommendations, budget allocation, messaging, and a 12-week timeline.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT'S INSIDE -->
+  <div class="features-section">
+    <div class="features-inner">
+      <p class="section-eyebrow">What's inside your plan</p>
+      <h2 class="section-heading">Everything you need to <em>launch</em></h2>
+      <p class="section-sub" style="color:rgba(250,246,237,0.6)">Each plan covers every dimension of your advertising strategy, ready to hand to an agency or execute yourself.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon-wrap">📡</div>
+          <h3 class="feature-title">Channel Strategy</h3>
+          <p class="feature-desc">AI-recommended channels matched to your audience and goals, with budget split and reasoning for each.</p>
+          <ul class="feature-list">
+            <li>Meta, Google, TikTok, LinkedIn & more</li>
+            <li>Budget allocation per channel</li>
+            <li>Why each channel fits your goals</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap">🎯</div>
+          <h3 class="feature-title">Audience Targeting</h3>
+          <p class="feature-desc">Detailed audience segments, demographic targeting parameters, and interest categories for each channel.</p>
+          <ul class="feature-list">
+            <li>Primary and secondary audiences</li>
+            <li>Targeting parameters per platform</li>
+            <li>Messaging tailored to each segment</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap">📅</div>
+          <h3 class="feature-title">12-Week Timeline</h3>
+          <p class="feature-desc">A week-by-week rollout plan with milestones, creative needs, and optimization checkpoints.</p>
+          <ul class="feature-list">
+            <li>Launch, test, and optimize phases</li>
+            <li>Creative deliverables checklist</li>
+            <li>Budget pacing by week</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap">✍️</div>
+          <h3 class="feature-title">Ad Copy & Messaging</h3>
+          <p class="feature-desc">Platform-specific copy and creative direction so you know exactly what to say and how to say it.</p>
+          <ul class="feature-list">
+            <li>Headlines and body copy per channel</li>
+            <li>Tone and brand voice guidance</li>
+            <li>Call-to-action recommendations</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap">💰</div>
+          <h3 class="feature-title">Budget Breakdown</h3>
+          <p class="feature-desc">Clear monthly and weekly budget tables so you always know exactly where every dollar is going.</p>
+          <ul class="feature-list">
+            <li>Channel-by-channel spend tables</li>
+            <li>Agency fee estimates</li>
+            <li>Expected cost-per-result ranges</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap">📈</div>
+          <h3 class="feature-title">KPIs & Success Metrics</h3>
+          <p class="feature-desc">Specific, measurable goals for each channel so you can tell what's working — and what isn't.</p>
+          <ul class="feature-list">
+            <li>Channel-specific KPIs</li>
+            <li>Benchmark ranges for your industry</li>
+            <li>Optimization triggers and thresholds</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA BANNER -->
+  <div class="cta-section">
+    <div class="cta-banner">
+      <div class="cta-left">
+        <p class="cta-eyebrow">Ready to start?</p>
+        <h2 class="cta-heading">Get your free advertising plan <em>today.</em></h2>
+        <p class="cta-sub">Takes 5 minutes. No credit card required. Your first plan is free — forever.</p>
+      </div>
+      <div class="cta-right">
+        <a class="btn-cta" href="/login.html">Get My Free Plan →</a>
+        <p class="btn-cta-note">Free · No credit card · Instant access</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq-section">
+    <p class="section-eyebrow" style="text-align:left;">Questions</p>
+    <h2 class="section-heading" style="text-align:left;font-size:32px;">Frequently asked</h2>
+    <div class="faq-list">
+      <div class="faq-item open">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Is AdCraft really free to use?
+          <span class="faq-chevron">+</span>
+        </button>
+        <div class="faq-a">
+          Yes! Creating advertising plans is completely free. You can create plans, view them, and export them for free. We offer a Pro plan ($49/month) for advanced features like performance optimization and Excel export, but the core plan generation is always free.
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          How does the AI create my plan?
+          <span class="faq-chevron">+</span>
+        </button>
+        <div class="faq-a">
+          AdCraft uses Claude, Anthropic's AI, combined with advertising best practices to analyze your business inputs and generate a tailored strategy. The AI considers your industry, budget, goals, target audience, and geographic focus to recommend the right channels, messaging, and timing.
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          How long does it take to get a plan?
+          <span class="faq-chevron">+</span>
+        </button>
+        <div class="faq-a">
+          The questionnaire takes about 3–5 minutes to complete, and your plan is generated in under a minute after you submit. Most users have a complete advertising strategy in their hands within 10 minutes of signing up.
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          What advertising channels does AdCraft cover?
+          <span class="faq-chevron">+</span>
+        </button>
+        <div class="faq-a">
+          AdCraft covers all major digital and traditional channels including Meta (Facebook/Instagram), Google Ads, TikTok, LinkedIn, YouTube, Email Marketing, SEO/Content, Programmatic Display, Radio, Print, OOH (billboards/transit), and more. The AI recommends the channels most likely to work for your specific business.
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Do I need advertising expertise to use AdCraft?
+          <span class="faq-chevron">+</span>
+        </button>
+        <div class="faq-a">
+          Not at all. AdCraft is designed for business owners, founders, and marketers who want expert-level advertising strategy without needing years of media buying experience. The plans are written in plain language and include the reasoning behind every recommendation.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-logo">✦ AdCraft</span>
+    <div class="footer-links">
+      <a class="footer-link" href="/login.html">Sign in</a>
+      <a class="footer-link" href="/upgrade.html">Pro</a>
+      <a class="footer-link" href="mailto:hello@getadcraft.com">Contact</a>
+    </div>
+    <span class="footer-copy">© 2024 AdCraft. AI-powered advertising plans.</span>
+  </footer>
+
+  <script>
+    function toggleFaq(btn) {
+      var item = btn.closest(".faq-item");
+      var isOpen = item.classList.contains("open");
+      document.querySelectorAll(".faq-item.open").forEach(function(el) {
+        el.classList.remove("open");
+      });
+      if (!isOpen) item.classList.add("open");
+    }
+  </script>
+</body>
+</html>
