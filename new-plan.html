@@ -532,14 +532,11 @@
         var data = await res.json();
 
         if (data.recordId) {
-          // Fire background generation from browser before navigating — ensures it isn't
-          // dropped by Netlify's 10s function timeout on the server-side trigger
-          fetch('/.netlify/functions/generate-plan-background', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ recordId: data.recordId, prompt: prompt })
-          }).catch(function(e) { console.warn('Background trigger error:', e.message); });
-
+          // Store prompt in sessionStorage so plan-viewer can fire the background call
+          // (navigating immediately would abort a fetch started here)
+          try {
+            sessionStorage.setItem('adcraft_pending_' + data.recordId, prompt);
+          } catch(e) {}
           window.location.href = '/plan-viewer.html?id=' + data.recordId;
         } else {
           throw new Error('No record ID returned');

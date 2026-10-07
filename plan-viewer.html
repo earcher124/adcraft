@@ -555,6 +555,19 @@
 
       startStepAnimation();
 
+      // Fire background generation if we have a pending prompt stored from new-plan.html
+      try {
+        var pendingPrompt = sessionStorage.getItem('adcraft_pending_' + recordId);
+        if (pendingPrompt) {
+          sessionStorage.removeItem('adcraft_pending_' + recordId);
+          fetch('/.netlify/functions/generate-plan-background', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recordId: recordId, prompt: pendingPrompt })
+          }).catch(function(e) { console.warn('Background trigger error:', e.message); });
+        }
+      } catch(e) {}
+
       // Poll immediately, then every 4 seconds
       pollPlan();
       pollInterval = setInterval(pollPlan, 4000);
