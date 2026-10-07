@@ -3,6 +3,7 @@ const AT_PLANS_TBL = "tblOAtGXbtWewEAm0";
 const AT_PROFILES_TBL = "tblvXoTaqOdiZ4Kzc";
 
 exports.handler = async function (event) {
+  console.log("generate-plan invoked", event.httpMethod);
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
