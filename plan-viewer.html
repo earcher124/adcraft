@@ -720,68 +720,17 @@
       exportInProgress = true;
 
       try {
-        var coverDataUrl = null;
+        // Cover art is generated inside generate-export (DALL-E 3 runs server-side).
+        // Airtable can't store a 1.7MB base64 string, so we generate inline each time.
+        // The function has a 90s timeout which covers ~20s for DALL-E + PPTX build.
+        btn.textContent = coverType === "illustration"
+          ? "Creating cover art & building presentation… (this may take ~30s)"
+          : "Building presentation…";
 
-        // Step 1 – get cover art (illustration mode only)
-        if (coverType === "illustration") {
-          btn.textContent = "Creating cover art…";
-          try {
-            // Fire via trigger proxy — background functions can't be called directly
-            // from the browser; this proxy calls the background function server-to-server.
-            // Returns 200 {status:"ready"} if already cached, 202 {status:"generating"} otherwise.
-            var bgRes = await fetch("/.netlify/functions/trigger-cover-art", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ recordId: recordId, email: email }),
-            });
-            if (bgRes.ok || bgRes.status === 202) {
-              var bgJson = await bgRes.json();
-              if (bgJson.status === "ready") {
-                // Already cached — fetch the record to get the data URL
-                var cachedRes = await fetch("/.netlify/functions/get-plan?recordId=" + encodeURIComponent(recordId));
-                if (cachedRes.ok) {
-                  var cachedJson = await cachedRes.json();
-                  var cachedArt = (cachedJson.fields || {})["Cover Art"] || "";
-                  if (cachedArt && cachedArt.startsWith("data:image/")) coverDataUrl = cachedArt;
-                }
-              } else if (bgJson.status === "generating") {
-                // Poll get-plan until the Cover Art field is populated
-                var maxPolls = 30;  // up to 30 × 2s = 60 seconds
-                for (var poll = 0; poll < maxPolls; poll++) {
-                  await new Promise(function(r) { setTimeout(r, 2000); });
-                  var elapsed = (poll + 1) * 2;
-                  btn.textContent = "Creating cover art… (" + elapsed + "s)";
-                  try {
-                    var pollRes = await fetch("/.netlify/functions/get-plan?recordId=" + encodeURIComponent(recordId));
-                    if (pollRes.ok) {
-                      var pollJson = await pollRes.json();
-                      var art = (pollJson.fields || {})["Cover Art"] || "";
-                      if (art && art.startsWith("data:image/")) {
-                        coverDataUrl = art;
-                        break;
-                      }
-                      if (art === "failed") break;  // generation failed — use minimal cover
-                    }
-                  } catch(pollErr) {
-                    console.warn("Cover art poll error:", pollErr);
-                  }
-                }
-              }
-            }
-          } catch(artErr) {
-            // Art failure is non-fatal — fall back to minimal cover
-            console.warn("Cover art fetch failed:", artErr);
-          }
-        }
-
-        // Step 2 – build PPTX
-        // Don't pass coverDataUrl in the body (can be ~1MB) — the server reads it
-        // from Airtable directly. The polling above ensured it's already saved there.
-        btn.textContent = "Building presentation…";
         var exportRes = await fetch("/.netlify/functions/generate-export", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ recordId: recordId, email: email }),
+          body: JSON.stringify({ recordId: recordId, email: email, coverType: coverType }),
         });
 
         if (!exportRes.ok) {

@@ -27,7 +27,7 @@
   background = true
 
 [functions."generate-export"]
-  timeout = 60
+  timeout = 90
 
 [[redirects]]
   from = "/"

@@ -12,6 +12,94 @@ const AT_BASE      = "appCtUgAKIoaa6ECh";
 const AT_PLANS_TBL = "tblOAtGXbtWewEAm0";
 const AT_USERS_TBL = "tbl7fisATFgQXPOhP";
 const AT_TOKEN     = process.env.AIRTABLE_TOKEN;
+const OPENAI_KEY   = process.env.OPENAI_API_KEY;
+
+// ── Cover art prompt helpers (mirrors generate-cover-art.js) ─────────────────
+
+const STYLE_RULES = `STYLE RULES:
+Minimal editorial illustration.
+Sophisticated geometric forms.
+Subtle organic texture.
+Premium but approachable.
+No text. No letters. No logos. No charts. No photorealism.
+Avoid people unless essential to representing the business category.
+Generous negative space. Neutral warm background.
+Designed for a modern professional presentation.
+Maintain a consistent visual language across all AdCraft plans.`;
+
+function deriveCoverArt(plan) {
+  var category = plan["Business_Type"] || plan["Industry"] || plan["Business_Name"] || "Professional business";
+  return {
+    business_category: String(category).slice(0, 80),
+    subject: "A refined editorial composition representing " + String(category).slice(0, 60),
+    mood: "Professional, confident, and forward-looking",
+    accent_palette: "Warm ivory and deep aubergine with charcoal accents",
+  };
+}
+
+function buildCoverPrompt(coverArt) {
+  return [
+    "Create a sophisticated editorial illustration for the cover of a professional advertising strategy presentation.",
+    "",
+    "Business category: " + coverArt.business_category,
+    "Subject: " + coverArt.subject,
+    "Mood: " + coverArt.mood,
+    "Accent palette: " + coverArt.accent_palette,
+    "",
+    STYLE_RULES,
+  ].join("\n");
+}
+
+function openaiImageRequest(prompt) {
+  return new Promise(function(resolve, reject) {
+    var payload = JSON.stringify({
+      model: "dall-e-3",
+      prompt: prompt,
+      n: 1,
+      size: "1024x1024",
+      response_format: "b64_json",
+      quality: "standard",
+    });
+    var options = {
+      hostname: "api.openai.com",
+      path: "/v1/images/generations",
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + OPENAI_KEY,
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(payload),
+      },
+    };
+    var req = https.request(options, function(res) {
+      var data = "";
+      res.on("data", function(c) { data += c; });
+      res.on("end", function() {
+        try { resolve({ status: res.statusCode, body: JSON.parse(data) }); }
+        catch(e) { resolve({ status: res.statusCode, body: data }); }
+      });
+    });
+    req.on("error", reject);
+    req.write(payload);
+    req.end();
+  });
+}
+
+async function generateCoverArt(plan) {
+  if (!OPENAI_KEY) return null;
+  try {
+    var coverArt = plan["Cover_Art"];
+    if (!coverArt || !coverArt.subject) coverArt = deriveCoverArt(plan);
+    var prompt = buildCoverPrompt(coverArt);
+    var result = await openaiImageRequest(prompt);
+    if (result.status === 200 && result.body.data && result.body.data[0]) {
+      return "data:image/png;base64," + result.body.data[0].b64_json;
+    }
+    console.error("Cover art generation failed:", JSON.stringify(result.body).slice(0, 200));
+  } catch(err) {
+    console.error("Cover art error:", err.message);
+  }
+  return null;
+}
 
 // ── Airtable helpers ──────────────────────────────────────────────────────────
 
@@ -196,7 +284,8 @@ exports.handler = async function(event) {
   try { body = JSON.parse(event.body || "{}"); }
   catch(e) { return { statusCode: 400, headers, body: JSON.stringify({ error: "Invalid request body" }) }; }
 
-  var { recordId, email, coverDataUrl } = body;
+  var { recordId, email, coverType } = body;
+  var coverDataUrl = null;
 
   if (!recordId || !email) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: "Missing recordId or email" }) };
@@ -229,11 +318,14 @@ exports.handler = async function(event) {
     return { statusCode: 422, headers, body: JSON.stringify({ error: "Plan data could not be parsed" }) };
   }
 
-  // If coverDataUrl not passed but one is cached in Airtable, use it
-  if (!coverDataUrl && fields["Cover Art"]) {
-    coverDataUrl = fields["Cover Art"];
+  // Generate cover art inline when requested (DALL-E 3 takes ~20s).
+  // Airtable long-text fields can't store a full base64 image (~1.7MB), so we skip
+  // Airtable caching and generate fresh each export. Falls back to minimal cover on failure.
+  if (coverType !== "minimal") {
+    console.log("Export: generating cover art inline…");
+    coverDataUrl = await generateCoverArt(plan);
+    console.log("Export: cover art present?", !!coverDataUrl);
   }
-  console.log("Export: coverDataUrl present?", !!coverDataUrl, coverDataUrl ? coverDataUrl.slice(0, 30) : "none");
 
   try {
     var pptxBase64 = await buildPresentation(plan, fields, coverDataUrl || null);
