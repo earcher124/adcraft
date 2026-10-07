@@ -107,30 +107,69 @@
       </div>
     </div>
 
-    <p class="section-label" style="margin-top:32px;">Business</p>
-    <div class="info-card">
-      <div class="info-row">
-        <div>
-          <div class="info-label">Business Profile</div>
-          <div style="font-size:13px;color:#6b6270;margin-top:3px;">Save your biz details once — skip the setup questions on every new plan.</div>
-        </div>
-        <a class="btn btn-outline" href="/profile.html">Edit Profile →</a>
-      </div>
-    </div>
-
-    <p class="section-label">Subscription</p>
+    <p class="section-label" style="margin-top:32px;">Subscription</p>
     <div class="info-card">
       <div class="info-row">
         <span class="info-label">Current Plan</span>
         <span class="info-value" id="acct-tier"><span class="tier-badge tier-free">Free</span></span>
       </div>
+      <!-- Pro users: manage billing -->
       <div class="info-row" id="manage-row" style="display:none;">
         <span class="info-label">Billing</span>
         <a class="btn btn-outline" href="https://billing.stripe.com/p/login/00wbJ38W25jCdb019XeME00" target="_blank">Manage Subscription →</a>
       </div>
+      <!-- Free users: upgrade CTA -->
       <div class="info-row" id="upgrade-row">
         <span class="info-label">Want more?</span>
         <a class="btn btn-primary" href="/upgrade.html">Upgrade to Pro</a>
+      </div>
+    </div>
+
+    <p class="section-label" style="margin-top:32px;">Business Profile</p>
+    <div class="info-card" id="profile-card">
+      <div id="profile-loading" style="padding:8px 0;color:#6b6270;font-size:13px;">Loading…</div>
+      <div id="profile-empty" style="display:none;">
+        <div class="info-row">
+          <div>
+            <div class="info-label">No profile saved yet</div>
+            <div style="font-size:13px;color:#6b6270;margin-top:3px;">Save your business details once and skip the setup questions on every new plan.</div>
+          </div>
+          <a class="btn btn-outline" href="/profile.html">Set Up Profile →</a>
+        </div>
+      </div>
+      <div id="profile-data" style="display:none;">
+        <div class="info-row">
+          <span class="info-label">Business Name</span>
+          <span class="info-value" id="p-bizName">—</span>
+        </div>
+        <div class="info-row" id="p-bizType-row">
+          <span class="info-label">Business Type</span>
+          <span class="info-value" id="p-bizType">—</span>
+        </div>
+        <div class="info-row" id="p-product-row">
+          <span class="info-label">Product / Service</span>
+          <span class="info-value" id="p-product">—</span>
+        </div>
+        <div class="info-row" id="p-geo-row">
+          <span class="info-label">Geography</span>
+          <span class="info-value" id="p-geo">—</span>
+        </div>
+        <div class="info-row" id="p-customer-row">
+          <span class="info-label">Target Customer</span>
+          <span class="info-value" id="p-customer">—</span>
+        </div>
+        <div class="info-row" id="p-revenue-row">
+          <span class="info-label">Monthly Revenue</span>
+          <span class="info-value" id="p-revenue">—</span>
+        </div>
+        <div class="info-row" id="p-ads-row">
+          <span class="info-label">Current Advertising</span>
+          <span class="info-value" id="p-ads">—</span>
+        </div>
+        <div class="info-row" style="border-bottom:none;padding-top:16px;">
+          <span></span>
+          <a class="btn btn-outline" href="/profile.html">Edit Profile →</a>
+        </div>
       </div>
     </div>
   </div>
@@ -142,18 +181,66 @@
       renderNav("");
 
       var user = clerk.user;
-      document.getElementById("acct-name").textContent = (user.firstName || "") + " " + (user.lastName || "");
-      document.getElementById("acct-email").textContent = user.primaryEmailAddress?.emailAddress || "";
+      var email = (user.primaryEmailAddress && user.primaryEmailAddress.emailAddress) || "";
+      document.getElementById("acct-name").textContent = ((user.firstName || "") + " " + (user.lastName || "")).trim() || "—";
+      document.getElementById("acct-email").textContent = email || "—";
 
-      // Check Airtable tier — requires AT key via meta tag
-      // For now show free tier; tier check wired in when AT token is available
-      var tier = "free"; // Will be replaced with Airtable lookup
+      // ── Fetch tier and profile in parallel ─────────────────────────────────
+      var tierPromise = email
+        ? fetch("/.netlify/functions/get-user?email=" + encodeURIComponent(email))
+            .then(function(r) { return r.json(); })
+            .catch(function() { return {}; })
+        : Promise.resolve({});
 
+      var profilePromise = email
+        ? fetch("/.netlify/functions/get-profile?email=" + encodeURIComponent(email))
+            .then(function(r) { return r.json(); })
+            .catch(function() { return {}; })
+        : Promise.resolve({});
+
+      var results = await Promise.all([tierPromise, profilePromise]);
+      var tierData    = results[0];
+      var profileData = results[1];
+
+      // ── Subscription section ────────────────────────────────────────────────
+      var tier = (tierData.tier || "Free");
+      var isPro = (tier === "Pro");
       var tierEl = document.getElementById("acct-tier");
-      if (tier === "pro") {
+      if (isPro) {
         tierEl.innerHTML = '<span class="tier-badge tier-pro">✦ Pro</span>';
-        document.getElementById("manage-row").style.display = "flex";
+        document.getElementById("manage-row").style.display = "";
         document.getElementById("upgrade-row").style.display = "none";
+      } else {
+        tierEl.innerHTML = '<span class="tier-badge tier-free">Free</span>';
+        document.getElementById("manage-row").style.display = "none";
+        document.getElementById("upgrade-row").style.display = "";
+      }
+
+      // ── Business profile section ────────────────────────────────────────────
+      document.getElementById("profile-loading").style.display = "none";
+      var profile = profileData.profile;
+      if (!profile || !profile.bizName) {
+        document.getElementById("profile-empty").style.display = "";
+      } else {
+        document.getElementById("profile-data").style.display = "";
+
+        function setField(id, rowId, value) {
+          var el = document.getElementById(id);
+          var row = document.getElementById(rowId);
+          if (value) {
+            el.textContent = value;
+          } else if (row) {
+            row.style.display = "none";
+          }
+        }
+
+        document.getElementById("p-bizName").textContent = profile.bizName || "—";
+        setField("p-bizType",   "p-bizType-row",   profile.bizType);
+        setField("p-product",   "p-product-row",   profile.productType);
+        setField("p-geo",       "p-geo-row",       profile.geo);
+        setField("p-customer",  "p-customer-row",  profile.targetCustomer);
+        setField("p-revenue",   "p-revenue-row",   profile.monthlyRevenue ? "$" + Number(String(profile.monthlyRevenue).replace(/[^0-9.]/g,"")).toLocaleString() + "/mo" : "");
+        setField("p-ads",       "p-ads-row",       profile.currentAdvertising);
       }
     });
   </script>
