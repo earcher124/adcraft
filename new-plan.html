@@ -576,13 +576,13 @@
     }
 
     // Hide content until auth + profile check complete
-    document.getElementById('progress-wrap').style.visibility = 'hidden';
-    document.getElementById('form-card').style.visibility = 'hidden';
+    document.getElementById('progress-wrap').style.display = 'none';
+    document.getElementById('form-card').style.display = 'none';
 
     function showFullForm() {
       document.getElementById('short-form-card').classList.remove('active');
-      document.getElementById('progress-wrap').style.visibility = 'visible';
-      document.getElementById('form-card').style.visibility = 'visible';
+      document.getElementById('progress-wrap').style.display = '';
+      document.getElementById('form-card').style.display = '';
       // Pre-fill full form from saved profile
       if (savedProfile) {
         document.getElementById('biz-name').value = savedProfile.bizName || '';
