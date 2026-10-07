@@ -51,20 +51,9 @@
         return;
       }
 
-      var mount = document.getElementById("clerk-mount");
-      var isSignUp = window.location.hash === "#signup";
-
-      if (isSignUp) {
-        clerk.mountSignUp(mount, {
-          fallbackRedirectUrl: "/dashboard.html",
-          signInUrl: "/login.html"
-        });
-      } else {
-        clerk.mountSignIn(mount, {
-          fallbackRedirectUrl: "/dashboard.html",
-          signUpUrl: "/login.html#signup"
-        });
-      }
+      clerk.mountSignIn(document.getElementById("clerk-mount"), {
+        fallbackRedirectUrl: "/dashboard.html"
+      });
     });
   </script>
 </body>
