@@ -33,7 +33,7 @@
       padding-block: 32px;
     }
     .page { max-width: 860px; margin: 0 auto; }
- 
+
     /* Loading / Error states */
     .state {
       display: flex;
@@ -62,7 +62,7 @@
       animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
- 
+
     /* Hero */
     .hero {
       padding: 48px 0 36px;
@@ -95,7 +95,7 @@
       padding-left: 18px;
       margin: 0;
     }
- 
+
     /* Section */
     .section { margin-bottom: 44px; }
     .section-label {
@@ -117,7 +117,7 @@
       background: var(--border);
       margin: 44px 0;
     }
- 
+
     /* Cards (channels) */
     .cards {
       display: grid;
@@ -148,7 +148,7 @@
       color: var(--fg-muted);
       margin-top: 6px;
     }
- 
+
     /* Budget table */
     .budget-table {
       width: 100%;
@@ -184,7 +184,7 @@
       background: var(--accent);
       border-radius: 2px;
     }
- 
+
     /* Audience */
     .audience-item { margin-bottom: 16px; }
     .audience-name {
@@ -194,7 +194,7 @@
       margin-bottom: 3px;
     }
     .audience-desc { font-size: 13px; color: var(--fg-soft); }
- 
+
     /* Messaging */
     .msg-item {
       padding: 16px;
@@ -210,7 +210,7 @@
       margin-bottom: 4px;
     }
     .msg-rationale { font-size: 13px; color: var(--fg-soft); }
- 
+
     /* KPI grid */
     .kpi-grid {
       display: grid;
@@ -233,7 +233,7 @@
       color: var(--fg-soft);
     }
     .kpi-list li { margin-bottom: 6px; }
- 
+
     /* Avoid */
     .avoid-item {
       display: flex;
@@ -250,7 +250,7 @@
     }
     .avoid-tactic { font-weight: 600; font-size: 13px; color: var(--fg); }
     .avoid-reason { font-size: 13px; color: var(--fg-soft); margin-top: 2px; }
- 
+
     /* Moves */
     .moves-list {
       margin: 0;
@@ -259,7 +259,7 @@
       color: var(--fg-soft);
     }
     .moves-list li { margin-bottom: 8px; }
- 
+
     /* Phase grid */
     .phase-grid {
       display: grid;
@@ -290,7 +290,7 @@
       line-height: 1.3;
     }
     .phase-body { font-size: 13px; color: var(--fg-soft); line-height: 1.6; }
- 
+
     /* Checklist (launch plan) */
     .checklist {
       list-style: none;
@@ -314,7 +314,7 @@
       flex-shrink: 0;
       margin-top: 1px;
     }
- 
+
     /* Assumptions */
     .assumptions-list {
       margin: 0;
@@ -323,7 +323,7 @@
       color: var(--fg-muted);
     }
     .assumptions-list li { margin-bottom: 6px; }
- 
+
     /* Pro actions */
     .pro-actions {
       display: flex;
@@ -350,7 +350,7 @@
     .btn-pro:hover { background: var(--accent-mid); }
     .btn-optimize { background: var(--surface); color: var(--accent); border: 2px solid var(--accent); }
     .btn-optimize:hover { background: var(--accent-light); }
- 
+
     /* Footer */
     .footer {
       margin-top: 60px;
@@ -380,10 +380,10 @@
       <div class="state-msg">Loading your plan…</div>
     </div>
   </div>
- 
+
   <script>
     // Token is server-side — calls go through Netlify function
- 
+
     function esc(s) {
       if (!s) return '';
       return String(s)
@@ -392,7 +392,7 @@
         .replace(/>/g,'&gt;')
         .replace(/"/g,'&quot;');
     }
- 
+
     // Convert long text into paragraphs split on sentence boundaries (every 2-3 sentences)
     function para(s) {
       if (!s) return '';
@@ -406,7 +406,7 @@
       }
       return chunks.map(function(c) { return '<p class="section-body">' + c + '</p>'; }).join('');
     }
- 
+
     // Convert launch plan text into checklist items split by period or newline
     function checklist(s) {
       if (!s) return '';
@@ -415,16 +415,16 @@
         return '<li><span class="check-icon">✓</span><span>' + item.trim().replace(/\.$/,'') + '</span></li>';
       }).join('') + '</ul>';
     }
- 
+
     function showError(msg) {
       document.getElementById('root').innerHTML =
         '<div class="state"><div class="state-logo">AdCraft</div>' +
         '<div class="state-msg">' + esc(msg) + '</div></div>';
     }
- 
+
     function render(p) {
       var html = '<div class="page">';
- 
+
       // Hero
       html += '<div class="hero">';
       html += '<div class="hero-eyebrow">AdCraft Advertising Plan</div>';
@@ -433,7 +433,7 @@
         html += '<p class="hero-strategy">' + esc(p.your_advertising_strategy) + '</p>';
       }
       html += '</div>';
- 
+
       if (p.the_opportunity) {
         html += '<div class="section"><div class="section-label">The Opportunity</div>';
         html += para(p.the_opportunity) + '</div>';
@@ -446,9 +446,9 @@
         html += '<div class="section"><div class="section-label">Recommended Approach</div>';
         html += para(p.recommended_approach) + '</div>';
       }
- 
+
       html += '<div class="divider"></div>';
- 
+
       // Channels
       if (p.recommended_channels && p.recommended_channels.length) {
         html += '<div class="section"><div class="section-label">Where to Advertise</div>';
@@ -464,7 +464,7 @@
         });
         html += '</div></div>';
       }
- 
+
       // Budget
       if (p.budget && p.budget.length) {
         html += '<div class="section"><div class="section-label">Budget</div>';
@@ -483,9 +483,9 @@
         });
         html += '</tbody></table></div>';
       }
- 
+
       html += '<div class="divider"></div>';
- 
+
       // Audiences
       if (p.who_to_target && p.who_to_target.length) {
         html += '<div class="section"><div class="section-label">Who to Target</div>';
@@ -497,7 +497,7 @@
         });
         html += '</div>';
       }
- 
+
       // Messaging
       if (p.messaging && p.messaging.length) {
         html += '<div class="section"><div class="section-label">What Your Ads Should Say</div>';
@@ -509,7 +509,7 @@
         });
         html += '</div>';
       }
- 
+
       if (p.creative) {
         html += '<div class="section"><div class="section-label">What the Ads Should Look Like</div>';
         html += '<p class="section-body">' + esc(p.creative) + '</p></div>';
@@ -518,9 +518,9 @@
         html += '<div class="section"><div class="section-label">Campaign Timing</div>';
         html += '<p class="section-body">' + esc(p.campaign_timing) + '</p></div>';
       }
- 
+
       html += '<div class="divider"></div>';
- 
+
       // KPIs
       if (p.how_to_measure_success) {
         html += '<div class="section"><div class="section-label">How to Measure Success</div>';
@@ -537,7 +537,7 @@
         }
         html += '</div></div>';
       }
- 
+
       // What not to do
       if (p.what_i_would_not_do && p.what_i_would_not_do.length) {
         html += '<div class="section"><div class="section-label">What I Would Not Do</div>';
@@ -550,7 +550,7 @@
         });
         html += '</div>';
       }
- 
+
       // Smart moves
       if (p.smart_next_moves && p.smart_next_moves.length) {
         html += '<div class="section"><div class="section-label">Smart Next Moves</div>';
@@ -558,7 +558,7 @@
         p.smart_next_moves.forEach(function(m) { html += '<li>' + esc(m) + '</li>'; });
         html += '</ol></div>';
       }
- 
+
       // 90-day plan
       if (p.launch_plan) {
         html += '<div class="section"><div class="section-label">90-Day Launch Plan</div>';
@@ -579,7 +579,7 @@
         });
         html += '</div></div>';
       }
- 
+
       // Assumptions
       if (p.assumptions && p.assumptions.length) {
         html += '<div class="section"><div class="section-label">Assumptions</div>';
@@ -587,7 +587,7 @@
         p.assumptions.forEach(function(a) { html += '<li>' + esc(a) + '</li>'; });
         html += '</ul></div>';
       }
- 
+
       // Pro actions
       if (isPro) {
         html += '<div class="pro-actions">';
@@ -595,23 +595,23 @@
         html += '<a class="btn-pro btn-optimize" href="https://adcraft.softr.app/performance-optimization?recordId=' + currentRecordId + '">✦ Optimize This Plan</a>';
         html += '</div>';
       }
- 
+
       // Footer
       html += '<div class="footer">';
       html += '<span class="footer-brand">AdCraft</span>';
       html += '<span>Generated by AdCraft · Powered by Claude</span>';
       html += '</div>';
- 
+
       html += '</div>';
       return html;
     }
- 
+
     // Main: get recordId and tier from URL
     var params = new URLSearchParams(window.location.search);
     var recordId = params.get('recordId');
     var currentRecordId = recordId;
     var isPro = (params.get('tier') || '').toLowerCase() === 'pro';
- 
+
     function downloadPlan() {
       if (!window._currentPlan) return;
       if (typeof XLSX === 'undefined') {
@@ -623,98 +623,318 @@
         buildXlsx(window._currentPlan);
       }
     }
- 
-    function styleHeader(ws, ref, bold, bg, color, size) {
-      if (!ws[ref]) return;
-      ws[ref].s = {
-        font: { bold: bold, color: { rgb: color || '211F26' }, sz: size || 11, name: 'Arial' },
-        fill: bg ? { fgColor: { rgb: bg } } : undefined,
-        alignment: { wrapText: true, vertical: 'top' }
-      };
+
+    // ── xlsx helpers ──
+    function xlRef(c, r) { return String.fromCharCode(65 + c) + (r + 1); }
+
+    function setCell(ws, col, row, value, style) {
+      var ref = xlRef(col, row);
+      if (!ws[ref]) ws[ref] = { t: typeof value === 'number' ? 'n' : 's', v: value == null ? '' : value };
+      else { ws[ref].t = typeof value === 'number' ? 'n' : 's'; ws[ref].v = value == null ? '' : value; }
+      if (style) ws[ref].s = style;
+      // Track range
+      if (!ws['!ref']) { ws['!ref'] = ref + ':' + ref; }
+      else {
+        var parts = ws['!ref'].split(':');
+        var minC = parts[0].charCodeAt(0) - 65, minR = parseInt(parts[0].slice(1)) - 1;
+        var maxC = parts[1].charCodeAt(0) - 65, maxR = parseInt(parts[1].slice(1)) - 1;
+        ws['!ref'] = xlRef(Math.min(minC,col), Math.min(minR,row)) + ':' + xlRef(Math.max(maxC,col), Math.max(maxR,row));
+      }
     }
- 
+
+    function mergeRange(ws, c1, r1, c2, r2) {
+      if (!ws['!merges']) ws['!merges'] = [];
+      ws['!merges'].push({ s: { c: c1, r: r1 }, e: { c: c2, r: r2 } });
+    }
+
+    var S = {
+      title: { font: { bold: true, sz: 16, color: { rgb: 'FFFFFF' }, name: 'Arial' }, fill: { fgColor: { rgb: '4A1040' }, patternType: 'solid' }, alignment: { vertical: 'center', wrapText: false } },
+      subtitle: { font: { bold: true, sz: 13, color: { rgb: 'FFFFFF' }, name: 'Arial' }, fill: { fgColor: { rgb: '7A2060' }, patternType: 'solid' }, alignment: { vertical: 'center', wrapText: false } },
+      sectionHdr: { font: { bold: true, sz: 11, color: { rgb: 'FFFFFF' }, name: 'Arial' }, fill: { fgColor: { rgb: '7A2060' }, patternType: 'solid' }, alignment: { vertical: 'center', wrapText: false } },
+      subHdr: { font: { bold: true, sz: 10, color: { rgb: '4A1040' }, name: 'Arial' }, fill: { fgColor: { rgb: 'F0E8EE' }, patternType: 'solid' }, alignment: { vertical: 'top', wrapText: true } },
+      labelA: { font: { bold: true, sz: 10, color: { rgb: '7A2060' }, name: 'Arial' }, fill: { fgColor: { rgb: 'FAF6ED' }, patternType: 'solid' }, alignment: { vertical: 'top', wrapText: false } },
+      labelB: { font: { bold: true, sz: 10, color: { rgb: '7A2060' }, name: 'Arial' }, fill: { fgColor: { rgb: 'F5EFE4' }, patternType: 'solid' }, alignment: { vertical: 'top', wrapText: false } },
+      bodyA: { font: { sz: 10, color: { rgb: '1A1A1A' }, name: 'Arial' }, fill: { fgColor: { rgb: 'FFFFFF' }, patternType: 'solid' }, alignment: { vertical: 'top', wrapText: true } },
+      bodyB: { font: { sz: 10, color: { rgb: '1A1A1A' }, name: 'Arial' }, fill: { fgColor: { rgb: 'FAF8FF' }, patternType: 'solid' }, alignment: { vertical: 'top', wrapText: true } },
+      tblHdr: { font: { bold: true, sz: 10, color: { rgb: 'FFFFFF' }, name: 'Arial' }, fill: { fgColor: { rgb: '7A2060' }, patternType: 'solid' }, alignment: { vertical: 'center', wrapText: false } },
+      rdHdr: { font: { bold: true, sz: 10, color: { rgb: 'FFFFFF' }, name: 'Arial' }, fill: { fgColor: { rgb: '4A1040' }, patternType: 'solid' }, alignment: { vertical: 'center', wrapText: false } },
+      rdLabel: { font: { bold: true, sz: 9, color: { rgb: '7A2060' }, name: 'Arial' }, fill: { fgColor: { rgb: 'FAF8FF' }, patternType: 'solid' }, alignment: { vertical: 'top', wrapText: false } },
+      rdLabelB: { font: { bold: true, sz: 9, color: { rgb: '7A2060' }, name: 'Arial' }, fill: { fgColor: { rgb: 'FFFFFF' }, patternType: 'solid' }, alignment: { vertical: 'top', wrapText: false } },
+      rdVal: { font: { sz: 9, color: { rgb: '1A1A1A' }, name: 'Arial' }, alignment: { vertical: 'top', wrapText: true } }
+    };
+
     function buildXlsx(p) {
       var wb = XLSX.utils.book_new();
- 
-      // ── Sheet 1: Overview ──
-      var ov = [];
-      ov.push(['AdCraft Advertising Plan']);
-      ov.push([p.plan_name || '']);
-      ov.push([]);
-      ov.push(['YOUR ADVERTISING STRATEGY']);
-      ov.push([p.your_advertising_strategy || '']);
-      ov.push([]);
-      ov.push(['THE OPPORTUNITY']);
-      ov.push([p.the_opportunity || '']);
-      ov.push([]);
-      ov.push(['WHAT ADVERTISING NEEDS TO DO']);
-      ov.push([p.what_advertising_needs_to_do || '']);
-      ov.push([]);
-      ov.push(['RECOMMENDED APPROACH']);
-      ov.push([p.recommended_approach || '']);
-      var wsOv = XLSX.utils.aoa_to_sheet(ov);
-      wsOv['!cols'] = [{ wch: 100 }];
-      wsOv['A1'].s = { font: { bold: true, sz: 18, color: { rgb: '4A1040' }, name: 'Arial' } };
-      wsOv['A2'].s = { font: { bold: true, sz: 14, color: { rgb: '211F26' }, name: 'Arial' } };
-      XLSX.utils.book_append_sheet(wb, wsOv, 'Overview');
- 
-      // ── Sheet 2: Channels ──
-      var ch = [['Channel', 'Role', 'What to Run', 'CTA', 'Why It Earns Its Place']];
-      (p.recommended_channels || []).forEach(function(c) {
-        ch.push([c.channel, c.role, c.what_to_run, c.cta, c.why]);
+
+      // ═══════════════════════════════
+      // SHEET 1: Ad Plan
+      // ═══════════════════════════════
+      var ws = {};
+      ws['!cols'] = [{ wch: 24 }, { wch: 72 }, { wch: 20 }, { wch: 20 }];
+      var rows = []; // track row heights: rows[i] = hpt
+      var r = 0;
+
+      function spacer() {
+        rows[r] = 8;
+        r++;
+      }
+
+      function sectionBanner(text) {
+        setCell(ws, 0, r, text, S.sectionHdr);
+        setCell(ws, 1, r, '', S.sectionHdr);
+        setCell(ws, 2, r, '', S.sectionHdr);
+        setCell(ws, 3, r, '', S.sectionHdr);
+        mergeRange(ws, 0, r, 3, r);
+        rows[r] = 24;
+        r++;
+      }
+
+      function bodyRow(text, alt) {
+        var style = alt ? S.bodyB : S.bodyA;
+        setCell(ws, 0, r, text, style);
+        setCell(ws, 1, r, '', style);
+        mergeRange(ws, 0, r, 1, r);
+        rows[r] = estimateHeight(text, 96 * 8); // approx chars per line at col width ~96
+        r++;
+      }
+
+      function labelValueRow(label, value, alt) {
+        setCell(ws, 0, r, label, alt ? S.labelB : S.labelA);
+        setCell(ws, 1, r, value, alt ? S.bodyB : S.bodyA);
+        mergeRange(ws, 1, r, 3, r);
+        rows[r] = 20;
+        r++;
+      }
+
+      function estimateHeight(text, charsPerLine) {
+        if (!text) return 20;
+        var lines = Math.ceil(String(text).length / (charsPerLine || 80));
+        return Math.max(20, Math.min(210, lines * 14 + 10));
+      }
+
+      // ── Title ──
+      setCell(ws, 0, r, 'AdCraft — Advertising Plan', S.title);
+      setCell(ws, 1, r, '', S.title);
+      setCell(ws, 2, r, '', S.title);
+      setCell(ws, 3, r, '', S.title);
+      mergeRange(ws, 0, r, 3, r);
+      rows[r] = 36; r++;
+
+      setCell(ws, 0, r, p.plan_name || '', S.subtitle);
+      setCell(ws, 1, r, '', S.subtitle);
+      setCell(ws, 2, r, '', S.subtitle);
+      setCell(ws, 3, r, '', S.subtitle);
+      mergeRange(ws, 0, r, 3, r);
+      rows[r] = 28; r++;
+
+      spacer();
+
+      // ── Inputs ──
+      var inputs = [
+        ['Business Name', p.business_name || ''],
+        ['Primary Goal', p.primary_goal || ''],
+        ['Geography', p.geography || ''],
+        ['Monthly Budget', p.monthly_ad_budget ? '$' + p.monthly_ad_budget : ''],
+        ['Budget Tier', p.budget_tier || ''],
+        ['Status', p.status || 'Ready']
+      ];
+      inputs.forEach(function(iv, i) {
+        labelValueRow(iv[0], iv[1], i % 2 === 1);
       });
-      var wsCh = XLSX.utils.aoa_to_sheet(ch);
-      wsCh['!cols'] = [{ wch: 20 }, { wch: 35 }, { wch: 35 }, { wch: 30 }, { wch: 40 }];
-      ['A1','B1','C1','D1','E1'].forEach(function(r) { styleHeader(wsCh, r, true, '4A1040', 'FFFFFF', 11); });
-      XLSX.utils.book_append_sheet(wb, wsCh, 'Channels');
- 
-      // ── Sheet 3: Budget ──
-      var bu = [['Channel', 'Monthly Investment', 'Percentage', 'Purpose']];
-      (p.budget || []).forEach(function(b) {
-        bu.push([b.channel, b.monthly_investment, b.percentage, b.purpose]);
+
+      spacer();
+
+      // ── Strategy ──
+      sectionBanner('Your Advertising Strategy');
+      bodyRow(p.your_advertising_strategy || '', false);
+      spacer();
+
+      // ── Opportunity ──
+      sectionBanner('The Opportunity');
+      bodyRow(p.the_opportunity || '', false);
+      spacer();
+
+      // ── What Advertising Needs to Do ──
+      sectionBanner('What Advertising Needs to Do');
+      bodyRow(p.what_advertising_needs_to_do || '', false);
+      spacer();
+
+      // ── Recommended Approach ──
+      sectionBanner('Recommended Approach');
+      bodyRow(p.recommended_approach || '', false);
+      spacer();
+
+      // ── Channels ──
+      sectionBanner('Where to Advertise');
+      (p.recommended_channels || []).forEach(function(ch, i) {
+        // sub-header: channel name
+        setCell(ws, 0, r, (i + 1) + '. ' + (ch.channel || ''), S.subHdr);
+        setCell(ws, 1, r, '', S.subHdr);
+        mergeRange(ws, 0, r, 1, r);
+        rows[r] = 20; r++;
+        // body: role + details
+        var detail = (ch.role || '') + (ch.what_to_run ? '\nWhat to run: ' + ch.what_to_run : '') + (ch.cta ? '\nCTA: ' + ch.cta : '') + (ch.why ? '\nWhy it earns its place: ' + ch.why : '');
+        bodyRow(detail, i % 2 === 1);
       });
-      var wsBu = XLSX.utils.aoa_to_sheet(bu);
-      wsBu['!cols'] = [{ wch: 20 }, { wch: 20 }, { wch: 15 }, { wch: 50 }];
-      ['A1','B1','C1','D1'].forEach(function(r) { styleHeader(wsBu, r, true, '4A1040', 'FFFFFF', 11); });
-      XLSX.utils.book_append_sheet(wb, wsBu, 'Budget');
- 
-      // ── Sheet 4: Audiences & Messaging ──
-      var am = [['AUDIENCES'], ['Audience Group', 'Description'], []];
-      (p.who_to_target || []).forEach(function(a) { am.push([a.audience_group, a.description]); });
-      am.push([]); am.push(['MESSAGING']); am.push(['Territory', 'Rationale']);
-      (p.messaging || []).forEach(function(m) { am.push([m.territory, m.rationale]); });
-      var wsAm = XLSX.utils.aoa_to_sheet(am);
-      wsAm['!cols'] = [{ wch: 30 }, { wch: 70 }];
-      XLSX.utils.book_append_sheet(wb, wsAm, 'Audiences & Messaging');
- 
-      // ── Sheet 5: KPIs ──
-      var kp = [['Business Outcomes', 'Media Signals']];
-      var bo = (p.how_to_measure_success && p.how_to_measure_success.business_outcomes) || [];
-      var ms = (p.how_to_measure_success && p.how_to_measure_success.media_signals) || [];
-      var maxLen = Math.max(bo.length, ms.length);
-      for (var i = 0; i < maxLen; i++) { kp.push([bo[i] || '', ms[i] || '']); }
-      var wsKp = XLSX.utils.aoa_to_sheet(kp);
-      wsKp['!cols'] = [{ wch: 50 }, { wch: 50 }];
-      ['A1','B1'].forEach(function(r) { styleHeader(wsKp, r, true, '4A1040', 'FFFFFF', 11); });
-      XLSX.utils.book_append_sheet(wb, wsKp, 'KPIs');
- 
-      // ── Sheet 6: 90-Day Plan ──
-      var lp = [['Days 1–30: Launch', 'Days 31–60: Optimize', 'Days 61–90: Scale']];
-      lp.push([
-        (p.launch_plan && p.launch_plan.days_1_30) || '',
-        (p.launch_plan && p.launch_plan.days_31_60) || '',
-        (p.launch_plan && p.launch_plan.days_61_90) || ''
-      ]);
-      var wsLp = XLSX.utils.aoa_to_sheet(lp);
-      wsLp['!cols'] = [{ wch: 45 }, { wch: 45 }, { wch: 45 }];
-      wsLp['!rows'] = [{}, { hpt: 120 }];
-      ['A1','B1','C1'].forEach(function(r) { styleHeader(wsLp, r, true, '4A1040', 'FFFFFF', 11); });
-      ['A2','B2','C2'].forEach(function(r) { if (wsLp[r]) wsLp[r].s = { alignment: { wrapText: true, vertical: 'top' } }; });
-      XLSX.utils.book_append_sheet(wb, wsLp, '90-Day Plan');
- 
-      XLSX.writeFile(wb, (p.plan_name || 'AdCraft-Plan').replace(/\s+/g, '-') + '.xlsx', { cellStyles: true });
+      spacer();
+
+      // ── Budget ──
+      sectionBanner('Budget');
+      // table headers
+      ['Channel', 'Monthly Investment', '% of Budget', 'Purpose'].forEach(function(h, c) {
+        setCell(ws, c, r, h, S.tblHdr);
+      });
+      rows[r] = 20; r++;
+      // budget rows
+      (p.budget || []).forEach(function(b, i) {
+        var style = i % 2 === 0 ? S.bodyA : S.bodyB;
+        setCell(ws, 0, r, b.channel || '', style);
+        setCell(ws, 1, r, b.monthly_investment ? '$' + b.monthly_investment : '', style);
+        setCell(ws, 2, r, b.percentage || '', style);
+        setCell(ws, 3, r, b.purpose || '', style);
+        rows[r] = 20; r++;
+      });
+      spacer();
+
+      // ── Audiences ──
+      sectionBanner('Who to Target');
+      (p.who_to_target || []).forEach(function(a, i) {
+        setCell(ws, 0, r, a.audience_group || '', S.subHdr);
+        setCell(ws, 1, r, a.description || '', i % 2 === 0 ? S.bodyA : S.bodyB);
+        mergeRange(ws, 1, r, 3, r);
+        rows[r] = estimateHeight(a.description, 72);
+        r++;
+      });
+      spacer();
+
+      // ── Messaging ──
+      sectionBanner('What Your Ads Should Say');
+      (p.messaging || []).forEach(function(m, i) {
+        var style = i % 2 === 0 ? S.bodyA : S.bodyB;
+        setCell(ws, 0, r, m.territory || '', S.subHdr);
+        setCell(ws, 1, r, m.rationale || '', style);
+        mergeRange(ws, 1, r, 3, r);
+        rows[r] = estimateHeight(m.rationale, 72);
+        r++;
+      });
+      spacer();
+
+      // ── Creative ──
+      if (p.creative) {
+        sectionBanner('What the Ads Should Look Like');
+        bodyRow(p.creative, false);
+        spacer();
+      }
+
+      // ── Timing ──
+      if (p.campaign_timing) {
+        sectionBanner('Campaign Timing');
+        bodyRow(p.campaign_timing, false);
+        spacer();
+      }
+
+      // ── KPIs ──
+      if (p.how_to_measure_success) {
+        sectionBanner('How to Measure Success');
+        var bo = p.how_to_measure_success.business_outcomes || [];
+        var ms2 = p.how_to_measure_success.media_signals || [];
+        var kpiText = '';
+        if (bo.length) kpiText += 'Business Outcomes:\n' + bo.map(function(x){return '• ' + x;}).join('\n');
+        if (ms2.length) kpiText += '\n\nMedia Signals:\n' + ms2.map(function(x){return '• ' + x;}).join('\n');
+        bodyRow(kpiText, false);
+        spacer();
+      }
+
+      // ── What Not to Do ──
+      if (p.what_i_would_not_do && p.what_i_would_not_do.length) {
+        sectionBanner('What I Would Not Do');
+        p.what_i_would_not_do.forEach(function(w, i) {
+          var style = i % 2 === 0 ? S.bodyA : S.bodyB;
+          setCell(ws, 0, r, w.tactic || '', S.subHdr);
+          setCell(ws, 1, r, w.reason || '', style);
+          mergeRange(ws, 1, r, 3, r);
+          rows[r] = estimateHeight(w.reason, 72);
+          r++;
+        });
+        spacer();
+      }
+
+      // ── Smart Moves ──
+      if (p.smart_next_moves && p.smart_next_moves.length) {
+        sectionBanner('Smart Next Moves');
+        p.smart_next_moves.forEach(function(m, i) {
+          bodyRow((i + 1) + '. ' + m, i % 2 === 1);
+        });
+        spacer();
+      }
+
+      // ── 90-Day Plan ──
+      if (p.launch_plan) {
+        sectionBanner('90-Day Launch Plan');
+        var phases = [
+          ['Days 1–30: Launch', p.launch_plan.days_1_30],
+          ['Days 31–60: Optimize', p.launch_plan.days_31_60],
+          ['Days 61–90: Scale', p.launch_plan.days_61_90]
+        ];
+        phases.forEach(function(ph, i) {
+          setCell(ws, 0, r, ph[0], S.subHdr);
+          setCell(ws, 1, r, ph[1] || '', i % 2 === 0 ? S.bodyA : S.bodyB);
+          mergeRange(ws, 1, r, 3, r);
+          rows[r] = estimateHeight(ph[1], 72);
+          r++;
+        });
+        spacer();
+      }
+
+      // ── Assumptions ──
+      if (p.assumptions && p.assumptions.length) {
+        sectionBanner('Assumptions');
+        p.assumptions.forEach(function(a, i) {
+          bodyRow('• ' + a, i % 2 === 1);
+        });
+      }
+
+      // Set row heights
+      ws['!rows'] = rows.map(function(h) { return h ? { hpt: h } : {}; });
+
+      XLSX.utils.book_append_sheet(wb, ws, 'Ad Plan');
+
+      // ═══════════════════════════════
+      // SHEET 2: Raw Data
+      // ═══════════════════════════════
+      var rd = {};
+      rd['!cols'] = [{ wch: 28 }, { wch: 100 }];
+
+      setCell(rd, 0, 0, 'Field', S.rdHdr);
+      setCell(rd, 1, 0, 'Value', S.rdHdr);
+
+      var rdRows = [
+        ['Plan Name', p.plan_name || ''],
+        ['Business Name', p.business_name || ''],
+        ['Primary Goal', p.primary_goal || ''],
+        ['Geography', p.geography || ''],
+        ['Monthly Ad Budget', p.monthly_ad_budget ? '$' + p.monthly_ad_budget : ''],
+        ['Budget Tier', p.budget_tier || ''],
+        ['Status', p.status || 'Ready'],
+        ['Plan Output', JSON.stringify(p, null, 2)]
+      ];
+
+      rdRows.forEach(function(row, i) {
+        var labelStyle = i % 2 === 0 ? S.rdLabel : S.rdLabelB;
+        setCell(rd, 0, i + 1, row[0], labelStyle);
+        setCell(rd, 1, i + 1, row[1], S.rdVal);
+      });
+
+      rd['!rows'] = [{ hpt: 22 }];
+      for (var ri = 1; ri <= 7; ri++) rd['!rows'].push({ hpt: 15 });
+      rd['!rows'].push({ hpt: 120 });
+
+      XLSX.utils.book_append_sheet(wb, rd, 'Raw Data');
+
+      var filename = (p.plan_name || 'AdCraft-Plan').replace(/[^a-zA-Z0-9 _\-]/g, '').replace(/\s+/g, '-');
+      XLSX.writeFile(wb, filename + '.xlsx', { cellStyles: true });
     }
- 
+
     if (!recordId) {
       showError('No plan selected. Please return to AdCraft and select a plan.');
     } else {
