@@ -355,9 +355,7 @@
   </div>
 
   <script>
-    var AIRTABLE_TOKEN = 'patoPfw89wCGuJFKC.7d2fc64e36a0ed8e67c8a5ccee35a0665b0be22ccd31acbe389b512d1624307a';
-    var BASE_ID = 'appCtUgAKIoaa6ECh';
-    var TABLE_NAME = 'Plans';
+    // Token is server-side — calls go through Netlify function
 
     function esc(s) {
       if (!s) return '';
@@ -579,9 +577,7 @@
     if (!recordId) {
       showError('No plan selected. Please return to AdCraft and select a plan.');
     } else {
-      fetch('https://api.airtable.com/v0/' + BASE_ID + '/' + encodeURIComponent(TABLE_NAME) + '/' + recordId, {
-        headers: { 'Authorization': 'Bearer ' + AIRTABLE_TOKEN }
-      })
+      fetch('/.netlify/functions/get-plan?recordId=' + recordId)
       .then(function(r) {
         if (!r.ok) throw new Error('Airtable error ' + r.status);
         return r.json();
