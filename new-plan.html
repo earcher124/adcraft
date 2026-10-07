@@ -569,7 +569,7 @@
         'Primary Goal: ' + (d.goal || 'Not provided'),
         'Geography: ' + (d.geo || 'Not provided'),
         'Monthly Ad Budget: ' + (d.budget || 'Not provided'),
-        'Monthly Revenue: ' + (d.monthlyRevenue || 'Not provided'),
+        'Monthly Revenue: ' + (d.monthlyRevenue ? '$' + Number(String(d.monthlyRevenue).replace(/[^0-9.]/g,'')).toLocaleString() : 'Not provided'),
         'Current Advertising: ' + (d.currentAdvertising || 'None described'),
         '',
         '--- DELIVERABLE ---',
