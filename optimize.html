@@ -363,8 +363,9 @@
     if (selectedFiles.length === 0 || !planId) return;
     hideError();
 
-    // Get email from intake (already fetched from the original plan record)
-    var email = (intake && intake["Email"]) || "";
+    // Get email — prefer URL param (passed from plan-viewer which has Clerk auth), fall back to intake
+    var emailParam = params.get("email") || "";
+    var email = emailParam || (intake && intake["Email"]) || "";
 
     // Show overlay
     document.getElementById("submitting-overlay").classList.add("visible");

@@ -580,7 +580,7 @@
 
     function optimizePlan() {
       if (!requirePro("Optimize Plan")) return;
-      window.location.href = "/optimize.html?id=" + encodeURIComponent(recordId);
+      window.location.href = "/optimize.html?id=" + encodeURIComponent(recordId) + (email ? "&email=" + encodeURIComponent(email) : "");
     }
 
     function printPlan() {
