@@ -2,7 +2,9 @@
   "name": "adcraft",
   "version": "1.0.0",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "busboy": "^1.6.0",
     "exceljs": "^4.4.0",
-    "@anthropic-ai/sdk": "^0.30.0"
+    "xlsx": "^0.18.5"
   }
 }

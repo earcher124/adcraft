@@ -15,6 +15,10 @@
   timeout = 900
   background = true
 
+[functions."optimize-plan-background"]
+  timeout = 900
+  background = true
+
 [[redirects]]
   from = "/"
   to = "/home.html"

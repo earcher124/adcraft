@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdCraft — Optimize Plan</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    :root {
+      --bg: #FAF6ED;
+      --fg: #1a1a1a;
+      --muted: #6b6270;
+      --border: #e8ddd0;
+      --purple: #4A1040;
+      --coral: #E8603C;
+      --card: #ffffff;
+      --success: #2d7a4f;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]):not([data-theme="dark"]) {
+        --bg: #FAF6ED; --fg: #1a1a1a; --muted: #6b6270;
+        --border: #e8ddd0; --card: #ffffff; color-scheme: light;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #1a1518; --fg: #f0ebe6; --muted: #9a8fa0;
+      --border: #3a2f38; --card: #231d22; color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); font-family: 'Inter', system-ui, sans-serif; color: var(--fg); }
+
+    /* Hero */
+    .hero { padding: 48px 48px 36px; }
+    .hero-inner { max-width: 700px; margin: 0 auto; }
+    .hero-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: var(--purple); margin-bottom: 10px; }
+    .hero-title { font-family: 'Playfair Display', Georgia, serif; font-size: 42px; font-weight: 800; color: var(--fg); margin: 0 0 16px; letter-spacing: -0.03em; line-height: 1.1; }
+    .hero-title em { font-style: italic; font-weight: 400; color: var(--purple); }
+    .hero-subtitle { font-size: 15px; color: var(--muted); line-height: 1.6; max-width: 520px; }
+    .hero-line { max-width: 700px; margin: 24px auto 0; height: 2px; background: linear-gradient(to right, var(--purple), transparent); }
+
+    /* Content */
+    .content { max-width: 700px; margin: 0 auto; padding: 40px 48px 80px; }
+
+    /* Plan context card */
+    .plan-context {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .plan-context-icon {
+      width: 40px; height: 40px;
+      background: var(--purple);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .plan-context-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px; }
+    .plan-context-name { font-size: 16px; font-weight: 600; color: var(--fg); }
+    .plan-context-loading { font-size: 14px; color: var(--muted); font-style: italic; }
+
+    /* Upload area */
+    .section-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--purple); margin-bottom: 10px;
+    }
+    .section-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 22px; font-weight: 700; color: var(--fg);
+      margin: 0 0 8px;
+    }
+    .section-desc {
+      font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px;
+    }
+
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 14px;
+      padding: 48px 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+      background: var(--card);
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--purple);
+      background: rgba(74, 16, 64, 0.03);
+    }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-icon { font-size: 36px; margin-bottom: 14px; }
+    .upload-title { font-size: 16px; font-weight: 600; color: var(--fg); margin-bottom: 6px; }
+    .upload-hint { font-size: 13px; color: var(--muted); }
+    .upload-hint strong { color: var(--purple); }
+
+    /* File list */
+    .file-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+    .file-item {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px;
+    }
+    .file-item-icon { font-size: 18px; flex-shrink: 0; }
+    .file-item-name { flex: 1; font-size: 13px; font-weight: 500; color: var(--fg); word-break: break-all; }
+    .file-item-size { font-size: 12px; color: var(--muted); flex-shrink: 0; }
+    .file-item-remove {
+      background: none; border: none; cursor: pointer;
+      font-size: 16px; color: var(--muted); padding: 0 2px;
+      line-height: 1; flex-shrink: 0;
+    }
+    .file-item-remove:hover { color: var(--coral); }
+
+    /* Tips */
+    .tips {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px 24px; margin-top: 32px;
+    }
+    .tips-title { font-size: 13px; font-weight: 700; color: var(--fg); margin-bottom: 12px; }
+    .tips-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+    .tips-list li { font-size: 13px; color: var(--muted); line-height: 1.5; padding-left: 20px; position: relative; }
+    .tips-list li::before { content: "✓"; position: absolute; left: 0; color: var(--success); font-weight: 700; }
+
+    /* Actions */
+    .actions { margin-top: 36px; display: flex; gap: 12px; align-items: center; }
+    .btn {
+      display: inline-block; font-size: 14px; font-weight: 600;
+      padding: 12px 24px; border-radius: 8px; text-decoration: none;
+      cursor: pointer; border: none; font-family: 'Inter', system-ui, sans-serif;
+      transition: background 0.2s, opacity 0.2s;
+    }
+    .btn-primary { background: var(--purple); color: #FAF6ED; }
+    .btn-primary:hover:not(:disabled) { background: #6a2060; }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-outline { background: transparent; color: var(--purple); border: 1px solid var(--purple); }
+    .btn-outline:hover { background: var(--purple); color: #FAF6ED; }
+
+    /* Submitting state */
+    .submitting-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(250, 246, 237, 0.92);
+      z-index: 100;
+      align-items: center; justify-content: center;
+      flex-direction: column;
+      text-align: center;
+    }
+    .submitting-overlay.visible { display: flex; }
+    .spinner {
+      width: 52px; height: 52px;
+      border: 3px solid var(--border);
+      border-top-color: var(--purple);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 24px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .submitting-title { font-family: 'Playfair Display', Georgia, serif; font-size: 26px; color: var(--fg); margin-bottom: 10px; }
+    .submitting-desc { font-size: 14px; color: var(--muted); max-width: 340px; line-height: 1.6; }
+
+    /* Error */
+    .error-msg {
+      background: #fff0ed; border: 1px solid #f5c6bb;
+      border-radius: 10px; padding: 14px 18px;
+      font-size: 14px; color: #8b2500;
+      margin-bottom: 20px; display: none;
+    }
+    .error-msg.visible { display: block; }
+
+    @media (max-width: 600px) {
+      .hero { padding: 32px 20px 24px; }
+      .content { padding: 28px 20px 60px; }
+      .hero-title { font-size: 30px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <p class="hero-eyebrow">Pro Feature</p>
+    <h1 class="hero-title">Optimize Your <em>Plan</em></h1>
+    <p class="hero-subtitle">Upload your real performance data and Claude will analyze what's working, what's not, and produce a revised plan grounded in the evidence.</p>
+  </div>
+  <div class="hero-line"></div>
+</div>
+
+<div class="content">
+
+  <!-- Original plan context -->
+  <div class="plan-context" id="plan-context">
+    <div class="plan-context-icon">📋</div>
+    <div>
+      <div class="plan-context-label">Optimizing from</div>
+      <div class="plan-context-name" id="plan-name"><span class="plan-context-loading">Loading plan...</span></div>
+    </div>
+  </div>
+
+  <div class="error-msg" id="error-msg"></div>
+
+  <p class="section-label">Performance Data</p>
+  <h2 class="section-title">Upload your ad performance reports</h2>
+  <p class="section-desc">Export from Meta Ads Manager, Google Ads, or any platform as CSV or Excel. You can also upload a manually built spreadsheet — just include channel, spend, impressions, clicks, conversions, and any other metrics you have.</p>
+
+  <div class="upload-zone" id="upload-zone">
+    <input type="file" id="file-input" multiple accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
+    <div class="upload-icon">📊</div>
+    <div class="upload-title">Drop files here or click to browse</div>
+    <div class="upload-hint">Accepts <strong>CSV</strong> or <strong>Excel (.xlsx/.xls)</strong> &nbsp;·&nbsp; Up to 3 files &nbsp;·&nbsp; 10MB each</div>
+  </div>
+
+  <div class="file-list" id="file-list"></div>
+
+  <div class="tips">
+    <div class="tips-title">What to include for the best results</div>
+    <ul class="tips-list">
+      <li>Channel name and date range covered</li>
+      <li>Spend per channel or campaign</li>
+      <li>Impressions, clicks, CTR, CPC if available</li>
+      <li>Conversions, leads, or sales and their cost</li>
+      <li>Creative performance (if broken out by ad)</li>
+      <li>Audience or targeting data if your platform provides it</li>
+    </ul>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" id="btn-generate" disabled onclick="generateOptimized()">Generate Optimized Plan</button>
+    <a class="btn btn-outline" id="btn-back" href="/plan-viewer.html">Back to Plan</a>
+  </div>
+
+</div>
+
+<!-- Submitting overlay -->
+<div class="submitting-overlay" id="submitting-overlay">
+  <div class="spinner"></div>
+  <div class="submitting-title">Sending to Claude&hellip;</div>
+  <div class="submitting-desc">Uploading your performance data. You'll be redirected to your optimized plan in just a moment.</div>
+</div>
+
+<script>
+  var planId = null;
+  var planName = "";
+  var selectedFiles = [];
+
+  // Parse query param
+  var params = new URLSearchParams(window.location.search);
+  planId = params.get("id");
+
+  if (!planId) {
+    showError("No plan ID provided. Please return to your plan and click Optimize Plan.");
+  } else {
+    // Update back link
+    document.getElementById("btn-back").href = "/plan-viewer.html?id=" + encodeURIComponent(planId);
+
+    // Fetch plan name from poll-plan
+    fetch("/.netlify/functions/poll-plan?id=" + encodeURIComponent(planId))
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d && d.planName) {
+          planName = d.planName;
+          document.getElementById("plan-name").textContent = planName;
+        } else {
+          document.getElementById("plan-name").textContent = "Your Advertising Plan";
+        }
+      })
+      .catch(function() {
+        document.getElementById("plan-name").textContent = "Your Advertising Plan";
+      });
+  }
+
+  // Drag and drop
+  var zone = document.getElementById("upload-zone");
+  zone.addEventListener("dragover", function(e) { e.preventDefault(); zone.classList.add("drag-over"); });
+  zone.addEventListener("dragleave", function() { zone.classList.remove("drag-over"); });
+  zone.addEventListener("drop", function(e) {
+    e.preventDefault();
+    zone.classList.remove("drag-over");
+    addFiles(Array.from(e.dataTransfer.files));
+  });
+
+  // File input
+  document.getElementById("file-input").addEventListener("change", function(e) {
+    addFiles(Array.from(e.target.files));
+    e.target.value = ""; // reset so same file can be re-added after removal
+  });
+
+  function addFiles(newFiles) {
+    newFiles.forEach(function(f) {
+      if (selectedFiles.length >= 3) return;
+      var ext = f.name.split(".").pop().toLowerCase();
+      if (ext !== "csv" && ext !== "xlsx" && ext !== "xls") {
+        showError("Only CSV and Excel files are supported. Skipping: " + f.name);
+        return;
+      }
+      if (f.size > 10 * 1024 * 1024) {
+        showError(f.name + " exceeds the 10MB limit.");
+        return;
+      }
+      selectedFiles.push(f);
+    });
+    renderFileList();
+    updateButton();
+  }
+
+  function removeFile(idx) {
+    selectedFiles.splice(idx, 1);
+    renderFileList();
+    updateButton();
+  }
+
+  function renderFileList() {
+    var list = document.getElementById("file-list");
+    list.innerHTML = "";
+    selectedFiles.forEach(function(f, i) {
+      var ext = f.name.split(".").pop().toLowerCase();
+      var icon = ext === "csv" ? "📄" : "📊";
+      var size = f.size < 1024 * 1024
+        ? Math.round(f.size / 1024) + " KB"
+        : (f.size / 1024 / 1024).toFixed(1) + " MB";
+      var item = document.createElement("div");
+      item.className = "file-item";
+      item.innerHTML =
+        '<span class="file-item-icon">' + icon + '</span>' +
+        '<span class="file-item-name">' + escHtml(f.name) + '</span>' +
+        '<span class="file-item-size">' + size + '</span>' +
+        '<button class="file-item-remove" onclick="removeFile(' + i + ')" title="Remove">&times;</button>';
+      list.appendChild(item);
+    });
+  }
+
+  function updateButton() {
+    var btn = document.getElementById("btn-generate");
+    btn.disabled = selectedFiles.length === 0 || !planId;
+  }
+
+  function showError(msg) {
+    var el = document.getElementById("error-msg");
+    el.textContent = msg;
+    el.classList.add("visible");
+  }
+
+  function hideError() {
+    document.getElementById("error-msg").classList.remove("visible");
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  async function generateOptimized() {
+    if (selectedFiles.length === 0 || !planId) return;
+    hideError();
+
+    // Get email from localStorage (set on login)
+    var email = "";
+    try { email = localStorage.getItem("adcraft_email") || ""; } catch(e) {}
+
+    // Show overlay
+    document.getElementById("submitting-overlay").classList.add("visible");
+    document.getElementById("btn-generate").disabled = true;
+
+    try {
+      // Step 1: create a pending record
+      var createRes = await fetch("/.netlify/functions/create-optimize-record", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email,
+          bizName: "",
+          originalPlanName: planName || "Your Plan"
+        })
+      });
+      if (!createRes.ok) throw new Error("Could not create optimization record");
+      var createData = await createRes.json();
+      var newRecordId = createData.recordId;
+      if (!newRecordId) throw new Error("No record ID returned");
+
+      // Step 2: upload files + trigger optimization
+      var form = new FormData();
+      form.append("recordId", newRecordId);
+      form.append("originalPlanId", planId);
+      selectedFiles.forEach(function(f) { form.append("files", f, f.name); });
+
+      var triggerRes = await fetch("/.netlify/functions/trigger-optimize", {
+        method: "POST",
+        body: form
+      });
+      if (!triggerRes.ok) {
+        var errData = await triggerRes.json().catch(function() { return {}; });
+        throw new Error(errData.error || "Upload failed");
+      }
+
+      // Step 3: redirect to plan viewer — it will poll until ready
+      window.location.href = "/plan-viewer.html?id=" + encodeURIComponent(newRecordId);
+
+    } catch (err) {
+      document.getElementById("submitting-overlay").classList.remove("visible");
+      document.getElementById("btn-generate").disabled = false;
+      showError("Something went wrong: " + (err.message || "Please try again."));
+    }
+  }
+</script>
+
+</body>
+</html>
