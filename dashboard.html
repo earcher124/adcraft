@@ -102,8 +102,8 @@
   <div class="hero">
     <div class="hero-inner">
       <div class="hero-left">
-        <p class="hero-eyebrow">Welcome back</p>
-        <h1 class="hero-title"><em id="first-name">Your</em><br>Dashboard</h1>
+        <p class="hero-eyebrow">Welcome back<span id="first-name-greeting"></span></p>
+        <h1 class="hero-title">Your <em>Dashboard</em></h1>
       </div>
       <div class="hero-right">
         <p class="hero-desc">Your AI-powered advertising command center. Build plans, analyze performance, and grow your business.</p>
@@ -141,12 +141,32 @@
         return;
       }
       renderNav("Dashboard");
+
       var firstName = clerk.user.firstName || clerk.user.primaryEmailAddress?.emailAddress?.split("@")[0] || "";
       if (firstName) {
-        document.getElementById("first-name").textContent = firstName;
+        document.getElementById("first-name-greeting").textContent = ", " + firstName;
       }
-      // Update pro card link based on tier (if Airtable user is pro)
-      // For now links to upgrade; once tier check is wired it'll go to optimize
+
+      // Fetch tier and update Optimize card accordingly
+      var email = clerk.user.primaryEmailAddress && clerk.user.primaryEmailAddress.emailAddress;
+      if (email) {
+        try {
+          var res = await fetch("/.netlify/functions/get-user?email=" + encodeURIComponent(email));
+          var data = await res.json();
+          var proCard = document.getElementById("pro-card");
+          if (data.tier === "Pro") {
+            proCard.href = "/optimize.html";
+            proCard.querySelector(".action-title").textContent = "Optimize a Plan";
+            proCard.querySelector(".action-desc").textContent = "Upload your ad performance data and get AI-driven recommendations.";
+          } else {
+            // Free user — show lock indicator
+            proCard.querySelector(".action-icon").textContent = "🔒";
+            proCard.querySelector(".action-title").innerHTML = "Optimize a Plan <span style=\"font-size:11px;font-weight:400;color:#9b7fa0;\">PRO</span>";
+          }
+        } catch(e) {
+          // Leave as upgrade link on error
+        }
+      }
     });
   </script>
 </body>
