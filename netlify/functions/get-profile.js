@@ -24,7 +24,6 @@ exports.handler = async function (event) {
 
     const data = await res.json();
     if (!res.ok) {
-      console.error("Airtable error:", data);
       return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to fetch profile" }) };
     }
 
@@ -32,25 +31,21 @@ exports.handler = async function (event) {
       return { statusCode: 200, headers, body: JSON.stringify({ profile: null }) };
     }
 
-    const record = data.records[0];
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({
-        profile: {
-          recordId: record.id,
-          bizName: record.fields["Business Name"] || "",
-          bizType: record.fields["Business Type"] || "",
-          productType: record.fields["Product"] || "",
-          targetCustomer: record.fields["Target Customer"] || "",
-          geo: record.fields["Geography"] || "",
-          monthlyRevenue: record.fields["Monthly Revenue"] || "",
-          currentAdvertising: record.fields["Current Advertising"] || "",
-        },
-      }),
+    const r = data.records[0];
+    const profile = {
+      recordId: r.id,
+      bizName: r.fields["Business Name"] || "",
+      bizType: r.fields["Business Type"] || "",
+      productType: r.fields["Product"] || "",
+      targetCustomer: r.fields["Target Customer"] || "",
+      geo: r.fields["Geography"] || "",
+      monthlyRevenue: r.fields["Monthly Revenue"] || "",
+      currentAdvertising: r.fields["Current Advertising"] || "",
     };
+
+    return { statusCode: 200, headers, body: JSON.stringify({ profile }) };
   } catch (err) {
-    console.error("Airtable error:", err);
+    console.error("get-profile error:", err);
     return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to fetch profile" }) };
   }
 };
