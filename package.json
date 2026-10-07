@@ -5,6 +5,7 @@
     "@anthropic-ai/sdk": "^0.30.0",
     "busboy": "^1.6.0",
     "exceljs": "^4.4.0",
+    "pptxgenjs": "^4.0.1",
     "xlsx": "^0.18.5"
   }
 }

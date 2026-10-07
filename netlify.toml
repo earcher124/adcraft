@@ -19,6 +19,12 @@
   timeout = 900
   background = true
 
+[functions."generate-cover-art"]
+  timeout = 30
+
+[functions."generate-export"]
+  timeout = 60
+
 [[redirects]]
   from = "/"
   to = "/home.html"
