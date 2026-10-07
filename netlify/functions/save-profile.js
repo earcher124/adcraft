@@ -21,6 +21,7 @@ exports.handler = async function (event) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: "Missing email" }) };
   }
 
+  const revenueRaw = profile.monthlyRevenue ? String(profile.monthlyRevenue).replace(/[^0-9.]/g, "") : "";
   const fields = {
     "Email": email,
     "Business Name": profile.bizName || "",
@@ -28,9 +29,12 @@ exports.handler = async function (event) {
     "Product": profile.productType || "",
     "Target Customer": profile.targetCustomer || "",
     "Geography": profile.geo || "",
-    "Monthly Revenue": profile.monthlyRevenue || "",
+    "Monthly Revenue": revenueRaw ? parseFloat(revenueRaw) : null,
     "Current Advertising": profile.currentAdvertising || "",
   };
+  // Remove null fields to avoid type errors on empty optional fields
+  Object.keys(fields).forEach(k => { if (fields[k] === null || fields[k] === "") delete fields[k]; });
+  fields["Email"] = email; // always keep email
 
   try {
     // Check if profile exists
