@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>AdCraft Plan</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    :root {
+      --bg: #FAF6ED;
+      --surface: #ffffff;
+      --border: #e8ddd0;
+      --fg: #1a1a1a;
+      --fg-soft: #4a4040;
+      --fg-muted: #7a6e6e;
+      --accent: #4A1040;
+      --accent-mid: #7a2060;
+      --accent-light: #f0e8ee;
+      --gold: #b87c2a;
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'Inter', system-ui, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #1a1218;
+        --surface: #251820;
+        --border: #3a2830;
+        --fg: #f0e8ee;
+        --fg-soft: #c8b8c4;
+        --fg-muted: #8a7a86;
+        --accent: #c070a8;
+        --accent-mid: #a05088;
+        --accent-light: #2a1828;
+        --gold: #d49848;
+        color-scheme: dark;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #1a1218;
+      --surface: #251820;
+      --border: #3a2830;
+      --fg: #f0e8ee;
+      --fg-soft: #c8b8c4;
+      --fg-muted: #8a7a86;
+      --accent: #c070a8;
+      --accent-mid: #a05088;
+      --accent-light: #2a1828;
+      --gold: #d49848;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.65;
+      margin: 0;
+      padding-inline: 20px;
+      padding-block: 32px;
+    }
+    .page { max-width: 860px; margin: 0 auto; }
+
+    /* Loading / Error states */
+    .state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      text-align: center;
+      gap: 12px;
+    }
+    .state-logo {
+      font-family: var(--font-display);
+      font-size: 28px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .state-msg {
+      color: var(--fg-muted);
+      font-size: 14px;
+    }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Hero */
+    .hero {
+      padding: 48px 0 36px;
+      border-bottom: 2px solid var(--accent);
+      margin-bottom: 40px;
+    }
+    .hero-eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .hero-name {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 700;
+      color: var(--fg);
+      margin: 0 0 16px;
+      text-wrap: balance;
+      line-height: 1.15;
+    }
+    .hero-strategy {
+      font-size: 16px;
+      color: var(--fg-soft);
+      max-width: 680px;
+      line-height: 1.7;
+      border-left: 3px solid var(--accent);
+      padding-left: 18px;
+      margin: 0;
+    }
+
+    /* Section */
+    .section { margin-bottom: 44px; }
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .section-body {
+      color: var(--fg-soft);
+      margin: 0;
+      max-width: 720px;
+    }
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 44px 0;
+    }
+
+    /* Cards (channels) */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+    }
+    .card-name {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--accent);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .card-body {
+      font-size: 13px;
+      color: var(--fg-soft);
+      margin-bottom: 10px;
+    }
+    .card-meta {
+      font-size: 12px;
+      color: var(--fg-muted);
+      margin-top: 6px;
+    }
+
+    /* Budget table */
+    .budget-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .budget-table th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--fg-muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .budget-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .budget-amount { font-weight: 700; font-variant-numeric: tabular-nums; }
+    .budget-pct { font-size: 11px; color: var(--fg-muted); }
+    .budget-bar-wrap {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 6px;
+      max-width: 140px;
+    }
+    .budget-bar {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    /* Audience */
+    .audience-item { margin-bottom: 16px; }
+    .audience-name {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--fg);
+      margin-bottom: 3px;
+    }
+    .audience-desc { font-size: 13px; color: var(--fg-soft); }
+
+    /* Messaging */
+    .msg-item {
+      padding: 16px;
+      border-left: 3px solid var(--accent-light);
+      margin-bottom: 12px;
+      background: var(--surface);
+      border-radius: 0 6px 6px 0;
+    }
+    .msg-territory {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .msg-rationale { font-size: 13px; color: var(--fg-soft); }
+
+    /* KPI grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+    @media (max-width: 560px) { .kpi-grid { grid-template-columns: 1fr; } }
+    .kpi-col-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--fg-muted);
+      margin-bottom: 10px;
+    }
+    .kpi-list {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 13px;
+      color: var(--fg-soft);
+    }
+    .kpi-list li { margin-bottom: 6px; }
+
+    /* Avoid */
+    .avoid-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .avoid-x {
+      color: #c0392b;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .avoid-tactic { font-weight: 600; font-size: 13px; color: var(--fg); }
+    .avoid-reason { font-size: 13px; color: var(--fg-soft); margin-top: 2px; }
+
+    /* Moves */
+    .moves-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 13px;
+      color: var(--fg-soft);
+    }
+    .moves-list li { margin-bottom: 8px; }
+
+    /* Phase grid */
+    .phase-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 640px) { .phase-grid { grid-template-columns: 1fr; } }
+    .phase-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+    }
+    .phase-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .phase-title {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--fg);
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+    .phase-body { font-size: 13px; color: var(--fg-soft); line-height: 1.6; }
+
+    /* Assumptions */
+    .assumptions-list {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 13px;
+      color: var(--fg-muted);
+    }
+    .assumptions-list li { margin-bottom: 6px; }
+
+    /* Footer */
+    .footer {
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--fg-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .footer-brand {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page" id="root">
+    <div class="state" id="loading-state">
+      <div class="state-logo">AdCraft</div>
+      <div class="spinner"></div>
+      <div class="state-msg">Loading your plan…</div>
+    </div>
+  </div>
+
+  <script>
+    var AIRTABLE_TOKEN = 'YOUR_AIRTABLE_PAT_TOKEN';
+    var BASE_ID = 'appCtUgAKIoaa6ECh';
+    var TABLE_NAME = 'Plans';
+
+    function esc(s) {
+      if (!s) return '';
+      return String(s)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;');
+    }
+
+    function showError(msg) {
+      document.getElementById('root').innerHTML =
+        '<div class="state"><div class="state-logo">AdCraft</div>' +
+        '<div class="state-msg">' + esc(msg) + '</div></div>';
+    }
+
+    function render(p) {
+      var html = '<div class="page">';
+
+      // Hero
+      html += '<div class="hero">';
+      html += '<div class="hero-eyebrow">AdCraft Advertising Plan</div>';
+      html += '<h1 class="hero-name">' + esc(p.plan_name) + '</h1>';
+      if (p.your_advertising_strategy) {
+        html += '<p class="hero-strategy">' + esc(p.your_advertising_strategy) + '</p>';
+      }
+      html += '</div>';
+
+      if (p.the_opportunity) {
+        html += '<div class="section"><div class="section-label">The Opportunity</div>';
+        html += '<p class="section-body">' + esc(p.the_opportunity) + '</p></div>';
+      }
+      if (p.what_advertising_needs_to_do) {
+        html += '<div class="section"><div class="section-label">What Advertising Needs to Do</div>';
+        html += '<p class="section-body">' + esc(p.what_advertising_needs_to_do) + '</p></div>';
+      }
+      if (p.recommended_approach) {
+        html += '<div class="section"><div class="section-label">Recommended Approach</div>';
+        html += '<p class="section-body">' + esc(p.recommended_approach) + '</p></div>';
+      }
+
+      html += '<div class="divider"></div>';
+
+      // Channels
+      if (p.recommended_channels && p.recommended_channels.length) {
+        html += '<div class="section"><div class="section-label">Where to Advertise</div>';
+        html += '<div class="cards">';
+        p.recommended_channels.forEach(function(ch) {
+          html += '<div class="card">';
+          html += '<div class="card-name">' + esc(ch.channel) + '</div>';
+          html += '<div class="card-body">' + esc(ch.role) + '</div>';
+          if (ch.what_to_run) html += '<div class="card-meta"><strong>What to run:</strong> ' + esc(ch.what_to_run) + '</div>';
+          if (ch.cta) html += '<div class="card-meta"><strong>CTA:</strong> ' + esc(ch.cta) + '</div>';
+          if (ch.why) html += '<div class="card-meta"><strong>Why it earns its place:</strong> ' + esc(ch.why) + '</div>';
+          html += '</div>';
+        });
+        html += '</div></div>';
+      }
+
+      // Budget
+      if (p.budget && p.budget.length) {
+        html += '<div class="section"><div class="section-label">Budget</div>';
+        html += '<table class="budget-table"><thead><tr>';
+        html += '<th>Channel</th><th>Investment</th><th style="min-width:200px">Purpose</th>';
+        html += '</tr></thead><tbody>';
+        p.budget.forEach(function(b) {
+          var pct = parseFloat(b.percentage) || 0;
+          html += '<tr>';
+          html += '<td>' + esc(b.channel) + '</td>';
+          html += '<td><div class="budget-amount">$' + (b.monthly_investment || 0).toLocaleString() + '</div>';
+          html += '<div class="budget-pct">' + esc(b.percentage) + '</div>';
+          html += '<div class="budget-bar-wrap"><div class="budget-bar" style="width:' + Math.min(pct,100) + '%"></div></div></td>';
+          html += '<td>' + esc(b.purpose) + '</td>';
+          html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+      }
+
+      html += '<div class="divider"></div>';
+
+      // Audiences
+      if (p.who_to_target && p.who_to_target.length) {
+        html += '<div class="section"><div class="section-label">Who to Target</div>';
+        p.who_to_target.forEach(function(a) {
+          html += '<div class="audience-item">';
+          html += '<div class="audience-name">' + esc(a.audience_group) + '</div>';
+          html += '<div class="audience-desc">' + esc(a.description) + '</div>';
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+
+      // Messaging
+      if (p.messaging && p.messaging.length) {
+        html += '<div class="section"><div class="section-label">What Your Ads Should Say</div>';
+        p.messaging.forEach(function(m) {
+          html += '<div class="msg-item">';
+          html += '<div class="msg-territory">' + esc(m.territory) + '</div>';
+          html += '<div class="msg-rationale">' + esc(m.rationale) + '</div>';
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+
+      if (p.creative) {
+        html += '<div class="section"><div class="section-label">What the Ads Should Look Like</div>';
+        html += '<p class="section-body">' + esc(p.creative) + '</p></div>';
+      }
+      if (p.campaign_timing) {
+        html += '<div class="section"><div class="section-label">Campaign Timing</div>';
+        html += '<p class="section-body">' + esc(p.campaign_timing) + '</p></div>';
+      }
+
+      html += '<div class="divider"></div>';
+
+      // KPIs
+      if (p.how_to_measure_success) {
+        html += '<div class="section"><div class="section-label">How to Measure Success</div>';
+        html += '<div class="kpi-grid">';
+        if (p.how_to_measure_success.business_outcomes) {
+          html += '<div><div class="kpi-col-label">Business Outcomes</div><ul class="kpi-list">';
+          p.how_to_measure_success.business_outcomes.forEach(function(o) { html += '<li>' + esc(o) + '</li>'; });
+          html += '</ul></div>';
+        }
+        if (p.how_to_measure_success.media_signals) {
+          html += '<div><div class="kpi-col-label">Media Signals</div><ul class="kpi-list">';
+          p.how_to_measure_success.media_signals.forEach(function(s) { html += '<li>' + esc(s) + '</li>'; });
+          html += '</ul></div>';
+        }
+        html += '</div></div>';
+      }
+
+      // What not to do
+      if (p.what_i_would_not_do && p.what_i_would_not_do.length) {
+        html += '<div class="section"><div class="section-label">What I Would Not Do</div>';
+        p.what_i_would_not_do.forEach(function(w) {
+          html += '<div class="avoid-item">';
+          html += '<div class="avoid-x">✕</div>';
+          html += '<div><div class="avoid-tactic">' + esc(w.tactic) + '</div>';
+          html += '<div class="avoid-reason">' + esc(w.reason) + '</div></div>';
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+
+      // Smart moves
+      if (p.smart_next_moves && p.smart_next_moves.length) {
+        html += '<div class="section"><div class="section-label">Smart Next Moves</div>';
+        html += '<ol class="moves-list">';
+        p.smart_next_moves.forEach(function(m) { html += '<li>' + esc(m) + '</li>'; });
+        html += '</ol></div>';
+      }
+
+      // 90-day plan
+      if (p.launch_plan) {
+        html += '<div class="section"><div class="section-label">90-Day Launch Plan</div>';
+        html += '<div class="phase-grid">';
+        var phases = [
+          { key: 'days_1_30', label: 'Phase 1', title: 'Days 1–30: Launch' },
+          { key: 'days_31_60', label: 'Phase 2', title: 'Days 31–60: Optimize' },
+          { key: 'days_61_90', label: 'Phase 3', title: 'Days 61–90: Scale' }
+        ];
+        phases.forEach(function(ph) {
+          if (p.launch_plan[ph.key]) {
+            html += '<div class="phase-card">';
+            html += '<div class="phase-label">' + ph.label + '</div>';
+            html += '<div class="phase-title">' + ph.title + '</div>';
+            html += '<div class="phase-body">' + esc(p.launch_plan[ph.key]) + '</div>';
+            html += '</div>';
+          }
+        });
+        html += '</div></div>';
+      }
+
+      // Assumptions
+      if (p.assumptions && p.assumptions.length) {
+        html += '<div class="section"><div class="section-label">Assumptions</div>';
+        html += '<ul class="assumptions-list">';
+        p.assumptions.forEach(function(a) { html += '<li>' + esc(a) + '</li>'; });
+        html += '</ul></div>';
+      }
+
+      // Footer
+      html += '<div class="footer">';
+      html += '<span class="footer-brand">AdCraft</span>';
+      html += '<span>Generated by AdCraft · Powered by Claude</span>';
+      html += '</div>';
+
+      html += '</div>';
+      return html;
+    }
+
+    // Main: get recordId from URL, fetch from Airtable
+    var recordId = new URLSearchParams(window.location.search).get('recordId');
+
+    if (!recordId) {
+      showError('No plan selected. Please return to AdCraft and select a plan.');
+    } else {
+      fetch('https://api.airtable.com/v0/' + BASE_ID + '/' + encodeURIComponent(TABLE_NAME) + '/' + recordId, {
+        headers: { 'Authorization': 'Bearer ' + AIRTABLE_TOKEN }
+      })
+      .then(function(r) {
+        if (!r.ok) throw new Error('Airtable error ' + r.status);
+        return r.json();
+      })
+      .then(function(data) {
+        var raw = data.fields['Plan JSON'];
+        if (!raw) throw new Error('Plan JSON field is empty for this record.');
+        var plan = JSON.parse(raw);
+        document.getElementById('root').innerHTML = render(plan);
+      })
+      .catch(function(err) {
+        showError('Could not load plan: ' + err.message);
+      });
+    }
+  </script>
+</body>
+</html>
