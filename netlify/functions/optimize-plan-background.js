@@ -255,6 +255,20 @@ exports.handler = async function (event) {
       planText = planText.trim();
     }
 
+    // Strip BOM if present
+    if (planText.charCodeAt(0) === 0xFEFF) planText = planText.slice(1);
+    // Find first { in case there is any preamble text before the JSON
+    var firstBrace = planText.indexOf("{");
+    if (firstBrace > 0) {
+      console.log("Stripping " + firstBrace + " chars of preamble before JSON");
+      planText = planText.slice(firstBrace);
+    }
+    // Also trim trailing content after last }
+    var lastBrace = planText.lastIndexOf("}");
+    if (lastBrace !== -1 && lastBrace < planText.length - 1) {
+      planText = planText.slice(0, lastBrace + 1);
+    }
+
     // Check if Claude stopped early (truncation)
     var stopReason = message.stop_reason;
     console.log("stop_reason=" + stopReason + " length=" + planText.length);
