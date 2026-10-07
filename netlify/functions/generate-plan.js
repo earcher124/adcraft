@@ -1,7 +1,7 @@
 const Anthropic = require("@anthropic-ai/sdk");
 
 const AT_BASE = "appCtUgAKIoaa6ECh";
-const AT_PLANS_TBL = "Plans";
+const AT_PLANS_TBL = "tblOAtGXbtWewEAm0";
 
 exports.handler = async function (event) {
   if (event.httpMethod !== "POST") {
