@@ -344,7 +344,10 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ids })
         });
-        if (!res.ok) throw new Error("Failed");
+        if (!res.ok) {
+          var errData = await res.json().catch(function() { return {}; });
+          throw new Error(JSON.stringify(errData.detail || errData.error || res.status));
+        }
         ids.forEach(function(id) {
           var plan = allPlans.find(function(p) { return p.id === id; });
           if (plan) plan.status = "Archived";
@@ -352,7 +355,7 @@
         clearSelection();
         renderPlans();
       } catch(e) {
-        alert("Archive failed. Please try again.");
+        alert("Archive failed: " + e.message);
       }
     }
 

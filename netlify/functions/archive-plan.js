@@ -22,27 +22,19 @@ exports.handler = async function (event) {
   }
 
   try {
-    // Airtable batch update supports up to 10 records at a time
-    const batches = [];
-    for (let i = 0; i < ids.length; i += 10) {
-      batches.push(ids.slice(i, i + 10));
-    }
-
-    for (const batch of batches) {
-      const res = await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_PLANS_TBL}`, {
+    for (const id of ids) {
+      const res = await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_PLANS_TBL}/${id}`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${process.env.AIRTABLE_TOKEN}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          records: batch.map(id => ({ id, fields: { Status: "Archived" } })),
-        }),
+        body: JSON.stringify({ fields: { Status: "Archived" } }),
       });
       if (!res.ok) {
         const d = await res.json();
-        console.error("Airtable archive error:", d);
-        return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to archive" }) };
+        console.error("Airtable archive error for", id, JSON.stringify(d));
+        return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to archive", detail: d }) };
       }
     }
 
