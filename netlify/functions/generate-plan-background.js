@@ -9,7 +9,7 @@ exports.handler = async function (event) {
   let body;
   try {
     body = JSON.parse(event.body);
-  } catch {
+  } catch (e) {
     return { statusCode: 400, body: "Invalid JSON" };
   }
 
@@ -20,7 +20,7 @@ exports.handler = async function (event) {
 
   const token = process.env.AIRTABLE_TOKEN;
 
-  // 1. Call Claude — no timeout pressure, background functions get up to 15 min
+  // 1. Call Claude -- no timeout pressure, background functions get up to 15 min
   let planText;
   try {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -35,14 +35,25 @@ exports.handler = async function (event) {
     console.log("Claude response length:", planText.length);
 
     // Strip markdown code fences if Claude wrapped the JSON
-    planText = planText.trim().replace(/^\x60\x60\x60(?:json)?\s*/i, ‘’).replace(/\s*\x60\x60\x60\s*$/i, ‘’).trim();
+    // Use charCodeAt approach to avoid any quote/backtick encoding issues
+    planText = planText.trim();
+    var tick = String.fromCharCode(96);
+    var fence = tick + tick + tick;
+    if (planText.slice(0, 3) === fence) {
+      var nl = planText.indexOf("\n");
+      planText = nl !== -1 ? planText.slice(nl + 1) : planText.slice(3);
+      if (planText.slice(-3) === fence) {
+        planText = planText.slice(0, -3);
+      }
+      planText = planText.trim();
+    }
 
     // Sanitize smart quotes and special chars that break JSON.parse in browsers
     planText = planText
-      .replace(/”|”/g, ‘”’)
-      .replace(/’|’/g, “’”)
-      .replace(/–|—/g, ‘-’)
-      .replace(/…/g, ‘...’);
+      .replace(/“|”/g, '"')
+      .replace(/‘|’/g, "'")
+      .replace(/–|—/g, "-")
+      .replace(/…/g, "...");
 
     // Validate it's JSON as expected
     try {
@@ -50,10 +61,9 @@ exports.handler = async function (event) {
       console.log("Claude returned valid JSON");
     } catch (e) {
       console.warn("Claude did not return valid JSON:", e.message);
-      // Log chars around the failure position for diagnosis
-      const match = e.message.match(/position (\d+)/);
+      var match = e.message.match(/position (\d+)/);
       if (match) {
-        const pos = parseInt(match[1]);
+        var pos = parseInt(match[1]);
         console.warn("Chars at failure (pos", pos, "):", JSON.stringify(planText.substring(pos - 30, pos + 30)));
         console.warn("First 200 chars:", planText.substring(0, 200));
         console.warn("Last 200 chars:", planText.substring(planText.length - 200));
@@ -82,19 +92,19 @@ exports.handler = async function (event) {
 };
 
 async function updateRecord(token, recordId, fields) {
-  const res = await fetch(
-    `https://api.airtable.com/v0/${AT_BASE}/${AT_PLANS_TBL}/${recordId}`,
+  var res = await fetch(
+    "https://api.airtable.com/v0/" + AT_BASE + "/" + AT_PLANS_TBL + "/" + recordId,
     {
       method: "PATCH",
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: "Bearer " + token,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ fields }),
+      body: JSON.stringify({ fields: fields }),
     }
   );
   if (!res.ok) {
-    const data = await res.json();
+    var data = await res.json();
     throw new Error(JSON.stringify(data));
   }
 }
