@@ -22,6 +22,7 @@ exports.handler = async function (event) {
   let planText;
   try {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    console.log("Calling Claude, recordId:", recordId);
     const message = await client.messages.create({
       model: "claude-opus-4-5",
       max_tokens: 4096,
@@ -29,21 +30,31 @@ exports.handler = async function (event) {
       messages: [{ role: "user", content: prompt }],
     });
     planText = message.content[0].text;
+    console.log("Claude response length:", planText.length);
+
+    // Validate it's JSON as expected
+    try {
+      JSON.parse(planText);
+      console.log("Claude returned valid JSON");
+    } catch (e) {
+      console.warn("Claude did not return valid JSON, saving as-is");
+    }
   } catch (err) {
-    console.error("Anthropic error:", err);
-    // Mark the record as failed so the frontend can show an error
+    console.error("Anthropic error:", err.message, err.status);
     await updateRecord(token, recordId, { "Status": "Error", "Plan Output": "Generation failed: " + err.message });
     return { statusCode: 500, body: "Claude API error" };
   }
 
   // 2. Update the Airtable record with the completed plan
   try {
+    console.log("Saving plan to Airtable, length:", planText.length);
     await updateRecord(token, recordId, {
       "Plan Output": planText,
       "Status": "Complete",
     });
+    console.log("Plan saved successfully");
   } catch (err) {
-    console.error("Airtable update error:", err);
+    console.error("Airtable update error:", err.message);
     return { statusCode: 500, body: "Failed to save plan" };
   }
 

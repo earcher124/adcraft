@@ -266,10 +266,125 @@
       document.getElementById('hero-meta').textContent =
         'Generated ' + new Date().toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' });
 
-      // Render markdown
-      marked.setOptions({ breaks: true });
-      document.getElementById('plan-body').innerHTML = marked.parse(planText);
+      // Try to parse as JSON (structured plan), fall back to markdown
+      var plan;
+      try {
+        plan = JSON.parse(planText);
+      } catch (e) {
+        plan = null;
+      }
+
+      var body = document.getElementById('plan-body');
+      if (plan) {
+        body.innerHTML = renderPlanJSON(plan);
+      } else {
+        marked.setOptions({ breaks: true });
+        body.innerHTML = marked.parse(planText);
+      }
       document.getElementById('plan-card').classList.add('visible');
+    }
+
+    function esc(str) {
+      return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function renderPlanJSON(p) {
+      var html = '';
+
+      // Title + strategy
+      if (p.plan_name) html += '<h1>' + esc(p.plan_name) + '</h1>';
+      if (p.your_advertising_strategy) html += '<p><strong>Strategy:</strong> ' + esc(p.your_advertising_strategy) + '</p>';
+
+      // Key sections
+      if (p.the_opportunity) html += '<h2>The Opportunity</h2><p>' + esc(p.the_opportunity) + '</p>';
+      if (p.what_advertising_needs_to_do) html += '<h2>What Advertising Needs to Do</h2><p>' + esc(p.what_advertising_needs_to_do) + '</p>';
+      if (p.recommended_approach) html += '<h2>Recommended Approach</h2><p>' + esc(p.recommended_approach) + '</p>';
+
+      // Channels
+      if (p.recommended_channels && p.recommended_channels.length) {
+        html += '<h2>Recommended Channels</h2>';
+        p.recommended_channels.forEach(function(c) {
+          html += '<h3>' + esc(c.channel) + '</h3>';
+          html += '<table><tr><th>Role</th><td>' + esc(c.role) + '</td></tr>';
+          if (c.audience) html += '<tr><th>Audience</th><td>' + esc(c.audience) + '</td></tr>';
+          if (c.what_to_run) html += '<tr><th>What to Run</th><td>' + esc(c.what_to_run) + '</td></tr>';
+          if (c.cta) html += '<tr><th>CTA</th><td>' + esc(c.cta) + '</td></tr>';
+          if (c.why) html += '<tr><th>Why</th><td>' + esc(c.why) + '</td></tr>';
+          html += '</table>';
+        });
+      }
+
+      // Budget
+      if (p.budget && p.budget.length) {
+        html += '<h2>Budget Allocation</h2>';
+        html += '<table><tr><th>Channel</th><th>Monthly</th><th>%</th><th>Purpose</th></tr>';
+        p.budget.forEach(function(b) {
+          html += '<tr><td>' + esc(b.channel) + '</td><td>$' + esc(b.monthly_investment) + '</td><td>' + esc(b.percentage) + '</td><td>' + esc(b.purpose) + '</td></tr>';
+        });
+        html += '</table>';
+      }
+
+      // Targeting
+      if (p.who_to_target && p.who_to_target.length) {
+        html += '<h2>Who to Target</h2>';
+        p.who_to_target.forEach(function(t) {
+          html += '<h3>' + esc(t.audience_group) + '</h3><p>' + esc(t.description) + '</p>';
+        });
+      }
+
+      // Messaging
+      if (p.messaging && p.messaging.length) {
+        html += '<h2>Messaging</h2>';
+        p.messaging.forEach(function(m) {
+          html += '<h3>' + esc(m.territory) + '</h3><p>' + esc(m.rationale) + '</p>';
+        });
+      }
+
+      // Creative
+      if (p.creative) html += '<h2>Creative Direction</h2><p>' + esc(p.creative) + '</p>';
+
+      // Timing
+      if (p.campaign_timing) html += '<h2>Campaign Timing</h2><p>' + esc(p.campaign_timing) + '</p>';
+
+      // Measurement
+      if (p.how_to_measure_success) {
+        html += '<h2>How to Measure Success</h2>';
+        var m = p.how_to_measure_success;
+        if (m.business_outcomes && m.business_outcomes.length) {
+          html += '<h3>Business Outcomes</h3><ul>' + m.business_outcomes.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('') + '</ul>';
+        }
+        if (m.media_signals && m.media_signals.length) {
+          html += '<h3>Media Signals</h3><ul>' + m.media_signals.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('') + '</ul>';
+        }
+      }
+
+      // What not to do
+      if (p.what_i_would_not_do && p.what_i_would_not_do.length) {
+        html += '<h2>What I Would Not Do</h2>';
+        p.what_i_would_not_do.forEach(function(w) {
+          html += '<h3>' + esc(w.tactic) + '</h3><p>' + esc(w.reason) + '</p>';
+        });
+      }
+
+      // Smart next moves
+      if (p.smart_next_moves && p.smart_next_moves.length) {
+        html += '<h2>Smart Next Moves</h2><ul>' + p.smart_next_moves.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('') + '</ul>';
+      }
+
+      // Launch plan
+      if (p.launch_plan) {
+        html += '<h2>Launch Plan</h2>';
+        if (p.launch_plan.days_1_30) html += '<h3>Days 1–30</h3><p>' + esc(p.launch_plan.days_1_30) + '</p>';
+        if (p.launch_plan.days_31_60) html += '<h3>Days 31–60</h3><p>' + esc(p.launch_plan.days_31_60) + '</p>';
+        if (p.launch_plan.days_61_90) html += '<h3>Days 61–90</h3><p>' + esc(p.launch_plan.days_61_90) + '</p>';
+      }
+
+      // Assumptions
+      if (p.assumptions && p.assumptions.length) {
+        html += '<h2>Assumptions</h2><ul>' + p.assumptions.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('') + '</ul>';
+      }
+
+      return html;
     }
 
     function showError() {
