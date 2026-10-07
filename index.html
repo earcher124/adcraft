@@ -135,9 +135,10 @@
     }
     .section-body {
       color: var(--fg-soft);
-      margin: 0;
+      margin: 0 0 12px;
       max-width: 720px;
     }
+    .section-body:last-child { margin-bottom: 0; }
     .divider {
       height: 1px;
       background: var(--border);
@@ -317,6 +318,30 @@
     }
     .phase-body { font-size: 13px; color: var(--fg-soft); line-height: 1.6; }
 
+    /* Checklist (launch plan) */
+    .checklist {
+      list-style: none;
+      padding: 0;
+      margin: 10px 0 0;
+    }
+    .checklist li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--fg-soft);
+      line-height: 1.5;
+    }
+    .checklist li:last-child { border-bottom: none; }
+    .check-icon {
+      color: var(--accent);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
     /* Assumptions */
     .assumptions-list {
       margin: 0;
@@ -370,6 +395,29 @@
         .replace(/"/g,'&quot;');
     }
 
+    // Convert long text into paragraphs split on sentence boundaries (every 2-3 sentences)
+    function para(s) {
+      if (!s) return '';
+      var escaped = esc(s);
+      // Split into sentences, group into chunks of 2
+      var sentences = escaped.match(/[^.!?]+[.!?]+(\s|$)/g);
+      if (!sentences || sentences.length <= 2) return '<p class="section-body">' + escaped + '</p>';
+      var chunks = [];
+      for (var i = 0; i < sentences.length; i += 2) {
+        chunks.push(sentences.slice(i, i + 2).join('').trim());
+      }
+      return chunks.map(function(c) { return '<p class="section-body">' + c + '</p>'; }).join('');
+    }
+
+    // Convert launch plan text into checklist items split by period or newline
+    function checklist(s) {
+      if (!s) return '';
+      var items = esc(s).split(/\.\s+/).filter(function(x) { return x.trim().length > 3; });
+      return '<ul class="checklist">' + items.map(function(item) {
+        return '<li><span class="check-icon">✓</span><span>' + item.trim().replace(/\.$/,'') + '</span></li>';
+      }).join('') + '</ul>';
+    }
+
     function showError(msg) {
       document.getElementById('root').innerHTML =
         '<div class="state"><div class="state-logo">AdCraft</div>' +
@@ -390,15 +438,15 @@
 
       if (p.the_opportunity) {
         html += '<div class="section"><div class="section-label">The Opportunity</div>';
-        html += '<p class="section-body">' + esc(p.the_opportunity) + '</p></div>';
+        html += para(p.the_opportunity) + '</div>';
       }
       if (p.what_advertising_needs_to_do) {
         html += '<div class="section"><div class="section-label">What Advertising Needs to Do</div>';
-        html += '<p class="section-body">' + esc(p.what_advertising_needs_to_do) + '</p></div>';
+        html += para(p.what_advertising_needs_to_do) + '</div>';
       }
       if (p.recommended_approach) {
         html += '<div class="section"><div class="section-label">Recommended Approach</div>';
-        html += '<p class="section-body">' + esc(p.recommended_approach) + '</p></div>';
+        html += para(p.recommended_approach) + '</div>';
       }
 
       html += '<div class="divider"></div>';
@@ -527,7 +575,7 @@
             html += '<div class="phase-card">';
             html += '<div class="phase-label">' + ph.label + '</div>';
             html += '<div class="phase-title">' + ph.title + '</div>';
-            html += '<div class="phase-body">' + esc(p.launch_plan[ph.key]) + '</div>';
+            html += checklist(p.launch_plan[ph.key]);
             html += '</div>';
           }
         });
