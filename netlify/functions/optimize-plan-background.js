@@ -235,7 +235,7 @@ exports.handler = async function (event) {
     console.log("Calling Claude for optimization, recordId:", recordId);
     var message = await client.messages.create({
       model: "claude-opus-4-5",
-      max_tokens: 6000,
+      max_tokens: 8192,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: prompt }],
     });
