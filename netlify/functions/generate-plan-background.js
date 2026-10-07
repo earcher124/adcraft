@@ -34,12 +34,18 @@ exports.handler = async function (event) {
     planText = message.content[0].text;
     console.log("Claude response length:", planText.length);
 
+    // Strip markdown code fences if Claude wrapped the JSON
+    planText = planText.trim();
+    if (planText.startsWith(‘```’)) {
+      planText = planText.replace(/^```(?:json)?\s*/i, ‘’).replace(/\s*```$/, ‘’).trim();
+    }
+
     // Sanitize smart quotes and special chars that break JSON.parse in browsers
     planText = planText
-      .replace(/“|”/g, '"')
-      .replace(/‘|’/g, "'")
-      .replace(/–|—/g, '-')
-      .replace(/…/g, '...');
+      .replace(/”|”/g, ‘”’)
+      .replace(/’|’/g, “’”)
+      .replace(/–|—/g, ‘-’)
+      .replace(/…/g, ‘...’);
 
     // Validate it's JSON as expected
     try {
