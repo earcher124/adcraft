@@ -948,31 +948,28 @@
       var btn = document.getElementById("btn-excel");
       btn.innerHTML = "Building…";
       btn.disabled = true;
+      // Merge intake fields (Business Name, Budget, etc.) into plan object
+      var payload = Object.assign({}, plan, intake || {});
       fetch("/.netlify/functions/generate-xlsx", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(plan),
+        body: JSON.stringify(payload),
       })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          if (data.xlsxBase64) {
-            var binary = atob(data.xlsxBase64);
-            var bytes = new Uint8Array(binary.length);
-            for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-            var blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement("a");
-            a.href = url;
-            a.download = data.filename || "AdCraft_Optimized_Plan.xlsx";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-          } else {
-            alert("Excel generation failed. Please try again.");
-          }
+        .then(function(res) {
+          if (!res.ok) throw new Error("Failed");
+          return res.blob();
         })
-        .catch(function() { alert("Excel generation failed. Please try again."); })
+        .then(function(blob) {
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url;
+          a.download = (plan.plan_name || "AdCraft-Optimized-Plan").replace(/[^a-zA-Z0-9 _\-]/g, "").replace(/\s+/g, "-") + ".xlsx";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        })
+        .catch(function() { alert("Excel export failed. Please try again."); })
         .finally(function() {
           btn.innerHTML = "↓ Excel";
           btn.disabled = false;
