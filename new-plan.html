@@ -569,7 +569,7 @@
         'Primary Goal: ' + (d.goal || 'Not provided'),
         'Geography: ' + (d.geo || 'Not provided'),
         'Monthly Ad Budget: ' + (d.budget || 'Not provided'),
-        'Monthly Revenue: ' + (d.monthlyRevenue ? '$' + Number(String(d.monthlyRevenue).replace(/[^0-9.]/g,'')).toLocaleString() : 'Not provided'),
+        'Monthly Revenue: ' + (d.monthlyRevenue != null && d.monthlyRevenue !== '' ? '$' + Number(String(d.monthlyRevenue).replace(/[^0-9.]/g,'')).toLocaleString() : 'Not provided'),
         'Current Advertising: ' + (d.currentAdvertising || 'None described'),
         '',
         '--- DELIVERABLE ---',
@@ -614,7 +614,7 @@
         ['Product', profile.productType],
         ['Location', profile.geo],
         ['Revenue', profile.monthlyRevenue],
-      ].filter(function(f) { return f[1]; });
+      ].filter(function(f) { return f[1] != null && f[1] !== ''; });
 
       var html = fields.map(function(f) {
         return '<div class="profile-summary-field"><span>' + f[0] + ':</span> ' + f[1] + '</div>';
