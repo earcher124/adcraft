@@ -725,7 +725,7 @@
 
       // Check for intake fields passed from plan-viewer via URL params
       var params = new URLSearchParams(window.location.search);
-      var fromPlanIntake = params.get('bizName') ? {
+      var fromPlanIntake = params.get('source') === 'plan' ? {
         bizName:            params.get('bizName')           || '',
         bizType:            params.get('bizType')           || '',
         productType:        params.get('productType')       || '',
