@@ -800,19 +800,24 @@
         ];
         html += '<div class="ps-phases">';
         launchPhases.forEach(function(phase) {
-          var text = p.launch_plan[phase.key];
-          if (!text) return;
+          var raw = p.launch_plan[phase.key];
+          if (!raw) return;
+          // Normalize: array → join, object → stringify, else String()
+          var tasks;
+          if (Array.isArray(raw)) {
+            tasks = raw.map(function(s){ return String(s).trim(); }).filter(function(s){ return s.length > 3; });
+          } else {
+            var text = String(raw);
+            tasks = text.split(/[\n\r]+/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 3; });
+          }
           html += '<div class="ps-phase">';
           html += '<div class="ps-phase-label">' + phase.label + '</div>';
-          var tasks = text.split(/[\n\r]+/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 3; });
-          if (tasks.length > 1) {
+          if (tasks.length > 0) {
             html += '<ul class="checklist" style="margin:0;">';
             tasks.forEach(function(t, i) {
               html += '<li><label><input type="checkbox" data-task="' + esc(phase.key) + '_' + i + '"> <span>' + esc(t) + '</span></label></li>';
             });
             html += '</ul>';
-          } else {
-            html += '<ul class="checklist" style="margin:0;"><li><label><input type="checkbox" data-task="' + esc(phase.key) + '_0"> <span>' + esc(text) + '</span></label></li></ul>';
           }
           html += '</div>';
         });
