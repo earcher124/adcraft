@@ -730,6 +730,21 @@
 
       var email = clerk.user.primaryEmailAddress?.emailAddress || '';
 
+      // Pro gate — fetch user tier and redirect non-Pro users to upgrade
+      if (email) {
+        try {
+          var tierRes = await fetch('/.netlify/functions/get-user?email=' + encodeURIComponent(email));
+          var tierData = await tierRes.json();
+          if ((tierData.tier || 'Free') !== 'Pro') {
+            window.location.href = '/upgrade.html';
+            return;
+          }
+        } catch(e) {
+          // If tier check fails, fall through (don't block on network error)
+          console.warn('Tier check failed:', e);
+        }
+      }
+
       // Check for intake fields passed from plan-viewer via URL params
       var params = new URLSearchParams(window.location.search);
       var fromPlanIntake = params.get('source') === 'plan' ? {
