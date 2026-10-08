@@ -168,9 +168,10 @@ async function upsertProfile(email, bizName, formData = {}) {
     "Product": formData.productType || "",
     "Target Customer": formData.targetCustomer || "",
     "Geography": formData.geo || "",
-    "Monthly Revenue": formData.monthlyRevenue ? parseFloat(String(formData.monthlyRevenue).replace(/[^0-9.]/g, "")) || null : null,
     "Current Advertising": formData.currentAdvertising || "",
   };
+  const revenueNum = formData.monthlyRevenue ? parseFloat(String(formData.monthlyRevenue).replace(/[^0-9.]/g, "")) : NaN;
+  if (!isNaN(revenueNum) && revenueNum > 0) fields["Monthly Revenue"] = revenueNum;
 
   if (searchData.records && searchData.records.length > 0) {
     const rid = searchData.records[0].id;
