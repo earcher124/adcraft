@@ -656,10 +656,12 @@
           savedProfile = data.profile;
           renderProfileSummary(savedProfile);
 
-          // If coming from Budget Advisor with both budget + goal, skip the form entirely
-          if (advisorBudget && advisorGoal) {
+          // If coming from Budget Advisor, skip the form entirely.
+          // Use advisorGoal if provided; fall back to saved profile's goal.
+          var effectiveGoal = advisorGoal || savedProfile.goal || '';
+          if (advisorBudget && effectiveGoal) {
             formData = Object.assign({}, savedProfile, {
-              goal: advisorGoal,
+              goal: effectiveGoal,
               budget: '$' + advisorBudget
             });
             document.getElementById('generating').classList.add('active');

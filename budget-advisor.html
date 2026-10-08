@@ -502,6 +502,7 @@
     var savedProfile = null;
     var advisorResult = null;
     var selectedTierIdx = 1; // default: recommended (index 1)
+    var lastSubmittedGoal = ''; // goal used when advisor was run — used in buildPlanUrl
 
     // Chip selection
     document.querySelectorAll('.chip-group').forEach(function(group) {
@@ -649,6 +650,8 @@
         var clerk = await window.__clerkLoaded;
         var email = clerk.user?.primaryEmailAddress?.emailAddress || '';
 
+        lastSubmittedGoal = goal; // capture goal used for this advisor run
+
         var payload = {
           email: email,
           bizName: bizName || (savedProfile && savedProfile.bizName) || '',
@@ -688,7 +691,9 @@
 
     function buildPlanUrl(budget) {
       var url = '/new-plan.html?advisorBudget=' + encodeURIComponent(budget);
-      var goal = getGoal();
+      // Use the goal that was actually submitted to the advisor (not a fresh DOM read,
+      // which may miss goals that didn't match a chip or were set via profile fallback)
+      var goal = lastSubmittedGoal || getGoal();
       if (goal) url += '&advisorGoal=' + encodeURIComponent(goal);
       return url;
     }
