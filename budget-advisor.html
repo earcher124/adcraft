@@ -664,14 +664,18 @@
       }
     }
 
+    function buildPlanUrl(budget) {
+      var url = '/new-plan.html?advisorBudget=' + encodeURIComponent(budget);
+      var goal = getGoal();
+      if (goal) url += '&advisorGoal=' + encodeURIComponent(goal);
+      return url;
+    }
+
     function useBudgetAndPlan() {
       if (!advisorResult) return;
       var tier = advisorResult.recommendation.tiers[selectedTierIdx];
       if (!tier) return;
-      var budget = tier.monthly_budget;
-      var url = '/new-plan.html?advisorBudget=' + encodeURIComponent(budget);
-      // Pass profile fields in URL if no saved profile
-      window.location.href = url;
+      window.location.href = buildPlanUrl(tier.monthly_budget);
     }
 
     function toggleCustomBudget() {
@@ -685,7 +689,7 @@
     function useCustomBudget() {
       var raw = document.getElementById('custom-budget-val').value.replace(/[^0-9]/g, '');
       if (!raw) { document.getElementById('custom-budget-val').focus(); return; }
-      window.location.href = '/new-plan.html?advisorBudget=' + encodeURIComponent(raw);
+      window.location.href = buildPlanUrl(raw);
     }
 
     function resetAdvisor() {

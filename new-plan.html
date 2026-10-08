@@ -643,9 +643,10 @@
 
       var email = clerk.user.primaryEmailAddress?.emailAddress || '';
 
-      // Pre-fill budget from Budget Advisor if passed via query param
+      // Pre-fill from Budget Advisor if passed via query params
       var urlParams = new URLSearchParams(window.location.search);
       var advisorBudget = urlParams.get('advisorBudget');
+      var advisorGoal   = urlParams.get('advisorGoal');
 
       // Check for existing business profile
       try {
@@ -654,11 +655,29 @@
         if (data.profile) {
           savedProfile = data.profile;
           renderProfileSummary(savedProfile);
+
+          // If coming from Budget Advisor with both budget + goal, skip the form entirely
+          if (advisorBudget && advisorGoal) {
+            formData = Object.assign({}, savedProfile, {
+              goal: advisorGoal,
+              budget: '$' + advisorBudget
+            });
+            document.getElementById('generating').classList.add('active');
+            animateSteps();
+            await submitPlan(formData, true);
+            return;
+          }
+
           document.getElementById('short-form-card').classList.add('active');
           if (advisorBudget) {
             document.getElementById('short-budget').value = advisorBudget;
           }
-          return; // Don't show full form
+          // Pre-select goal chip if provided
+          if (advisorGoal) {
+            var chip = document.querySelector('#short-goal-chips .chip[data-val="' + advisorGoal.replace(/"/g, '') + '"]');
+            if (chip) chip.click();
+          }
+          return;
         }
       } catch (e) {
         console.warn('Could not fetch profile:', e);
