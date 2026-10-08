@@ -421,10 +421,15 @@
           <div class="chip" data-val="Get new customers">Get new customers</div>
           <div class="chip" data-val="Get repeat customers / bring people back">Get repeat customers</div>
           <div class="chip" data-val="Get more sales overall">Get more sales</div>
+          <div class="chip" data-val="Increase average order / basket size">Increase basket size</div>
           <div class="chip" data-val="Get more leads / inquiries">Get more leads</div>
           <div class="chip" data-val="Get more foot traffic to my location">More foot traffic</div>
+          <div class="chip" data-val="Get more website visitors">More website visitors</div>
           <div class="chip" data-val="Launch a new product or service">Launch something new</div>
+          <div class="chip" data-val="Promote an event or sale">Promote an event / sale</div>
           <div class="chip" data-val="Grow brand awareness — more people knowing who we are">Grow brand awareness</div>
+          <div class="chip" data-val="Grow my social media following">Grow social following</div>
+          <div class="chip" data-val="Build an email or SMS list">Build a list</div>
           <div class="chip" data-val="Other">Other</div>
         </div>
         <input type="text" id="goal-other" placeholder="Describe your goal…" style="margin-top:10px;display:none;">
@@ -746,10 +751,24 @@
         } catch(e) { /* profile fetch failed — proceed with plan data only */ }
 
         loadProfile(mergedIntake);
+        // Explicitly set revenue and goal in the DOM so runAdvisor() reads them correctly
+        if (mergedIntake.monthlyRevenue) {
+          document.getElementById('monthly-revenue').value = String(mergedIntake.monthlyRevenue).replace(/[^0-9.]/g, '');
+        }
         // Pre-select goal chip if present
         if (mergedIntake.goal) {
           var chip = document.querySelector('#goal-chips .chip[data-val="' + mergedIntake.goal.replace(/"/g, '') + '"]');
-          if (chip) chip.click();
+          if (chip) {
+            chip.click();
+          } else {
+            // Goal doesn't match any chip — use Other + fill the text input
+            var otherChip = document.querySelector('#goal-chips .chip[data-val="Other"]');
+            if (otherChip) {
+              otherChip.click();
+              document.getElementById('goal-other').value = mergedIntake.goal;
+              document.getElementById('goal-other').style.display = 'block';
+            }
+          }
         }
         // Auto-submit since all data is already known
         await runAdvisor();
