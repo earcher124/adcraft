@@ -532,7 +532,17 @@
             if (e.target.type === 'checkbox') saveCheckboxes();
           });
         } catch(renderErr) {
-          console.error('renderPlanJSON failed:', renderErr.message);
+          console.error('renderPlanJSON failed:', renderErr.message, renderErr.stack);
+          // Try rendering section by section to find the crash point
+          var sections = ['your_advertising_strategy','the_opportunity','what_advertising_needs_to_do','recommended_approach','who_to_target','recommended_channels','budget','messaging','creative','how_to_measure_success','what_i_would_not_do','smart_next_moves','launch_plan','assumptions'];
+          for (var si = 0; si < sections.length; si++) {
+            try {
+              var testObj = {}; testObj[sections[si]] = plan[sections[si]];
+              renderPlanJSON(testObj);
+            } catch(se) {
+              console.error('renderPlanJSON crash in section:', sections[si], se.message);
+            }
+          }
           body.innerHTML = '<pre style="white-space:pre-wrap;font-size:13px;line-height:1.6;">' + esc(planText) + '</pre>';
         }
       } else {
@@ -794,7 +804,7 @@
           if (!text) return;
           html += '<div class="ps-phase">';
           html += '<div class="ps-phase-label">' + phase.label + '</div>';
-          var tasks = text.split(/(?<=\.)\s+(?=[A-Z])|[\n\r]+/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 3; });
+          var tasks = text.split(/[\n\r]+/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 3; });
           if (tasks.length > 1) {
             html += '<ul class="checklist" style="margin:0;">';
             tasks.forEach(function(t, i) {
