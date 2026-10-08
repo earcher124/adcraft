@@ -708,11 +708,33 @@
 
       var email = clerk.user.primaryEmailAddress?.emailAddress || '';
 
-      // Check URL param for incoming budget from new-plan
+      // Check for intake fields passed from plan-viewer via URL params
       var params = new URLSearchParams(window.location.search);
-      var fromPlan = params.get('fromPlan');
+      var fromPlanIntake = params.get('bizName') ? {
+        bizName:            params.get('bizName')           || '',
+        bizType:            params.get('bizType')           || '',
+        productType:        params.get('productType')       || '',
+        targetCustomer:     params.get('targetCustomer')    || '',
+        goal:               params.get('goal')              || '',
+        geo:                params.get('geo')               || '',
+        monthlyRevenue:     params.get('monthlyRevenue')    || '',
+        currentAdvertising: params.get('currentAdvertising')|| '',
+      } : null;
 
-      // Try to load business profile
+      if (fromPlanIntake) {
+        // Pre-fill form from plan intake and auto-run
+        loadProfile(fromPlanIntake);
+        // Pre-select goal chip if present
+        if (fromPlanIntake.goal) {
+          var chip = document.querySelector('#goal-chips .chip[data-val="' + fromPlanIntake.goal.replace(/"/g, '') + '"]');
+          if (chip) chip.click();
+        }
+        // Auto-submit since all data is already known
+        await runAdvisor();
+        return;
+      }
+
+      // Try to load saved business profile
       try {
         var res = await fetch('/.netlify/functions/get-profile?email=' + encodeURIComponent(email));
         var data = await res.json();

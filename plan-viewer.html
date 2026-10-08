@@ -329,6 +329,7 @@
           <button class="btn btn-outline" id="btn-excel" onclick="downloadExcel()">↓ Excel</button>
           <button class="btn btn-outline" id="btn-export" onclick="toggleExportPanel()">↓ Export Plan</button>
           <button class="btn btn-outline" id="btn-optimize" onclick="optimizePlan()">✦ Optimize Plan</button>
+          <button class="btn btn-outline" id="btn-budget-advisor" onclick="openBudgetAdvisor()">💰 Check Budget</button>
         </div>
       </div>
     </div>
@@ -881,6 +882,20 @@
       });
       var badge = document.getElementById("pro-badge");
       if (badge) badge.style.display = isPro ? "" : "none";
+    }
+
+    function openBudgetAdvisor() {
+      var params = new URLSearchParams();
+      var intake = currentIntake || {};
+      if (intake.bizName)           params.set('bizName', intake.bizName);
+      if (intake.bizType)           params.set('bizType', intake.bizType);
+      if (intake.productType)       params.set('productType', intake.productType);
+      if (intake.targetCustomer)    params.set('targetCustomer', intake.targetCustomer);
+      if (intake.goal)              params.set('goal', intake.goal);
+      if (intake.geo)               params.set('geo', intake.geo);
+      if (intake.monthlyRevenue)    params.set('monthlyRevenue', intake.monthlyRevenue);
+      if (intake.currentAdvertising) params.set('currentAdvertising', intake.currentAdvertising);
+      window.location.href = '/budget-advisor.html?' + params.toString();
     }
 
     function downloadExcel() {
