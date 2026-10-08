@@ -32,12 +32,17 @@ exports.handler = async function (event) {
     const plan = data.fields?.["Plan Output"] || null;
     const bizName = data.fields?.["Business Name"] || "";
     const intake = {
-      "Business Name": data.fields?.["Business Name"] || "",
-      "Primary Goal": data.fields?.["Primary Goal"] || "",
-      "Geography": data.fields?.["Geography"] || "",
-      "Monthly Ad Budget": data.fields?.["Monthly Ad Budget"] || "",
-      "Budget Tier": data.fields?.["Budget Tier"] || "",
-      "Email": data.fields?.["Email"] || "",
+      bizName:            data.fields?.["Business Name"]    || "",
+      bizType:            data.fields?.["Business Type"]    || "",
+      productType:        data.fields?.["Product"]          || "",
+      targetCustomer:     data.fields?.["Target Customer"]  || "",
+      goal:               data.fields?.["Primary Goal"]     || "",
+      geo:                data.fields?.["Geography"]        || "",
+      monthlyRevenue:     data.fields?.["Monthly Revenue"]  || "",
+      currentAdvertising: data.fields?.["Current Advertising"] || "",
+      monthlyAdBudget:    data.fields?.["Monthly Ad Budget"] || "",
+      budgetTier:         data.fields?.["Budget Tier"]      || "",
+      email:              data.fields?.["Email"]            || "",
     };
 
     return {
