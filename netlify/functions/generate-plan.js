@@ -61,7 +61,8 @@ exports.handler = async function (event) {
     const atData = await atRes.json();
     if (!atRes.ok) {
       console.error("Airtable create error:", JSON.stringify(atData));
-      return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to create plan record", detail: atData }) };
+      const atErrMsg = atData.error?.message || atData.error?.type || JSON.stringify(atData).slice(0, 200);
+      return { statusCode: 500, headers, body: JSON.stringify({ error: atErrMsg }) };
     }
     recordId = atData.id;
   } catch (err) {
