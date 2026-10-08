@@ -626,13 +626,20 @@
         if (fallbackChip) { fallbackChip.click(); goal = getGoal(); }
       }
 
+      var fromPlan = new URLSearchParams(window.location.search).get('source') === 'plan';
       if (!revRaw) {
-        alert('Please enter your approximate monthly revenue — it\'s the key input for sizing a budget.');
-        return;
+        if (!fromPlan) {
+          alert('Please enter your approximate monthly revenue — it\'s the key input for sizing a budget.');
+          return;
+        }
+        // fromPlan: proceed without revenue, API prompt handles missing data gracefully
       }
       if (!goal) {
-        alert('Please select a primary goal.');
-        return;
+        if (!fromPlan) {
+          alert('Please select a primary goal.');
+          return;
+        }
+        // fromPlan: proceed without goal
       }
 
       document.getElementById('form-card').style.display = 'none';
@@ -650,7 +657,7 @@
           targetCustomer: targetCustomer || (savedProfile && savedProfile.targetCustomer) || '',
           geo: geo || (savedProfile && savedProfile.geo) || '',
           goal: goal,
-          monthlyRevenue: revRaw.replace(/[^0-9.]/g, ''),
+          monthlyRevenue: revRaw ? revRaw.replace(/[^0-9.]/g, '') : '',
           currentAdvertising: currentAds || (savedProfile && savedProfile.currentAdvertising) || '',
         };
 
