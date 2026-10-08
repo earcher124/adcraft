@@ -611,6 +611,16 @@
       var goal        = getGoal();
       var revRaw      = document.getElementById('monthly-revenue').value.trim();
 
+      // Fall back to saved profile values rather than blocking with a popup
+      if (!revRaw && savedProfile && savedProfile.monthlyRevenue) {
+        revRaw = String(savedProfile.monthlyRevenue);
+        document.getElementById('monthly-revenue').value = revRaw;
+      }
+      if (!goal && savedProfile && savedProfile.goal) {
+        var fallbackChip = document.querySelector('#goal-chips .chip[data-val="' + savedProfile.goal.replace(/"/g, '') + '"]');
+        if (fallbackChip) { fallbackChip.click(); goal = getGoal(); }
+      }
+
       if (!revRaw) {
         alert('Please enter your approximate monthly revenue — it\'s the key input for sizing a budget.');
         return;
