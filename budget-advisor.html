@@ -247,6 +247,57 @@
     .retry-link a { font-size: 12px; color: #6b6270; text-decoration: none; }
     .retry-link a:hover { color: #4A1040; text-decoration: underline; }
 
+    .custom-budget-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .custom-budget-toggle {
+      font-size: 12px;
+      color: #6b6270;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', system-ui, sans-serif;
+      text-decoration: underline;
+      padding: 0;
+    }
+    .custom-budget-toggle:hover { color: #4A1040; }
+    .custom-budget-input-wrap {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .custom-budget-input-wrap.visible { display: flex; }
+    .custom-budget-input-wrap input {
+      width: 130px;
+      padding: 8px 12px;
+      border: 1px solid #e8ddd0;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #fff;
+      color: #1a1a1a;
+    }
+    .custom-budget-input-wrap input:focus { outline: none; border-color: #4A1040; }
+    .btn-custom-go {
+      background: #4A1040;
+      color: #FAF6ED;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    .btn-custom-go:hover { background: #3a0c32; }
+
     @media (max-width: 700px) {
       .hero { padding: 32px 20px 24px; }
       .hero-inner { flex-direction: column; gap: 16px; }
@@ -426,6 +477,15 @@
 
       <div class="retry-link">
         <a href="javascript:void(0)" onclick="resetAdvisor()">← Start over with different inputs</a>
+      </div>
+
+      <div style="text-align:center;margin-top:8px;">
+        <button class="custom-budget-toggle" id="custom-toggle" onclick="toggleCustomBudget()">or enter my own budget</button>
+        <div class="custom-budget-input-wrap" id="custom-budget-wrap">
+          <span style="font-size:13px;color:#6b6270;">$</span>
+          <input type="text" id="custom-budget-val" placeholder="e.g. 750" inputmode="numeric">
+          <button class="btn-custom-go" onclick="useCustomBudget()">Build a Plan →</button>
+        </div>
       </div>
 
     </div>
@@ -612,6 +672,20 @@
       var url = '/new-plan.html?advisorBudget=' + encodeURIComponent(budget);
       // Pass profile fields in URL if no saved profile
       window.location.href = url;
+    }
+
+    function toggleCustomBudget() {
+      var wrap = document.getElementById('custom-budget-wrap');
+      var toggle = document.getElementById('custom-toggle');
+      var visible = wrap.classList.toggle('visible');
+      toggle.textContent = visible ? 'cancel' : 'or enter my own budget';
+      if (visible) document.getElementById('custom-budget-val').focus();
+    }
+
+    function useCustomBudget() {
+      var raw = document.getElementById('custom-budget-val').value.replace(/[^0-9]/g, '');
+      if (!raw) { document.getElementById('custom-budget-val').focus(); return; }
+      window.location.href = '/new-plan.html?advisorBudget=' + encodeURIComponent(raw);
     }
 
     function resetAdvisor() {
