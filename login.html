@@ -53,22 +53,35 @@
       }
 
       var mount = document.getElementById("clerk-mount");
-      // Clerk appends __clerk_status=sign_up when routing to sign-up URL
-      var params = new URLSearchParams(window.location.search);
-      var isSignUp = params.get("__clerk_status") === "sign_up" || window.location.hash === "#signup";
 
-      if (isSignUp) {
-        clerk.mountSignUp(mount, {
-          fallbackRedirectUrl: "/dashboard.html",
-          signInUrl: "/login.html"
-        });
-      } else {
-        clerk.mountSignIn(mount, {
-          fallbackRedirectUrl: "/dashboard.html",
-          signUpUrl: "/login.html#signup",
-          signUpFallbackRedirectUrl: "/dashboard.html"
-        });
+      function mountWidget() {
+        // Clerk appends __clerk_status=sign_up when routing to sign-up URL
+        var params = new URLSearchParams(window.location.search);
+        var isSignUp = params.get("__clerk_status") === "sign_up" || window.location.hash === "#signup";
+
+        // Unmount any existing widget before remounting
+        try { clerk.unmountSignIn(mount); } catch(e) {}
+        try { clerk.unmountSignUp(mount); } catch(e) {}
+        mount.innerHTML = '';
+
+        if (isSignUp) {
+          clerk.mountSignUp(mount, {
+            fallbackRedirectUrl: "/dashboard.html",
+            signInUrl: "/login.html"
+          });
+        } else {
+          clerk.mountSignIn(mount, {
+            fallbackRedirectUrl: "/dashboard.html",
+            signUpUrl: "/login.html#signup",
+            signUpFallbackRedirectUrl: "/dashboard.html"
+          });
+        }
       }
+
+      mountWidget();
+
+      // Re-mount when hash changes (e.g. Clerk's "Sign up" link sets #signup)
+      window.addEventListener('hashchange', mountWidget);
     });
   </script>
 </body>
