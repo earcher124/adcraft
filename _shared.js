@@ -45,13 +45,26 @@ function renderNav(activePage) {
   var mount = document.getElementById("nav-mount");
   if (mount) {
     mount.innerHTML = html;
-    // Mount Clerk UserButton into nav
-    window.__clerkLoaded.then(function() {
-      if (window.Clerk && window.Clerk.mountUserButton) {
-        window.Clerk.mountUserButton(document.getElementById("clerk-user-btn"), {
-          afterSignOutUrl: "/login.html"
-        });
+    // Mount Clerk UserButton into nav, fall back to a plain sign-out link
+    window.__clerkLoaded.then(function(clerk) {
+      var btn = document.getElementById("clerk-user-btn");
+      if (!btn) return;
+      if (clerk && clerk.mountUserButton) {
+        try {
+          clerk.mountUserButton(btn, { afterSignOutUrl: "/login.html" });
+        } catch(e) {}
       }
+      // Always show a plain sign-out link so there's always a way to log out
+      var link = document.createElement("a");
+      link.href = "#";
+      link.textContent = "Sign out";
+      link.style.cssText = "color:#FAF6ED;opacity:0.7;font-size:13px;text-decoration:none;margin-left:12px;";
+      link.addEventListener("click", function(e) {
+        e.preventDefault();
+        if (clerk && clerk.signOut) clerk.signOut().then(function() { window.location.href = "/login.html"; });
+        else window.location.href = "/login.html";
+      });
+      btn.appendChild(link);
     });
   }
 }

@@ -173,6 +173,18 @@
         </div>
       </div>
     </div>
+
+    <p class="section-label" style="margin-top:32px;">Session</p>
+    <div class="info-card">
+      <div class="info-row">
+        <span class="info-label">Signed in as</span>
+        <span class="info-value" id="acct-email" style="color:#6b6270;font-size:13px;"></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label"></span>
+        <button class="btn btn-outline" id="logout-btn">Sign Out</button>
+      </div>
+    </div>
   </div>
 
   <script src="_shared.js"></script>
@@ -180,6 +192,13 @@
     window.__clerkLoaded.then(async function(clerk) {
       if (!clerk.user) { window.location.href = "/login.html"; return; }
       renderNav("");
+
+      // Show email and wire up logout
+      var email = clerk.user.primaryEmailAddress && clerk.user.primaryEmailAddress.emailAddress;
+      if (email) { var el = document.getElementById("acct-email"); if (el) el.textContent = email; }
+      document.getElementById("logout-btn").addEventListener("click", function() {
+        clerk.signOut().then(function() { window.location.href = "/login.html"; });
+      });
 
       var user = clerk.user;
       var email = (user.primaryEmailAddress && user.primaryEmailAddress.emailAddress) || "";
