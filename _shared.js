@@ -28,18 +28,22 @@ function renderNav(activePage) {
 
   var links = navItems.map(function(item) {
     var active = activePage === item.label;
-    return '<a href="' + item.href + '" style="' +
+    return '<a href="' + item.href + '" class="nav-link" style="' +
       'font-size:13px;font-weight:600;color:' + (active ? '#FAF6ED' : 'rgba(250,246,237,0.7)') + ';' +
-      'text-decoration:none;padding:6px 12px;border-radius:6px;' +
+      'text-decoration:none;padding:6px 10px;border-radius:6px;white-space:nowrap;' +
       (active ? 'background:rgba(255,255,255,0.15);' : '') +
       '">' + item.label + '</a>';
   }).join('');
 
-  var html = '<nav style="background:#4A1040;padding:0 32px;display:flex;align-items:center;gap:8px;height:52px;position:sticky;top:0;z-index:100;">' +
-    '<a href="/dashboard.html" style="font-family:\'Playfair Display\',Georgia,serif;font-size:18px;font-weight:700;color:#FAF6ED;text-decoration:none;margin-right:24px;letter-spacing:-0.02em;">AdCraft</a>' +
-    links +
-    '<div style="flex:1;"></div>' +
-    '<div id="clerk-user-btn"></div>' +
+  var html = '<style>' +
+    '@media(max-width:500px){.nav-link{font-size:12px;padding:5px 7px!important;}}' +
+    '@media(max-width:400px){.nav-link-account{display:none!important;}}' +
+    '</style>' +
+    '<nav style="background:#4A1040;padding:0 16px;display:flex;align-items:center;gap:4px;height:52px;position:sticky;top:0;z-index:100;min-width:0;">' +
+    '<a href="/dashboard.html" style="font-family:\'Playfair Display\',Georgia,serif;font-size:18px;font-weight:700;color:#FAF6ED;text-decoration:none;margin-right:12px;letter-spacing:-0.02em;flex-shrink:0;">AdCraft</a>' +
+    links.replace('">Account<', '" class="nav-link-account">Account<') +
+    '<div style="flex:1;min-width:4px;"></div>' +
+    '<div id="clerk-user-btn" style="flex-shrink:0;"></div>' +
     '</nav>';
 
   var mount = document.getElementById("nav-mount");
